@@ -1,0 +1,54 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return (posts as any[]).map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const ogImage = `/og/stories/${post.id}.png`;
+---
+
+<Layout 
+  title={post.data.title}
+  description={post.data.excerpt}
+  image={ogImage}
+  type="article"
+>
+  <main id="page-story-detail" class="page active" aria-label={`Story: ${post.data.title}`}>
+    <div class="container" style="padding-top:48px;">
+      <div id="blogDetail" class="blog-detail open">
+        <a href="/stories" class="back-btn" aria-label="Back to stories">
+          ← Back to Stories
+        </a>
+        <div id="blogDetailContent">
+          <div class="blog-hero-img" style={`background:${post.data.bg}`}>{post.data.emoji}</div>
+          <div class="blog-post-header">
+            <span class="blog-post-tag">{post.data.tag}</span>
+            <h1 class="blog-post-title">{post.data.title}</h1>
+            <div class="blog-post-meta">
+              <span>✍️ Mum & Dad</span>
+              <span>📅 {post.data.date}</span>
+              <span>⏱ {post.data.readTime}</span>
+            </div>
+          </div>
+          <div class="blog-post-body">
+            <Content />
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>

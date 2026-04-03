@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort((a: any, b: any) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+
+const featuredPost = posts[0];
+const remainingPosts = posts.slice(1);
+---
+
+<Layout 
+  title="Our Stories" 
+  description="Every story, every sleepless night, every burst of joy — written down so you'll always know how loved you are."
+  image="/og/home.png"
+>
+  <main id="page-stories" class="page active" aria-label="Stories">
+    <div class="container">
+      <div id="blogListing">
+        <div class="page-header fade-up">
+          <span class="section-label">Letters to Gursez</span>
+          <h1 class="section-title">Our <em>Stories</em></h1>
+          <p class="section-sub" style="margin:0 auto">Every story, every sleepless night, every burst of joy — written down so you'll always know how loved you are.</p>
+        </div>
+        
+        <div class="blog-grid" id="blogGrid">
+          <!-- Featured (first post) -->
+          {featuredPost && (
+            <a href={`/stories/${featuredPost.id}`} class="blog-card-lg fade-up">
+              <div class="blog-lg-img" style={`background:${featuredPost.data.bg}`}>{featuredPost.data.emoji}</div>
+              <div class="blog-lg-body">
+                <div class="blog-lg-featured">✦ Featured Post</div>
+                <div class="blog-lg-title">{featuredPost.data.title}</div>
+                <div class="blog-lg-excerpt">{featuredPost.data.excerpt}</div>
+                <div class="blog-meta">
+                  <span>✍️ Mum & Dad</span>
+                  <span>📅 {featuredPost.data.date}</span>
+                  <span>⏱ {featuredPost.data.readTime}</span>
+                </div>
+              </div>
+            </a>
+          )}
+
+          <!-- Remaining posts -->
+          {(remainingPosts as any[]).map((p, i) => (
+            <a href={`/stories/${p.id}`} class="blog-card fade-up" style={`transition-delay: ${i * 0.07}s`}>
+              <div class="blog-card-img">
+                <div class="blog-card-img-inner" style={`background:${p.data.bg}`}>{p.data.emoji}</div>
+              </div>
+              <div class="blog-card-body">
+                <span class="blog-card-tag">{p.data.tag}</span>
+                <div class="blog-card-title">{p.data.title}</div>
+                <div class="blog-card-excerpt">{p.data.excerpt}</div>
+              </div>
+              <div class="blog-card-footer">
+                <span class="blog-card-date">{p.data.date}</span>
+                <span class="blog-card-read">{p.data.readTime}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(e => revealObserver.observe(e));
+  </script>
+</Layout>

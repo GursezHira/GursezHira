@@ -1,0 +1,171 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allMilestones = await getCollection('milestones');
+const milestones = allMilestones.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()).slice(0, 3);
+
+const allPosts = await getCollection('blog');
+const posts = allPosts.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()).slice(0, 3);
+
+function getCategoryClass(cat: string) {
+  const map: Record<string, string> = { Firsts: 'cat-firsts', Monthly: 'cat-monthly', Growth: 'cat-growth', Funny: 'cat-funny', Health: 'cat-health', Celebration: 'cat-celebration' };
+  return map[cat] || 'cat-firsts';
+}
+---
+
+<Layout title="Home" image="/og/home.png">
+  <main id="page-home" class="page active" aria-label="Home">
+    <div class="container">
+      <!-- HERO -->
+      <section class="hero" aria-label="Welcome">
+        <div class="hero-text">
+          <span class="hero-eyebrow">Welcome to the world,</span>
+          <h1 class="hero-name">
+            Gursez<span>S Hira</span>
+          </h1>
+          <p class="hero-tagline">Every yawn, every giggle, every tiny milestone — lovingly captured and kept forever. This is your story, sweetheart, from the very first breath.</p>
+          <div class="hero-buttons">
+            <a href="/milestones" class="btn btn-primary">✦ View Milestones</a>
+            <a href="/stories" class="btn btn-outline">Read My Stories</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-photo-wrap">
+            <div class="hero-photo-main">
+              <img src="/image.png" alt="Gursez Singh Hira"/>
+            </div>
+            <div class="hero-badge hero-badge-born">
+              <span class="badge-icon">🌙</span>
+              <div class="badge-text">
+                <span class="badge-label">Born</span>
+                <span class="badge-value">Jan 13, 2026</span>
+              </div>
+            </div>
+            <div class="hero-badge hero-badge-days">
+              <span class="badge-num" id="daysCount">—</span>
+              <div class="badge-tiny">Days of Joy</div>
+            </div>
+            <div class="hero-decoration"><div class="deco-ring"></div></div>
+            <div class="hero-decoration deco-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip" aria-label="Baby stats">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item fade-up">
+            <div class="stat-icon">📅</div>
+            <span class="stat-label">Born on</span>
+            <span class="stat-val">Jan 13, 2026</span>
+          </div>
+          <div class="stat-item fade-up" style="transition-delay:0.2s">
+            <div class="stat-icon">🕐</div>
+            <span class="stat-label">Born At</span>
+            <span class="stat-val">02:00 am</span>
+          </div>
+          <div class="stat-item fade-up" style="transition-delay:0.3s">
+            <div class="stat-icon">🏥</div>
+            <span class="stat-label">Born in</span>
+            <span class="stat-val">Auckland</span>
+          </div>
+          <div class="stat-item fade-up" style="transition-delay:0.1s">
+            <div class="stat-icon">👦</div>
+            <span class="stat-label">Born as</span>
+            <span class="stat-val">Boy</span>
+          </div>
+          
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- MILESTONES PREVIEW -->
+      <section class="section" aria-label="Latest milestones">
+        <div class="fade-up">
+          <span class="section-label">Precious Moments</span>
+          <h2 class="section-title">Latest <em>Milestones</em></h2>
+          <p class="section-sub">A few of the beautiful firsts we never want to forget.</p>
+        </div>
+        <div class="milestones-preview-grid">
+          {milestones.map((m) => (
+            <div class="milestone-preview-card fade-up">
+              <span class={`mpc-category ${getCategoryClass(m.data.category)}`}>{m.data.category}</span>
+              <div class="mpc-title">{m.data.emoji} {m.data.title}</div>
+              <div class="mpc-age">{m.data.age}</div>
+              <div class="mpc-desc">{m.data.desc}</div>
+              <div class="mpc-date">{m.data.displayDate}</div>
+            </div>
+          ))}
+        </div>
+        <div style="text-align:center;margin-top:36px">
+          <a href="/milestones" class="btn btn-soft">See All Milestones →</a>
+        </div>
+      </section>
+
+      <!-- LOVE NOTE -->
+      <section aria-label="Quote">
+        <div class="love-note fade-up">
+          <p class="love-note-text">"In all the world, there is no heart for us like yours. In all the world, there is no love for you like ours."</p>
+          <span class="love-note-attr">— Mum & Dad</span>
+        </div>
+      </section>
+
+      <!-- BLOG PREVIEW -->
+      <section class="section" aria-label="Recent posts">
+        <div class="fade-up">
+          <span class="section-label">From Our Hearts</span>
+          <h2 class="section-title">Recent <em>Stories</em></h2>
+          <p class="section-sub">Little letters to our little one.</p>
+        </div>
+        <div class="blog-preview-grid">
+          {posts.map((p) => (
+            <a href={`/stories/${p.id}`} class="blog-card fade-up">
+              <div class="blog-card-img">
+                <div class="blog-card-img-inner" style={`background:${p.data.bg}`}>{p.data.emoji}</div>
+              </div>
+              <div class="blog-card-body">
+                <span class="blog-card-tag">{p.data.tag}</span>
+                <div class="blog-card-title">{p.data.title}</div>
+                <div class="blog-card-excerpt">{p.data.excerpt}</div>
+              </div>
+              <div class="blog-card-footer">
+                <span class="blog-card-date">{p.data.date}</span>
+                <span class="blog-card-read">{p.data.readTime}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+        <div style="text-align:center;margin-top:36px">
+          <a href="/stories" class="btn btn-soft">Read All Stories →</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    function calcDays() {
+      const born = new Date('2026-01-13');
+      const today = new Date();
+      const diff = Math.floor((today.getTime() - born.getTime()) / (1000 * 60 * 60 * 24));
+      const el = document.getElementById('daysCount');
+      if (el) el.textContent = diff.toString();
+    }
+    calcDays();
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(e => revealObserver.observe(e));
+  </script>
+</Layout>
