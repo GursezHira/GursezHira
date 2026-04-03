@@ -55,7 +55,6 @@ export default defineConfig({
               { name: 'date',     label: 'Date',      widget: 'datetime', date_format: 'YYYY-MM-DD', time_format: false },
               { name: 'readTime', label: 'Read Time', widget: 'string', hint: 'e.g. 5 min read' },
               { name: 'excerpt',  label: 'Excerpt',   widget: 'text' },
-              { name: 'body',     label: 'Body',      widget: 'markdown' },
             ],
           },
         ],
