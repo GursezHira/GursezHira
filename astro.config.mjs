@@ -2,8 +2,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// https://astro.build/config
 export default defineConfig({
-  site: 'https://gursezhira.github.io/',
+  site: 'https://gursez.hira.im',
   integrations: [sitemap()],
 });
