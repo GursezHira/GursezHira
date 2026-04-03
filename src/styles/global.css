@@ -476,7 +476,7 @@ nav {
   position: relative; padding: 0 0 60px;
 }
 .timeline-line {
-  position: absolute; left: 50%; top: 0; bottom: 0;
+  position: absolute; left: 50%; top: 0; bottom: 5%;
   width: 2px; background: linear-gradient(to bottom, var(--blush) 0%, var(--lavender) 50%, var(--sage) 100%);
   transform: translateX(-50%);
 }
@@ -723,7 +723,7 @@ footer {
   font-family: var(--font-display); font-style: italic;
   font-size: 1rem; color: var(--text-soft); margin-bottom: 20px;
 }
-.footer-tiny { font-size: 0.72rem; color: var(--text-faint); letter-spacing: 0.08em; }
+.footer-tiny { font-size: 0.72rem; color: var(--text-faint); letter-spacing: 0.08em; margin-bottom: 5px; }
 
 /* ─── RESPONSIVE ────────────────────────────────────────── */
 @media (max-width: 1024px) {

@@ -7,8 +7,6 @@ const milestonesCollection = defineCollection({
     id: z.number(),
     title: z.string(),
     date: z.string(),
-    displayDate: z.string(),
-    age: z.string(),
     category: z.string(),
     emoji: z.string(),
     color: z.string(),

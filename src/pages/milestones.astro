@@ -77,6 +77,42 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
       return map[cat] || 'cat-firsts';
     }
 
+    const BIRTH_DATE = '2026-01-13';
+
+    function formatMilestoneDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function getMilestoneAge(dateStr) {
+      const birth = new Date(BIRTH_DATE);
+      const milestone = new Date(dateStr);
+      const diffMs = milestone.getTime() - birth.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Newborn';
+      if (diffDays < 0) return 'Pre-birth';
+      if (diffDays < 7) return `${diffDays} days old`;
+      
+      const diffWeeks = Math.floor(diffDays / 7);
+      if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} old`;
+      
+      let months = (milestone.getFullYear() - birth.getFullYear()) * 12 + (milestone.getMonth() - birth.getMonth());
+      if (milestone.getDate() < birth.getDate()) months--;
+      
+      if (months < 1) return `${diffWeeks} weeks old`;
+      if (months < 24) return `${months} month${months > 1 ? 's' : ''} old`;
+      
+      const years = Math.floor(months / 12);
+      const remainingMonths = months % 12;
+      if (remainingMonths === 0) return `${years} year${years > 1 ? 's' : ''} old`;
+      return `${years} year${years > 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} old`;
+    }
+
     function initMilestones() {
       milestoneSearch = '';
       document.getElementById('milestoneSearch').value = '';
@@ -158,8 +194,8 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
           <span class="mpc-category ${getCategoryClass(m.category)} modal-category">${m.category}</span>
           <h2 class="modal-title">${m.title}</h2>
           <div class="modal-age-date">
-            <span>👶 ${m.age}</span>
-            <span>📅 ${m.displayDate}</span>
+            <span>👶 ${getMilestoneAge(m.date)}</span>
+            <span>📅 ${formatMilestoneDate(m.date)}</span>
           </div>
           <div class="modal-desc">${m.desc}</div>
           <div class="modal-full-story">${m.story}</div>
@@ -208,8 +244,8 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
               <div class="tl-card-img" style="background:${m.color}">${m.emoji}</div>
               <div class="tl-card-desc">${m.desc}</div>
               <div class="tl-card-footer">
-                <span class="tl-age">${m.age}</span>
-                <span class="tl-date">${m.displayDate}</span>
+                <span class="tl-age">${getMilestoneAge(m.date)}</span>
+                <span class="tl-date">${formatMilestoneDate(m.date)}</span>
               </div>
             </div>
           `;

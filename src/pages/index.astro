@@ -8,6 +8,8 @@ const milestones = allMilestones.sort((a, b) => new Date(b.data.date).valueOf() 
 const allPosts = await getCollection('blog');
 const posts = allPosts.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()).slice(0, 3);
 
+import { getMilestoneAge, formatMilestoneDate } from '../utils/milestone';
+
 function getCategoryClass(cat: string) {
   const map: Record<string, string> = { Firsts: 'cat-firsts', Monthly: 'cat-monthly', Growth: 'cat-growth', Funny: 'cat-funny', Health: 'cat-health', Celebration: 'cat-celebration' };
   return map[cat] || 'cat-firsts';
@@ -24,7 +26,7 @@ function getCategoryClass(cat: string) {
           <h1 class="hero-name">
             Gursez<span>S Hira</span>
           </h1>
-          <p class="hero-tagline">Every yawn, every giggle, every tiny milestone — lovingly captured and kept forever. This is your story, sweetheart, from the very first breath.</p>
+          <p class="hero-tagline">Every yawn, every giggle, every tiny milestone — lovingly captured and kept forever. This is my story from the very first breath.</p>
           <div class="hero-buttons">
             <a href="/milestones" class="btn btn-primary">✦ View Milestones</a>
             <a href="/stories" class="btn btn-outline">Read My Stories</a>
@@ -65,7 +67,7 @@ function getCategoryClass(cat: string) {
           <div class="stat-item fade-up" style="transition-delay:0.2s">
             <div class="stat-icon">🕐</div>
             <span class="stat-label">Born At</span>
-            <span class="stat-val">02:00 am</span>
+            <span class="stat-val">01:30 am</span>
           </div>
           <div class="stat-item fade-up" style="transition-delay:0.3s">
             <div class="stat-icon">🏥</div>
@@ -96,9 +98,9 @@ function getCategoryClass(cat: string) {
             <div class="milestone-preview-card fade-up">
               <span class={`mpc-category ${getCategoryClass(m.data.category)}`}>{m.data.category}</span>
               <div class="mpc-title">{m.data.emoji} {m.data.title}</div>
-              <div class="mpc-age">{m.data.age}</div>
+              <div class="mpc-age">{getMilestoneAge(m.data.date)}</div>
               <div class="mpc-desc">{m.data.desc}</div>
-              <div class="mpc-date">{m.data.displayDate}</div>
+              <div class="mpc-date">{formatMilestoneDate(m.data.date)}</div>
             </div>
           ))}
         </div>
