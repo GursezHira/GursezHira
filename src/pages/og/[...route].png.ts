@@ -13,16 +13,10 @@ function getEmojiCode(emoji: string) {
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  const milestones = await getCollection('milestones');
   
   const postPaths = posts.map((post) => ({
     params: { route: `stories/${post.id}` },
     props: { emoji: post.data.emoji, bg: post.data.bg },
-  }));
-
-  const milestonePaths = milestones.map((milestone) => ({
-    params: { route: `milestones/${milestone.id}` },
-    props: { emoji: milestone.data.emoji, bg: milestone.data.color },
   }));
 
   const homePath = {
@@ -30,7 +24,7 @@ export async function getStaticPaths() {
     props: { emoji: "👶", bg: "linear-gradient(90deg,rgba(255, 251, 232, 1) 0%, rgba(250, 230, 207, 1) 50%);" },
   };
 
-  return [...postPaths, ...milestonePaths, homePath];
+  return [...postPaths, homePath];
 }
 
 export async function GET({ props }: any) {
@@ -76,8 +70,8 @@ export async function GET({ props }: any) {
             props: {
               src: emojiBase64,
               style: {
-                width: '320px',
-                height: '320px',
+                width: '200px',
+                height: '200px',
               },
             },
           },
@@ -85,7 +79,7 @@ export async function GET({ props }: any) {
           {
             type: 'div',
             props: {
-              style: { fontSize: '180px' },
+              style: { fontSize: '120px' },
               children: emoji,
             },
           }
@@ -106,7 +100,12 @@ export async function GET({ props }: any) {
     }
   );
 
-  const resvg = new Resvg(svg);
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: 'width',
+      value: 2400,
+    },
+  });
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
