@@ -641,7 +641,7 @@ nav {
   border-bottom: 1px solid rgba(200,160,140,0.15);
 }
 .blog-post-body {
-  max-width: 720px; margin: 0 auto;
+  max-width: 720px; margin: 0 auto 55px;
   font-size: 1.05rem; line-height: 1.9; color: var(--text-mid);
 }
 .blog-post-body p { margin-bottom: 24px; }
