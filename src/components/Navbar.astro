@@ -1,0 +1,31 @@
+---
+const pathname = Astro.url.pathname;
+const isHome = pathname === '/';
+const isMilestones = pathname.startsWith('/milestones');
+const isStories = pathname.startsWith('/stories');
+---
+
+<nav role="navigation" aria-label="Main navigation">
+  <div class="nav-logo"><a href="/">Little Gursez</a></div>
+  <ul class="nav-links">
+    <li><a href="/" class={isHome ? 'active' : ''}>Home</a></li>
+    <li><a href="/milestones" class={isMilestones ? 'active' : ''}>Milestones</a></li>
+    <li><a href="/stories" class={isStories ? 'active' : ''}>Stories</a></li>
+  </ul>
+  <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()" aria-label="Close menu">✕</button>
+  <a href="/" onclick="toggleMobileMenu()">Home</a>
+  <a href="/milestones" onclick="toggleMobileMenu()">Milestones</a>
+  <a href="/stories" onclick="toggleMobileMenu()">Stories</a>
+</div>
+
+<script is:inline>
+  function toggleMobileMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+</script>

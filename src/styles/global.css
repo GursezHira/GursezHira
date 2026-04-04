@@ -345,7 +345,7 @@ nav {
 .cat-monthly { background: var(--lavender-light); color: #7c65a0; }
 .cat-growth { background: var(--sage-light); color: var(--sage-deep); }
 .cat-funny { background: var(--gold-light); color: #9a7430; }
-.cat-health { background: var(--sky-light); color: #4a7e9e; }
+.cat-health { background: var(--sky-light); color: #dff8fc; }
 .cat-celebration { background: #fde8d8; color: #c07040; }
 
 .mpc-title {

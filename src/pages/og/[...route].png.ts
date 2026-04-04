@@ -4,105 +4,91 @@ import { getCollection } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+// Helper to get emoji code point
+function getEmojiCode(emoji: string) {
+  return Array.from(emoji)
+    .map(char => char.codePointAt(0)!.toString(16))
+    .join('-');
+}
+
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  const paths = posts.map((post) => ({
+  const milestones = await getCollection('milestones');
+  
+  const postPaths = posts.map((post) => ({
     params: { route: `stories/${post.id}` },
-    props: { title: post.data.title, description: post.data.excerpt, emoji: post.data.emoji, bg: post.data.bg },
+    props: { emoji: post.data.emoji, bg: post.data.bg },
   }));
 
-  paths.push({
-    params: { route: 'home' },
-    props: { 
-      title: "Gursez Singh Hira's Memory Book", 
-      description: "Every yawn, every giggle, every tiny milestone — lovingly captured and kept forever.",
-      emoji: "🌙",
-      bg: "#5cd7ea"
-    },
-  });
+  const milestonePaths = milestones.map((milestone) => ({
+    params: { route: `milestones/${milestone.id}` },
+    props: { emoji: milestone.data.emoji, bg: milestone.data.color },
+  }));
 
-  return paths;
+  const homePath = {
+    params: { route: 'home' },
+    props: { emoji: "🍼", bg: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)" },
+  };
+
+  return [...postPaths, ...milestonePaths, homePath];
 }
 
 export async function GET({ props }: any) {
-  const { title, description, emoji, bg } = props;
+  const { emoji, bg } = props;
 
-  // Load fonts
-  const fontRegularPath = path.resolve('./public/fonts/DM_Sans/static/DMSans-Regular.ttf');
+  // Load font
   const fontBoldPath = path.resolve('./public/fonts/DM_Sans/static/DMSans-Bold.ttf');
-  
-  const [fontRegularData, fontBoldData] = await Promise.all([
-    fs.readFile(fontRegularPath),
-    fs.readFile(fontBoldPath),
-  ]);
+  const fontBoldData = await fs.readFile(fontBoldPath);
+
+  // Fetch emoji as a PNG Data URI
+  let emojiBase64 = '';
+  try {
+    const code = getEmojiCode(emoji);
+    // Use Twitter's official assets for maximum reliability
+    const url = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/${code}.png`;
+    const emojiRes = await fetch(url);
+    if (emojiRes.ok) {
+      const arrayBuffer = await emojiRes.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      emojiBase64 = `data:image/png;base64,${base64}`;
+    }
+  } catch (e) {
+    console.error('Emoji fetch failed:', e);
+  }
+
+  const containerStyle: any = {
+    height: '630px',
+    width: '1200px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: bg.includes('gradient') ? bg : bg,
+  };
 
   const svg = await satori(
     {
       type: 'div',
       props: {
-        style: {
-          height: '100%',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#fffaf6',
-          backgroundImage: `linear-gradient(135deg, ${bg}22 0%, #fffaf6 100%)`,
-          padding: '40px',
-          fontFamily: 'DM Sans',
-        },
-        children: [
+        style: containerStyle,
+        children: emojiBase64 ? [
+          {
+            type: 'img',
+            props: {
+              src: emojiBase64,
+              style: {
+                width: '320px',
+                height: '320px',
+              },
+            },
+          },
+        ] : [
           {
             type: 'div',
             props: {
-              style: {
-                display: 'flex',
-                fontSize: '120px',
-                marginBottom: '20px',
-              },
+              style: { fontSize: '240px' },
               children: emoji,
             },
-          },
-          {
-            type: 'div',
-            props: {
-              style: {
-                fontSize: '70px',
-                fontWeight: 700,
-                color: '#1f2333',
-                textAlign: 'center',
-                marginBottom: '20px',
-              },
-              children: title,
-            },
-          },
-          {
-            type: 'div',
-            props: {
-              style: {
-                fontSize: '32px',
-                fontWeight: 400,
-                color: '#5e5550',
-                textAlign: 'center',
-                maxWidth: '800px',
-              },
-              children: description,
-            },
-          },
-          {
-            type: 'div',
-            props: {
-              style: {
-                position: 'absolute',
-                bottom: '40px',
-                fontSize: '24px',
-                color: '#8e817a',
-                fontWeight: 400,
-              },
-              children: 'gursez.hira.im',
-            },
-          },
+          }
         ],
       },
     },
@@ -110,12 +96,6 @@ export async function GET({ props }: any) {
       width: 1200,
       height: 630,
       fonts: [
-        {
-          name: 'DM Sans',
-          data: fontRegularData,
-          weight: 400,
-          style: 'normal',
-        },
         {
           name: 'DM Sans',
           data: fontBoldData,
@@ -133,6 +113,7 @@ export async function GET({ props }: any) {
   return new Response(new Uint8Array(pngBuffer), {
     headers: {
       'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
     },
   });
 }

@@ -1,0 +1,22 @@
+---
+interface Props {
+  post: any;
+}
+
+const { post: p } = Astro.props;
+---
+
+<a href={`/stories/${p.id}`} class="blog-card fade-up">
+  <div class="blog-card-img">
+    <div class="blog-card-img-inner" style={`background:${p.data.bg}`}>{p.data.emoji}</div>
+  </div>
+  <div class="blog-card-body">
+    <span class="blog-card-tag">{p.data.tag}</span>
+    <div class="blog-card-title">{p.data.title}</div>
+    <div class="blog-card-excerpt">{p.data.excerpt}</div>
+  </div>
+  <div class="blog-card-footer">
+    <span class="blog-card-date">{p.data.date}</span>
+    <span class="blog-card-read">{p.data.readTime}</span>
+  </div>
+</a>
