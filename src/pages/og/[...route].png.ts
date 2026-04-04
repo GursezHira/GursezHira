@@ -27,7 +27,7 @@ export async function getStaticPaths() {
 
   const homePath = {
     params: { route: 'home' },
-    props: { emoji: "🍼", bg: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)" },
+    props: { emoji: "👶", bg: "linear-gradient(90deg,rgba(255, 251, 232, 1) 0%, rgba(250, 230, 207, 1) 50%);" },
   };
 
   return [...postPaths, ...milestonePaths, homePath];
@@ -85,7 +85,7 @@ export async function GET({ props }: any) {
           {
             type: 'div',
             props: {
-              style: { fontSize: '240px' },
+              style: { fontSize: '180px' },
               children: emoji,
             },
           }
