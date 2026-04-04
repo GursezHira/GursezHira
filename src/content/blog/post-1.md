@@ -2,7 +2,6 @@
 id: 2
 title: "The Night You Came"
 tag: "Special Day"
-tagColor: "cat-firsts"
 emoji: "💙"
 bg: "linear-gradient(135deg,#e8f0fe,#f3e8fc)"
 date: "January 13, 2026"

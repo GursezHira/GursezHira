@@ -4,11 +4,11 @@ import { getCollection } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-// Helper to get emoji code point
+// Helper to get emoji code point (underscore-separated, lowercase for Noto)
 function getEmojiCode(emoji: string) {
   return Array.from(emoji)
     .map(char => char.codePointAt(0)!.toString(16))
-    .join('-');
+    .join('_');
 }
 
 export async function getStaticPaths() {
@@ -34,12 +34,11 @@ export async function GET({ props }: any) {
   const fontBoldPath = path.resolve('./public/fonts/DM_Sans/static/DMSans-Bold.ttf');
   const fontBoldData = await fs.readFile(fontBoldPath);
 
-  // Fetch emoji as a PNG Data URI
+  // Fetch emoji as a PNG Data URI using Google Noto Emoji
   let emojiBase64 = '';
   try {
     const code = getEmojiCode(emoji);
-    // Use Twitter's official assets for maximum reliability
-    const url = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/${code}.png`;
+    const url = `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/72/emoji_u${code}.png`;
     const emojiRes = await fetch(url);
     if (emojiRes.ok) {
       const arrayBuffer = await emojiRes.arrayBuffer();
