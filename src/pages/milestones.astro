@@ -20,7 +20,7 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
       </div>
 
       <!-- FILTER BAR -->
-      <div class="filter-bar" role="search" aria-label="Filter milestones">
+      <div class="filter-bar fade-up" style="transition-delay:0.1s" role="search" aria-label="Filter milestones">
         <div class="filter-search">
           <input type="text" id="milestoneSearch" placeholder="Search milestones…" aria-label="Search milestones" />
         </div>
@@ -160,6 +160,7 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
     }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(e => revealObserver.observe(e));
 
     function renderSkeletons(count) {
       const container = document.getElementById('timelineItems');

@@ -1,17 +1,27 @@
 ---
-id: 1
-title: "Welcome to the World, Little One"
+id: 2
+title: "The Night You Came"
 tag: "Special Day"
 tagColor: "cat-firsts"
-emoji: "🌸"
-bg: "linear-gradient(135deg,#fce8e8,#ede9f5)"
-date: "March 14, 2025"
-readTime: "4 min read"
-excerpt: "At 6:48 in the morning, after the longest, most terrifying and beautiful night of our lives, you arrived. Tiny, perfect, utterly ours."
+emoji: "💙"
+bg: "linear-gradient(135deg,#e8f0fe,#f3e8fc)"
+date: "January 13, 2026"
+readTime: "5 min read"
+excerpt: "At 1:42 in the morning, after the most intense and extraordinary night of our lives, you arrived. 3265 grams, 48 centimetres, and entirely, completely ours."
 ---
-<p>The contractions started at 2am. Mum timed them on her phone while Dad fumbled with the hospital bag we'd packed and repacked a hundred times. The drive to the hospital was quiet — the kind of quiet that holds its breath.</p>
-<p>At 6:48am, on the 14th of March, you came into the world. The midwife placed you on Mum's chest and you opened your eyes — dark, searching, ancient somehow — and looked straight at us.</p>
-<blockquote>We had no idea love could happen that fast. That completely. That irreversibly.</blockquote>
-<h2>The First Hour</h2>
-<p>You weighed 3.4 kilograms and you were 51 centimetres long. Your fingers were impossibly small. Your cry was the most reassuring sound we'd ever heard. Grandma rang eight times. We didn't answer because we couldn't stop staring at you.</p>
-<p>We sat in that hospital room for hours, passing you back and forth, too afraid to put you down, already completely rearranged by you.</p>
+<p>It started on the evening of the 12th of January. Labour was induced at Middlemore Hospital — your arrival was not going to be left to chance. Mum had been monitored closely in the weeks leading up to this night, and the doctors made the call. It was time. By 11pm, things were moving.</p>
+
+<p>The membranes ruptured at 12:45am. Fifty-seven minutes later, you were fully on your way. The room was calm but purposeful — our Lead Midwife Fateme Moloodi was steady and reassuring throughout, alongside the team who had gathered to bring you safely into the world. Dad stood close, not quite knowing what to do with his hands, heart hammering.</p>
+
+<blockquote>At 1:42am on the 13th of January 2026, you arrived. The world became a completely different place.</blockquote>
+
+<h2>Your Very First Details</h2>
+<p>You weighed 3265 grams and measured 48 centimetres long, with a head circumference of 34.5 centimetres. Your Apgar scores were 9 at one minute and 9 at five minutes — strong, healthy, and already doing brilliantly. You were placed skin to skin with Mum at 1:42am, and you stayed there for 68 minutes. We think you both needed it equally.</p>
+
+<p>You were born via ventouse at Middlemore Hospital, and the moment you were out, the room seemed to exhale. No resuscitation needed. No complications for you. Just a healthy, beautiful baby boy, looking up at the world with wide, curious eyes.</p>
+
+<h2>The People in the Room</h2>
+<p>Midwife Fateme Moloodi led the way, with Ashley Chan assisting the birth. Cate Johns and Samana Hussaini were also present — a room full of people whose one job that night was to bring you safely to us. And Dad, of course, who was the only non-medical person in the room and absolutely the most terrified.</p>
+
+<p>You received your Vitamin K at 3:00am — a tiny 1 milligram, intramuscularly, just to give you the best possible start. By the time the sun came up, we had already been staring at you for hours. We couldn't stop. We still can't.</p>
+

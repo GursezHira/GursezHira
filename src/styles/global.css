@@ -229,8 +229,7 @@ nav {
 }
 .hero-name span { font-style: italic; color: var(--blush-deep); display: block; }
 .hero-tagline {
-  font-size: 1.05rem; color: var(--text-soft);
-  max-width: 440px; line-height: 1.75; margin-bottom: 36px;
+  font-size: 1.05rem; color: var(--text-soft);max-width: 440px; line-height: 1.75; margin-bottom: 36px;margin-top: 36px;
 }
 .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
 
@@ -731,7 +730,7 @@ footer {
   .hero-tagline { margin: 0 auto 36px; }
   .hero-buttons { justify-content: center; }
   .hero-visual { justify-content: center; }
-  .hero-badge-born { left: 0; }
+  .hero-badge-born { left: -50px; }
   .hero-photo-wrap { width: 320px; height: 400px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 0; }
   .stat-item:nth-child(2) { border-right: none; }
@@ -768,7 +767,7 @@ footer {
   .filter-bar { flex-direction: column; align-items: stretch; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .hero-photo-wrap { width: 260px; height: 330px; }
-  .love-note { margin: 0; border-radius: 0; }
+  .love-note { margin: 0; border-radius: var(--radius-xl); padding: 80px 10px; }
   .blog-lg-body { padding: 24px; }
   .blog-lg-title { font-size: 1.5rem; }
 }

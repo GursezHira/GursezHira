@@ -25,3 +25,4 @@ pnpm-debug.log*
 
 # more
 package-lock.json
+bun.lock
