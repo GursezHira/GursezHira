@@ -194,9 +194,9 @@ nav {
 }
 .btn-outline:hover { background: var(--text-dark); color: var(--cream); transform: translateY(-2px); }
 .btn-soft {
-  background: var(--blush-light); color: var(--text-dark);
+  background: #e0dee6; color: var(--text-dark); border: 1.5px solid #d2cce6;
 }
-.btn-soft:hover { background: var(--blush); transform: translateY(-2px); }
+.btn-soft:hover { background: #d4d1db; transform: translateY(-2px); }
 
 /* ─── FADE ANIMATIONS ───────────────────────────────────── */
 .fade-up {
