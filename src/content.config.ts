@@ -46,4 +46,4 @@ export const collections = {
   'milestones': milestonesCollection,
   'blog': blogCollection,
   'family': familyCollection,
-};
+};

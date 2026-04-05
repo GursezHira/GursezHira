@@ -216,7 +216,6 @@ nav {
   align-items: center; gap: 64px;
   padding: 80px 0;
 }
-.hero-text { }
 .hero-eyebrow {
   font-family: var(--font-script); font-size: 1.6rem;
   color: var(--blush-deep); margin-bottom: 16px; display: block;
@@ -229,7 +228,7 @@ nav {
 }
 .hero-name span { font-style: italic; color: var(--blush-deep); display: block; }
 .hero-tagline {
-  font-size: 1.05rem; color: var(--text-soft);max-width: 440px; line-height: 1.75; margin-bottom: 36px;margin-top: 36px;
+  font-size: 1.05rem; color: var(--text-soft); max-width: 440px; line-height: 1.75; margin-bottom: 36px; margin-top: 36px;
 }
 .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
 
@@ -261,7 +260,6 @@ nav {
   display: flex; align-items: center; gap: 12px;
 }
 .badge-icon { font-size: 1.6rem; }
-.badge-text { }
 .badge-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
 .badge-value { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text-dark); }
 
@@ -826,7 +824,7 @@ footer {
 .ft-couple {
   display: flex; align-items: center; gap: 8px;
   padding: 16px; border-radius: var(--radius-lg);
-  transition: background 0.3s;
+  transition: background 0.3s; position: relative;
 }
 .ft-couple--paternal { background: rgba(92,215,234,0.06); border: 1.5px dashed rgba(92,215,234,0.25); }
 .ft-couple--maternal { background: rgba(154,126,200,0.06); border: 1.5px dashed rgba(154,126,200,0.25); }
@@ -843,8 +841,6 @@ footer {
 .ft-couple:hover .ft-connector-heart { opacity: 0.9; }
 .ft-connector-heart--parents { font-size: 1.8rem; opacity: 0.75; }
 
-/* Vertical connector line from couple down */
-.ft-couple { position: relative; }
 .ft-couple::after {
   content: '';
   display: block;
@@ -1048,7 +1044,7 @@ footer {
   margin: 0 auto;
 }
 
-/* ─── RESPONSIVE ───────────────────────────────────────── */
+/* ─── FT RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 900px) {
   .ft-gen { gap: 16px; }
   .ft-couple { gap: 4px; padding: 10px; }
@@ -1059,4 +1055,3 @@ footer {
   .ft-mobile-view { display: block; }
   .ft-panel { width: 100%; right: -100vw; }
 }
-
