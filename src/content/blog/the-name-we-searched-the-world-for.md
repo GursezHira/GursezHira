@@ -13,8 +13,11 @@ Naming you was supposed to be the fun part. And in some ways it was. But it was 
 The day you were born, your Nana made their way to the Gurudwara for your Naam Karan. This is how it begins, by placing the question in front of something bigger than any of us. The Hukamnama that day carried the line:
 
 > ਭਗਤਾ ਦੀ ਸਦਾ ਤੂ ਰਖਦਾ ਹਰਿ ਜੀਉ ਧੁਰਿ ਤੂ ਰਖਦਾ ਆਇਆ ॥
+> 
 > Bhagathaa Dhee Sadhaa Thoo Rakhadhaa Har Jeeo Dhhur Thoo Rakhadhaa Aaeiaa ||
+> 
 > You always preserve the honor of Your devotees, O Dear Lord; You have protected them from the very beginning of time.
+> 
 > ਸੋਰਠਿ (ਮਃ ੩) ਅਸਟ. (੧) ੧:੧ - ਗੁਰੂ ਗ੍ਰੰਥ ਸਾਹਿਬ : ਅੰਗ ੬੩੭ ਪੰ. ੧੩
 
 The word that came forward was **ਭਗਤਾ** (Bha-ga-thaa). And so the letters for your name were set: **B, G, and T**.
