@@ -1,10 +1,11 @@
 {
   "nodeId": "node-nani",
   "name": "Nani",
-  "relation": "Maternal Grandmother",
+  "relation": "Nani Ji",
   "side": "Maternal",
   "emoji": "👵",
   "color": "linear-gradient(135deg, #ede4f8, #f8f0ff)",
   "generation": 2,
-  "note": "Nani's kitchen always smells like love, and she's already counting the days to spoil Gursez rotten."
+  "note": "Nani's kitchen always smells like love, and she's already counting the days to spoil Gursez rotten.",
+  "coupleId": "couple-nana-nani"
 }

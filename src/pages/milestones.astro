@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import MemberModal from '../components/MemberModal.astro';
 import { getCollection } from 'astro:content';
 
 const allMilestonesRaw = await getCollection('milestones');
@@ -54,13 +55,8 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
     </div>
   </main>
 
-  <!-- MILESTONE MODAL -->
-  <div class="modal-overlay" id="milestoneModal" role="dialog" aria-modal="true" aria-label="Milestone detail">
-    <div class="modal-wrap">
-      <div class="modal" id="modalContent"></div>
-      <button class="modal-close" id="closeModalBtn" aria-label="Close">✕</button>
-    </div>
-  </div>
+  <!-- ── MILESTONE DETAIL MODAL (centred overlay variant) ───── -->
+  <MemberModal id="milestoneModal" label="Milestone detail" />
 
   <script define:vars={{ ALL_MILESTONES }}>
     let milestoneCategory = 'all';
@@ -186,10 +182,8 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
       document.querySelectorAll('.sk-item').forEach(s => s.remove());
     }
 
-    window.openModal = function(mId) {
-      const m = ALL_MILESTONES.find(x => x.id == mId || x.id == mId.toString());
-      if (!m) return;
-      document.getElementById('modalContent').innerHTML = `
+    function buildMilestoneHTML(m) {
+      return `
         <div class="modal-img" style="background:${m.color}">${m.emoji}</div>
         <div class="modal-body">
           <span class="mpc-category ${getCategoryClass(m.category)} modal-category">${m.category}</span>
@@ -202,19 +196,15 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
           <div class="modal-full-story">${m.story}</div>
         </div>
       `;
-      document.getElementById('milestoneModal').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    };
-
-    function closeModalBtn() {
-      document.getElementById('milestoneModal').classList.remove('open');
-      document.body.style.overflow = '';
     }
-    document.getElementById('closeModalBtn').addEventListener('click', closeModalBtn);
-    document.getElementById('milestoneModal').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('milestoneModal')) closeModalBtn();
-    });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+
+    window.openModal = function(mId) {
+      const m = ALL_MILESTONES.find(x => x.id == mId || x.id == mId.toString());
+      if (!m) return;
+      if (typeof window['milestoneModal_open'] === 'function') {
+        window['milestoneModal_open'](buildMilestoneHTML(m));
+      }
+    };
 
     function loadNextBatch() {
       if (isLoading) return;
@@ -259,7 +249,7 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
         if (loadedCount >= filteredMilestones.length) {
           document.getElementById('noMore').style.display = 'block';
         }
-      }, 500); // reduced delay for quicker UX
+      }, 500);
     }
 
     function setupInfiniteScroll() {

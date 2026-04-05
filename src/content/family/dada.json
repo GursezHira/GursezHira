@@ -1,10 +1,12 @@
 {
   "nodeId": "node-dada",
-  "name": "Dada",
-  "relation": "Paternal Grandfather",
+  "name": "Deep Singh",
+  "relation": "Dada Ji",
   "side": "Paternal",
   "emoji": "👴",
   "color": "linear-gradient(135deg, #dff8fc, #c9f4f8)",
   "generation": 2,
-  "note": "Dada's eyes sparkle when he holds little Gursez — a bond forged across generations and written in love."
+  "note": "Dada's eyes sparkle when he holds little Gursez — a bond forged across generations and written in love.",
+  "coupleId": "couple-dada-dadi",
+  "parentCoupleId": "couple-nand-ranjeet"
 }

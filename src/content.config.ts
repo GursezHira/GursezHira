@@ -39,6 +39,10 @@ const familyCollection = defineCollection({
     generation: z.number(),
     born: z.string().optional(),
     note: z.string(),
+    // Optional: give two people the same coupleId to render them as a pair
+    coupleId: z.string().optional(),
+    // Optional: reference a coupleId from the generation above to draw lineage
+    parentCoupleId: z.string().optional(),
   })
 });
 

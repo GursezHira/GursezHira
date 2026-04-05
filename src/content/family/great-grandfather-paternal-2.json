@@ -1,10 +1,12 @@
 {
   "nodeId": "node-ggf-p2",
-  "name": "Great-Grandpa",
-  "relation": "Dadi's Father",
+  "name": "Puran Singh",
+  "relation": "Par-Par-Dada",
   "side": "Paternal",
   "emoji": "👴",
   "color": "linear-gradient(135deg, #dff8fc, #f8f3ee)",
-  "generation": 1,
-  "note": "The roots run deep on the paternal side — blessings passed down through time."
+  "generation": 0,
+  "note": "The roots run deep on the paternal side — blessings passed down through time.",
+  "coupleId": "couple-puran-uttam",
+  "parentCoupleId": "couple-maan"
 }

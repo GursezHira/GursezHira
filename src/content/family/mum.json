@@ -1,10 +1,12 @@
 {
   "nodeId": "node-mum",
-  "name": "Mum",
-  "relation": "Mother",
+  "name": "Jastinder Kaur",
+  "relation": "Mumma Ji",
   "side": "Maternal",
   "emoji": "👩",
   "color": "linear-gradient(135deg, #ede4f8, #f8f0ff)",
   "generation": 3,
-  "note": "Mum — the one whose heartbeat Gursez knows best. She carried him, and now she carries his whole world in her eyes. Pure, unconditional love."
+  "note": "Mum — the one whose heartbeat Gursez knows best. She carried him, and now she carries his whole world in her eyes. Pure, unconditional love.",
+  "coupleId": "couple-dad-mum",
+  "parentCoupleId": "couple-nana-nani"
 }

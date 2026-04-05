@@ -1,0 +1,86 @@
+---
+/**
+ * MemberModal — shared detail overlay component.
+ *
+ * Props:
+ *   id       — unique id for this modal instance (default: "memberModal")
+ *   label    — aria-label for the dialog (default: "Detail")
+ *   variant  — "modal"  → centred overlay  (milestones, default)
+ *              "panel"  → slide-in from right (family tree)
+ */
+export interface Props {
+  id?:      string;
+  label?:   string;
+  variant?: 'modal' | 'panel';
+}
+
+const { id = 'memberModal', label = 'Detail', variant = 'modal' } = Astro.props;
+const isPanel = variant === 'panel';
+---
+
+{isPanel ? (
+  <>
+    <div class="ft-panel" id={id} role="dialog" aria-modal="true" aria-label={label}>
+      <div class="ft-panel-inner" id={`${id}Content`}></div>
+      <button class="ft-panel-close" id={`${id}CloseBtn`} aria-label="Close">✕</button>
+    </div>
+    <div class="ft-panel-overlay" id={`${id}Overlay`}></div>
+  </>
+) : (
+  <div class="modal-overlay" id={id} role="dialog" aria-modal="true" aria-label={label}>
+    <div class="modal-wrap">
+      <div class="modal" id={`${id}Content`}></div>
+      <button class="modal-close" id={`${id}CloseBtn`} aria-label="Close">✕</button>
+    </div>
+  </div>
+)}
+
+<script define:vars={{ id, isPanel }}>
+  (function () {
+    const closeBtn = document.getElementById(id + 'CloseBtn');
+    const content  = document.getElementById(id + 'Content');
+
+    // Panel variant uses a separate overlay element; modal variant uses the wrapper itself
+    const overlay = isPanel
+      ? document.getElementById(id + 'Overlay')
+      : document.getElementById(id);
+
+    const panel = isPanel ? document.getElementById(id) : null;
+
+    function closeModal() {
+      if (isPanel) {
+        panel.classList.remove('open');
+        overlay.classList.remove('open');
+      } else {
+        overlay.classList.remove('open');
+      }
+      document.body.style.overflow = '';
+    }
+
+    function openModal(html) {
+      content.innerHTML = html;
+      if (isPanel) {
+        panel.classList.add('open');
+        overlay.classList.add('open');
+      } else {
+        overlay.classList.add('open');
+      }
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+
+    // Expose on window so each page's inline script can call them
+    window[id + '_open']  = openModal;
+    window[id + '_close'] = closeModal;
+
+    closeBtn.addEventListener('click', closeModal);
+    // Panel: the overlay div IS the backdrop, click anywhere on it closes
+    // Modal: click only when target is the overlay backdrop itself
+    overlay.addEventListener('click', function (e) {
+      if (isPanel || e.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  })();
+</script>

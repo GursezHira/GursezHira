@@ -1,10 +1,11 @@
 {
   "nodeId": "node-bhua",
-  "name": "Bhua",
-  "relation": "Paternal Aunt",
+  "name": "Satinder Kaur",
+  "relation": "Bhua Ji",
   "side": "Paternal",
   "emoji": "👩",
   "color": "linear-gradient(135deg, #dff8fc, #f0fbfc)",
   "generation": 3,
-  "note": "Bhua is one of Gursez's biggest fans. She was one of the first to hold him and already can't stop saying his name."
+  "note": "Bhua is one of Gursez's biggest fans. She was one of the first to hold him and already can't stop saying his name.",
+  "parentCoupleId": "couple-dada-dadi"
 }
