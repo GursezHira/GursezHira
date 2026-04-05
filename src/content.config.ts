@@ -4,7 +4,6 @@ import { glob } from 'astro/loaders';
 const milestonesCollection = defineCollection({
   loader: glob({ pattern: "*.json", base: "./src/content/milestones" }),
   schema: z.object({
-    id: z.number(),
     title: z.string(),
     date: z.string(),
     category: z.string(),
@@ -18,7 +17,6 @@ const milestonesCollection = defineCollection({
 const blogCollection = defineCollection({
   loader: glob({ pattern: "*.md", base: "./src/content/blog" }),
   schema: z.object({
-    id: z.number(),
     title: z.string(),
     tag: z.string(),
     emoji: z.string(),

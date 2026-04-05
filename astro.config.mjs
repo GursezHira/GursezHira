@@ -25,7 +25,6 @@ export default defineConfig({
             extension: 'json',
             create: true,
             fields: [
-              { name: 'id', label: 'ID', widget: 'number' },
               { name: 'title', label: 'Title', widget: 'string' },
               {
                 name: 'date',
@@ -50,13 +49,13 @@ export default defineConfig({
           {
             name: 'blog',
             label: 'Blog',
+            slug: '{{slug}}',
             label_singular: 'Blog Post',
             folder: 'src/content/blog',
             format: 'frontmatter',
             extension: 'md',
             create: true,
             fields: [
-              { name: 'id',       label: 'ID',        widget: 'number' },
               { name: 'title',    label: 'Title',     widget: 'string' },
               { name: 'tag',      label: 'Tag',       widget: 'string' },
               { name: 'emoji',    label: 'Emoji',     widget: 'string' },

@@ -1,5 +1,4 @@
 ---
-id: 2
 title: "The Night You Came"
 tag: "Special Day"
 emoji: "💙"
