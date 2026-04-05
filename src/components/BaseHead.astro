@@ -25,27 +25,30 @@ const personSchema = {
   "birthDate": "2026-01-13",
   "description": "Gursez Singh Hira's personal memory book documenting his life milestones and stories."
 };
+
+const isHome = title === "Home" || title === "Gursez Singh Hira";
+const fullTitle = isHome ? "Gursez Singh Hira" : `${title} · Gursez Singh Hira`;
 ---
 
 <!-- Primary Meta Tags -->
-<title>{title} | Gursez Singh Hira</title>
-<meta name="title" content={`${title} | Gursez Singh Hira`} />
+<title>{fullTitle}</title>
+<meta name="title" content={fullTitle} />
 <meta name="description" content={description} />
-<meta name="author" content="Mum & Dad" />
+<meta name="author" content="Harman Singh Hira" />
 
 <link rel="canonical" href={canonicalURL} />
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content={type} />
 <meta property="og:url" content={canonicalURL} />
-<meta property="og:title" content={`${title} | Gursez Singh Hira`} />
+<meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImageURL} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={canonicalURL} />
-<meta property="twitter:title" content={`${title} | Gursez Singh Hira`} />
+<meta property="twitter:title" content={fullTitle} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={ogImageURL} />
 
