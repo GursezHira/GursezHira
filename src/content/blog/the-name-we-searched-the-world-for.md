@@ -3,7 +3,7 @@ title: The Name We Searched the World For
 tag: Your Name
 emoji: ✨
 bg: '#6ff33f'
-date: 2026-01-28
+date: January 28, 2026
 readTime: 4 min read
 excerpt: Choosing your name was one of the hardest things we did. It took more than a week, a Hukamnama, a rejected suggestion of Gavin, and a lot of late-night scrolling. But in the end, we found you.
 ---
