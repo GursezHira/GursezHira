@@ -1,91 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import MemberModal from '../components/MemberModal.astro';
-import { getCollection } from 'astro:content';
-
-const family = await getCollection('family');
-
-// ── Panel data: full map passed to client script ───────────────
-const membersMap = Object.fromEntries(family.map(m => [m.data.nodeId, m.data]));
-const membersJSON = JSON.stringify(membersMap);
-
-// ── Types ──────────────────────────────────────────────────────
-type Member = (typeof family)[number]['data'];
-
-// ── Helpers ────────────────────────────────────────────────────
-const get = (id: string) => family.find(m => m.data.nodeId === id)?.data;
-
-// CSS side modifier (case-insensitive)
-const sideClass = (side: string = '') =>
-  side.toLowerCase() === 'maternal' ? 'ft-node--maternal' : 'ft-node--paternal';
-
-// ── Couple-grouping logic ──────────────────────────────────────
-// Group members that share a coupleId into pairs.
-// Members without a coupleId are treated as singletons.
-// Within each generation we produce an ordered list of "slots":
-//   { type: 'couple', coupleId, members: [m1, m2?], side }
-//   { type: 'single', member }
-
-type CoupleSlot = { type: 'couple'; coupleId: string; members: Member[]; side: string };
-type SingleSlot = { type: 'single'; member: Member };
-type Slot = CoupleSlot | SingleSlot;
-
-function buildSlots(members: Member[]): Slot[] {
-  const slots: Slot[] = [];
-  const seen = new Set<string>();
-
-  for (const m of members) {
-    if (m.coupleId) {
-      if (seen.has(m.coupleId)) continue; // already added as part of the pair
-      seen.add(m.coupleId);
-      const pair = members.filter(x => x.coupleId === m.coupleId);
-      slots.push({ type: 'couple', coupleId: m.coupleId, members: pair, side: m.side });
-    } else {
-      slots.push({ type: 'single', member: m });
-    }
-  }
-  return slots;
-}
-
-// ── Generation grouping ────────────────────────────────────────
-// Collect all unique generation numbers and sort ascending (oldest first).
-const allGenerations = [...new Set(family.map(m => m.data.generation))].sort((a, b) => a - b);
-
-// For each generation, split into paternal and maternal columns.
-// Structured nodeIds handled separately (gen 3 & 4) are excluded here.
-const structuredIds = new Set([
-  'node-bhua','node-dad','node-mum','node-mama','node-gursez',
-  'node-dada','node-dadi','node-nana','node-nani',
-]);
-
-function getMembersForGen(gen: number): { paternal: Member[]; maternal: Member[] } {
-  const all = family
-    .map(m => m.data)
-    .filter(m => m.generation === gen && !structuredIds.has(m.nodeId));
-  return {
-    paternal: all.filter(m => m.side.toLowerCase() === 'paternal'),
-    maternal: all.filter(m => m.side.toLowerCase() === 'maternal'),
-  };
-}
-
-// Dynamic generations = everything except gen 3 (parents row) and gen 4 (Gursez)
-const dynamicGens = allGenerations.filter(g => g <= 2);
-
-// ── Named lookups for structured rows ─────────────────────────
-const dad    = get('node-dad');
-const mum    = get('node-mum');
-const gursez = get('node-gursez');
-const bhua   = get('node-bhua');
-const mama   = get('node-mama');
-const dada   = get('node-dada');
-const dadi   = get('node-dadi');
-const nana   = get('node-nana');
-const nani   = get('node-nani');
+import { TREE_DATA } from '../data/family-tree';
 ---
 
 <Layout
   title="Family Tree"
-  description="The beautiful family tree of Gursez Singh Hira — a tapestry of love across generations."
+  description="Gursez's Family Tree — a tapestry of love across generations."
   image="/og/home.png"
 >
   <main id="page-family-tree" class="page active" aria-label="Family Tree">
@@ -97,416 +17,574 @@ const nani   = get('node-nani');
         <p class="section-sub" style="margin:0 auto">Every branch a story, every leaf a heartbeat. This is where Gursez belongs.</p>
       </div>
 
-      <!-- ── MOBILE VIEW (≤768px) ──────────────────────────── -->
-      <div class="ft-mobile-view fade-up" style="transition-delay:0.1s">
+      <!-- LEGEND -->
+      <div class="ft-legend fade-up" aria-label="Legend">
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
+      </div>
+
+      <!-- TREE CANVAS AREA (pan/zoom from family-tree-2) -->
+      <div class="tree-outer fade-up">
+        <div class="tree-hint">✦ Click any card to learn more · Scroll or pinch to explore</div>
+        <div class="tree-viewport" id="treeViewport">
+          <div class="tree-canvas" id="treeCanvas">
+            <svg id="treeSvg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>
+            <div id="treeNodes"></div>
+          </div>
+        </div>
+        <!-- Pan/zoom controls -->
+        <div class="tree-controls">
+          <button class="tree-ctrl-btn" onclick="treeZoom(0.15)" aria-label="Zoom in">＋</button>
+          <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)" aria-label="Zoom out">－</button>
+          <button class="tree-ctrl-btn" onclick="treeReset()" aria-label="Reset view" style="font-size:0.75rem;padding:0 12px;">Reset</button>
+        </div>
+      </div>
+
+      <!-- FAMILY DETAIL PANEL (inline, no separate component) -->
+      <div class="family-detail-panel" id="familyPanel" style="display:none">
+        <button class="family-panel-close" onclick="closeFamilyPanel()" aria-label="Close">✕</button>
+        <div id="familyPanelContent"></div>
+      </div>
+
+      <!-- MOBILE-ONLY VIEW (visible when tree-outer is hidden) -->
+      <div class="ft-mobile-view fade-up">
         <div class="ft-desktop-hint">
           <div class="ft-desktop-hint-icon">🌳</div>
           <p>
-            The full family tree is best explored on a larger screen.<br>
+            The full family tree is best explored on a larger screen.<br/>
             <strong>Visit on desktop</strong> to see all generations and every branch of the tree.
           </p>
         </div>
+
         <div class="ft-mobile-parents">
           <div class="ft-mobile-couple">
-            {dad && (
-              <div class="ft-mobile-member" id={`mobile-${dad.nodeId}`} tabindex="0" role="button" aria-label={dad.name}>
-                <div class="ft-avatar ft-avatar--lg">{dad.emoji}</div>
-                <div class="ft-name">{dad.name}</div>
-                <div class="ft-relation">{dad.relation}</div>
-              </div>
-            )}
+            <div class="ft-mobile-member" id="mobile-node-dad" tabindex="0" role="button" aria-label="Harman Singh">
+              <div class="ft-avatar ft-avatar--lg">👨</div>
+              <div class="ft-name">Harman Singh</div>
+              <div class="ft-relation">Papa</div>
+            </div>
             <div class="ft-mobile-heart">💑</div>
-            {mum && (
-              <div class="ft-mobile-member" id={`mobile-${mum.nodeId}`} tabindex="0" role="button" aria-label={mum.name}>
-                <div class="ft-avatar ft-avatar--lg">{mum.emoji}</div>
-                <div class="ft-name">{mum.name}</div>
-                <div class="ft-relation">{mum.relation}</div>
-              </div>
-            )}
+            <div class="ft-mobile-member" id="mobile-node-mum" tabindex="0" role="button" aria-label="Jastinder Kaur">
+              <div class="ft-avatar ft-avatar--lg">👩</div>
+              <div class="ft-name">Jastinder Kaur</div>
+              <div class="ft-relation">Muma</div>
+            </div>
           </div>
-          <div class="ft-mobile-connector" aria-hidden="true"></div>
-          {gursez && (
-            <div class="ft-mobile-member ft-mobile-gursez" id={`mobile-${gursez.nodeId}`} tabindex="0" role="button" aria-label={gursez.name}>
-              <div class="ft-avatar ft-avatar--hero">{gursez.emoji}</div>
-              <div class="ft-name ft-name--hero">{gursez.name}</div>
-              <div class="ft-relation ft-relation--hero">Singh Hira</div>
-              {gursez.born && <div class="ft-born">Born · {gursez.born}</div>}
-            </div>
-          )}
+          <div class="ft-mobile-child-line"></div>
+          <div class="ft-mobile-member ft-mobile-member--star" id="mobile-node-gursez" tabindex="0" role="button" aria-label="Gursez">
+            <div class="ft-avatar ft-avatar--xl">👶</div>
+            <div class="ft-name">Gursez Singh Hira</div>
+            <div class="ft-relation">The Star of Our World</div>
+          </div>
         </div>
       </div>
 
-      <!-- ── LEGEND ─────────────────────────────────────────── -->
-      <div class="ft-legend fade-up" style="transition-delay:0.1s" aria-label="Legend">
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Gursez</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--parents"></span> Parents</div>
-      </div>
-
-      <!-- ── TREE CANVAS ────────────────────────────────────── -->
-      <div class="ft-canvas-wrapper" style="width: 100vw; margin-left: calc(-50vw + 50%); overflow-x: auto; padding: 0 1rem;">
-        <div class="ft-canvas fade-up" style="transition-delay:0.2s; min-width: max-content; width: fit-content; margin: 0 auto; position: relative;" role="img" aria-label="Family tree diagram">
-
-        <!--
-          ── HOW GENERATIONS ARE ORDERED ────────────────────────
-          Generation numbers in the JSON files control vertical order.
-          Lower number = older ancestor = higher up the tree.
-
-          Recommended numbering:
-            0  = great-great-grandparents  (e.g. Maan Singh)
-            1  = great-grandparents        (e.g. Puran Singh & Uttam Kaur)
-            2  = grandparents              (Dada/Dadi, Nana/Nani)
-            3  = parents + aunts/uncles    (structured row, see below)
-            4  = Gursez                    (structured row, see below)
-
-          ── HOW COUPLES WORK ───────────────────────────────────
-          Give two people the same "coupleId" string in their JSON.
-          They render as a connected pair automatically.
-
-          ── HOW SIBLINGS / CHILD LINES WORK ───────────────────
-          Give a person "parentCoupleId": "<coupleId of their parents>"
-          and a CSS child-line will be drawn from the couple box down
-          to that person's node.  Works even if not all siblings are
-          added yet — each child just references the same parentCoupleId.
-        -->
-
-        <!-- Dynamic generations (≤ 2): oldest ancestors at the top -->
-        {dynamicGens.map(gen => {
-          const { paternal, maternal } = getMembersForGen(gen);
-          if (!paternal.length && !maternal.length) return null;
-
-          const paternalSlots = buildSlots(paternal);
-          const maternalSlots = buildSlots(maternal);
-
-          return (
-            <div class={`ft-gen ft-gen--dyn`} data-gen={gen}>
-
-              {/* ── PATERNAL COLUMN (left) ── */}
-              <div class="ft-gen-col ft-gen-col--paternal">
-                {paternalSlots.map(slot => slot.type === 'couple' ? (
-                  <div
-                    class={`ft-couple ft-couple--paternal`}
-                    id={`couple-${slot.coupleId}`}
-                    data-couple-id={slot.coupleId}
-                    data-side="paternal"
-                  >
-                    {slot.members.map((m, i) => (
-                      <>
-                        {i > 0 && <div class="ft-connector-heart" aria-hidden="true">🤝</div>}
-                        <div
-                          class={`ft-node ${sideClass(m.side)}`}
-                          id={m.nodeId}
-                          data-parent-couple-id={m.parentCoupleId}
-                          tabindex="0" role="button"
-                          aria-label={m.name}
-                        >
-                          <div class="ft-avatar">{m.emoji}</div>
-                          <div class="ft-name">{m.name}</div>
-                          <div class="ft-relation">{m.relation}</div>
-                          {m.born && <div class="ft-born">{m.born}</div>}
-                        </div>
-                      </>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    class={`ft-node ${sideClass(slot.member.side)}`}
-                    id={slot.member.nodeId}
-                    data-parent-couple-id={slot.member.parentCoupleId}
-                    tabindex="0" role="button"
-                    aria-label={slot.member.name}
-                  >
-                    <div class="ft-avatar">{slot.member.emoji}</div>
-                    <div class="ft-name">{slot.member.name}</div>
-                    <div class="ft-relation">{slot.member.relation}</div>
-                    {slot.member.born && <div class="ft-born">{slot.member.born}</div>}
-                  </div>
-                ))}
-              </div>
-
-              {/* ── SPACER ── */}
-              <div class="ft-spacer"></div>
-
-              {/* ── MATERNAL COLUMN (right) ── */}
-              <div class="ft-gen-col ft-gen-col--maternal">
-                {maternalSlots.map(slot => slot.type === 'couple' ? (
-                  <div
-                    class={`ft-couple ft-couple--maternal`}
-                    id={`couple-${slot.coupleId}`}
-                    data-couple-id={slot.coupleId}
-                    data-side="maternal"
-                  >
-                    {slot.members.map((m, i) => (
-                      <>
-                        {i > 0 && <div class="ft-connector-heart" aria-hidden="true">🤝</div>}
-                        <div
-                          class={`ft-node ${sideClass(m.side)}`}
-                          id={m.nodeId}
-                          data-parent-couple-id={m.parentCoupleId}
-                          tabindex="0" role="button"
-                          aria-label={m.name}
-                        >
-                          <div class="ft-avatar">{m.emoji}</div>
-                          <div class="ft-name">{m.name}</div>
-                          <div class="ft-relation">{m.relation}</div>
-                          {m.born && <div class="ft-born">{m.born}</div>}
-                        </div>
-                      </>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    class={`ft-node ${sideClass(slot.member.side)}`}
-                    id={slot.member.nodeId}
-                    data-parent-couple-id={slot.member.parentCoupleId}
-                    tabindex="0" role="button"
-                    aria-label={slot.member.name}
-                  >
-                    <div class="ft-avatar">{slot.member.emoji}</div>
-                    <div class="ft-name">{slot.member.name}</div>
-                    <div class="ft-relation">{slot.member.relation}</div>
-                    {slot.member.born && <div class="ft-born">{slot.member.born}</div>}
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          );
-        })}
-
-        <!-- ── GENERATION 2: GRANDPARENTS (structured couples) ── -->
-        <div class="ft-gen ft-gen--2">
-          {(dada || dadi) && (
-            <div class="ft-couple ft-couple--paternal" id="couple-dada-dadi" data-couple-id="couple-dada-dadi" data-side="paternal">
-              {dada && (
-                <div class={`ft-node ${sideClass(dada.side)}`} id={dada.nodeId} data-parent-couple-id={dada.parentCoupleId} tabindex="0" role="button" aria-label={dada.name}>
-                  <div class="ft-avatar ft-avatar--lg">{dada.emoji}</div>
-                  <div class="ft-name">{dada.name}</div>
-                  <div class="ft-relation">{dada.relation}</div>
-                </div>
-              )}
-              <div class="ft-connector-heart" aria-hidden="true">🤝</div>
-              {dadi && (
-                <div class={`ft-node ${sideClass(dadi.side)}`} id={dadi.nodeId} data-parent-couple-id={dadi.parentCoupleId} tabindex="0" role="button" aria-label={dadi.name}>
-                  <div class="ft-avatar ft-avatar--lg">{dadi.emoji}</div>
-                  <div class="ft-name">{dadi.name}</div>
-                  <div class="ft-relation">{dadi.relation}</div>
-                </div>
-              )}
-            </div>
-          )}
-          {(nana || nani) && (
-            <div class="ft-couple ft-couple--maternal" id="couple-nana-nani" data-couple-id="couple-nana-nani" data-side="maternal">
-              {nana && (
-                <div class={`ft-node ${sideClass(nana.side)}`} id={nana.nodeId} data-parent-couple-id={nana.parentCoupleId} tabindex="0" role="button" aria-label={nana.name}>
-                  <div class="ft-avatar ft-avatar--lg">{nana.emoji}</div>
-                  <div class="ft-name">{nana.name}</div>
-                  <div class="ft-relation">{nana.relation}</div>
-                </div>
-              )}
-              <div class="ft-connector-heart" aria-hidden="true">🤝</div>
-              {nani && (
-                <div class={`ft-node ${sideClass(nani.side)}`} id={nani.nodeId} data-parent-couple-id={nani.parentCoupleId} tabindex="0" role="button" aria-label={nani.name}>
-                  <div class="ft-avatar ft-avatar--lg">{nani.emoji}</div>
-                  <div class="ft-name">{nani.name}</div>
-                  <div class="ft-relation">{nani.relation}</div>
-                </div>
-              )}
-            </div>
-          )}
+      <!-- EVERYONE WHO LOVES GURSEZ GRID (from family-tree-2) -->
+      <section class="section" aria-label="Family members">
+        <div class="fade-up">
+          <span class="section-label">The Whole Family</span>
+          <h2 class="section-title">Everyone Who <em>Loves</em> Gursez</h2>
         </div>
+        <div class="family-grid" id="familyGrid"></div>
+      </section>
 
-        <!-- ── GENERATION 3: PARENTS + SIBLINGS ───────────────── -->
-        <div class="ft-gen ft-gen--3">
-          {bhua && (
-            <div class={`ft-node ${sideClass(bhua.side)} ft-node--sibling`} id={bhua.nodeId} data-parent-couple-id={bhua.parentCoupleId} tabindex="0" role="button" aria-label={bhua.name}>
-              <div class="ft-avatar">{bhua.emoji}</div>
-              <div class="ft-name">{bhua.name}</div>
-              <div class="ft-relation">{bhua.relation}</div>
-            </div>
-          )}
-          {(dad || mum) && (
-            <div class="ft-couple ft-couple--parents" id="couple-dad-mum" data-couple-id="couple-dad-mum" data-side="parents">
-              {dad && (
-                <div class={`ft-node ${sideClass(dad.side)} ft-node--parent`} id={dad.nodeId} data-parent-couple-id={dad.parentCoupleId} tabindex="0" role="button" aria-label={dad.name}>
-                  <div class="ft-avatar ft-avatar--xl">{dad.emoji}</div>
-                  <div class="ft-name">{dad.name}</div>
-                  <div class="ft-relation">{dad.relation}</div>
-                </div>
-              )}
-              <div class="ft-connector-heart ft-connector-heart--parents" aria-hidden="true">💑</div>
-              {mum && (
-                <div class={`ft-node ${sideClass(mum.side)} ft-node--parent`} id={mum.nodeId} data-parent-couple-id={mum.parentCoupleId} tabindex="0" role="button" aria-label={mum.name}>
-                  <div class="ft-avatar ft-avatar--xl">{mum.emoji}</div>
-                  <div class="ft-name">{mum.name}</div>
-                  <div class="ft-relation">{mum.relation}</div>
-                </div>
-              )}
-            </div>
-          )}
-          {mama && (
-            <div class={`ft-node ${sideClass(mama.side)} ft-node--sibling`} id={mama.nodeId} data-parent-couple-id={mama.parentCoupleId} tabindex="0" role="button" aria-label={mama.name}>
-              <div class="ft-avatar">{mama.emoji}</div>
-              <div class="ft-name">{mama.name}</div>
-              <div class="ft-relation">{mama.relation}</div>
-            </div>
-          )}
-        </div>
-
-        <!-- ── GENERATION 4: GURSEZ ───────────────────────────── -->
-        <div class="ft-gen ft-gen--4">
-          {gursez && (
-            <div class="ft-node ft-node--gursez ft-node--star" id={gursez.nodeId} data-parent-couple-id={gursez.parentCoupleId} tabindex="0" role="button" aria-label={gursez.name}>
-              <div class="ft-avatar ft-avatar--hero">{gursez.emoji}</div>
-              <div class="ft-name ft-name--hero">{gursez.name}</div>
-              <div class="ft-relation ft-relation--hero">Singh Hira</div>
-              <div class="ft-star-ring" aria-hidden="true"></div>
-              {gursez.born && <div class="ft-born">Born · {gursez.born}</div>}
-            </div>
-          )}
-        </div>
-
-      </div><!-- /ft-canvas-wrapper -->
-    </div><!-- /container -->
-
-    <!-- ── MEMBER DETAIL PANEL (slide-in variant) ─────────────── -->
-    <MemberModal id="ftPanel" label="Family member details" variant="panel" />
-
+    </div>
   </main>
 
-  <script is:inline define:vars={{ membersJSON }}>
-    var MEMBERS = JSON.parse(membersJSON);
+  <script is:inline define:vars={{ TREE_DATA }}>
+    /* ─── DATA ───────────────────────────────────────────────────
+       To add a new family member, edit src/data/family-tree.js
+    ──────────────────────────────────────────────────────────── */
 
-    function buildMemberHTML(m) {
-      return (
-        '<div class="fp-avatar-wrap" style="background:' + m.color + '">' + m.emoji + '</div>' +
-        '<span class="fp-relation">' + m.side + ' Family</span>' +
-        '<h2 class="fp-name">' + m.name + '</h2>' +
-        '<div class="fp-divider"></div>' +
-        '<div class="fp-fact"><span class="fp-fact-icon">🌿</span><div>' +
-          '<span class="fp-fact-label">Role in the Tree</span>' +
-          '<span class="fp-fact-val">' + m.relation + '</span>' +
-        '</div></div>' +
-        (m.born
-          ? '<div class="fp-fact"><span class="fp-fact-icon">🎂</span><div>' +
-            '<span class="fp-fact-label">Born</span>' +
-            '<span class="fp-fact-val">' + m.born + '</span>' +
-            '</div></div>'
-          : '') +
-        '<div class="fp-love-note">"' + m.note + '"</div>'
-      );
-    }
+    /* ─── FAMILY TREE ENGINE ───────────────────────────────────── */
+    function initFamilyTree() {
+      const rawNodes = TREE_DATA.treeData;
+      const nodeMap  = {};
+      rawNodes.forEach(n => nodeMap[n.id] = n);
 
-    function openMemberPanel(id) {
-      var key = id.replace(/^mobile-/, '');
-      if (!Object.prototype.hasOwnProperty.call(MEMBERS, key)) return;
-      if (typeof window['ftPanel_open'] === 'function') {
-        window['ftPanel_open'](buildMemberHTML(MEMBERS[key]));
+      /* ── 1. ASSIGN GENERATION ──────────────────────────────── */
+      const genMap = {};
+      function assignGen(id, g) {
+        if (id in genMap) return;
+        genMap[id] = g;
+        const n = nodeMap[id];
+        if (!n) return;
+        (n.rels.spouses  || []).forEach(s  => assignGen(s,  g));
+        (n.rels.parents  || []).forEach(p  => assignGen(p,  g - 1));
+        (n.rels.children || []).forEach(c  => assignGen(c,  g + 1));
       }
+      assignGen('node-gursez', 0);
+      rawNodes.forEach(n => {
+        if (!(n.id in genMap)) {
+          const pg = (n.rels.parents||[]).map(p=>genMap[p]).filter(x=>x!=null);
+          const sg = (n.rels.spouses||[]).map(s=>genMap[s]).filter(x=>x!=null);
+          genMap[n.id] = pg.length ? pg[0]+1 : sg.length ? sg[0] : -4;
+        }
+      });
+
+      /* ── 2. BUILD COUPLE-UNITS ──────────────────────────────── */
+      const unitByNode = {};
+      const units = [];
+      const paired = new Set();
+      rawNodes.forEach(n => {
+        if (paired.has(n.id)) return;
+        const spouses = (n.rels.spouses || []).filter(s => nodeMap[s]);
+        if (spouses.length) {
+          const sp = spouses[0];
+          paired.add(n.id); paired.add(sp);
+          const unit = { ids: [n.id, sp], gen: genMap[n.id], side: n.data.side };
+          units.push(unit);
+          unitByNode[n.id] = unit;
+          unitByNode[sp]   = unit;
+        }
+      });
+      rawNodes.forEach(n => {
+        if (paired.has(n.id)) return;
+        const unit = { ids: [n.id], gen: genMap[n.id], side: n.data.side };
+        units.push(unit);
+        unitByNode[n.id] = unit;
+      });
+
+      /* ── 3. GROUP UNITS BY GENERATION ──────────────────────── */
+      const byGen = {};
+      units.forEach(u => {
+        if (!byGen[u.gen]) byGen[u.gen] = [];
+        byGen[u.gen].push(u);
+      });
+
+      const gens = Object.keys(byGen).map(Number).sort((a,b)=>a-b);
+      const sideOrder = { Paternal:0, Gursez:1, Maternal:2 };
+      gens.forEach(g => {
+        byGen[g].sort((a,b) => (sideOrder[a.side]??1) - (sideOrder[b.side]??1));
+      });
+
+      /* ── 4. ASSIGN PIXEL POSITIONS ──────────────────────────── */
+      const CARD_W     = 150;
+      const CARD_H     = 100;
+      const HEART_W    = 24;  // approximate width of 🤝 element
+      const BOX_PAD_X  = 10;  // horizontal padding inside couple box
+      const BOX_PAD_Y  = 8;   // vertical padding inside couple box
+      const UNIT_GAP   = 44;
+      const ROW_H      = 210;
+      const PAD_X      = 70;
+      const PAD_Y      = 70;
+
+      // Total width of a unit for layout spacing purposes.
+      // For couples: outer box = pad + card + heart + card + pad
+      // For solos:   solo box has NO horizontal padding, so outer = card width
+      function unitWidth(u) {
+        if (u.ids.length === 2) {
+          return BOX_PAD_X * 2 + CARD_W * 2 + HEART_W;  // = 300
+        }
+        return CARD_W;  // solo: no horizontal padding
+      }
+      // Height with padding
+      const UNIT_H = BOX_PAD_Y * 2 + CARD_H;
+
+      function rowTotalWidth(row) {
+        return row.reduce((s,u) => s + unitWidth(u), 0) + (row.length-1) * UNIT_GAP;
+      }
+
+      const maxRowW = Math.max(...gens.map(g => rowTotalWidth(byGen[g])));
+      const canvasW  = maxRowW + PAD_X * 2;
+      const canvasH  = gens.length * ROW_H + PAD_Y * 2;
+      const unitPos  = new Map();
+
+      gens.forEach((g, rowIdx) => {
+        const row  = byGen[g];
+        const rowW = rowTotalWidth(row);
+        const startX = (canvasW - rowW) / 2;
+        let cx = startX;
+        const y = PAD_Y + rowIdx * ROW_H;
+        row.forEach(u => {
+          const w = unitWidth(u);
+          unitPos.set(u, { x: cx, y, w, h: UNIT_H });
+          cx += w + UNIT_GAP;
+        });
+      });
+
+      // Bottom-center exit point for connector lines.
+      // For couples: exits from the heart connector midpoint (between the two cards).
+      // For solos:   exits from the center-bottom of the single card.
+      function unitCB(u) {
+        const p = unitPos.get(u);
+        if (u.ids.length === 2) {
+          const heartCenterX = p.x + BOX_PAD_X + CARD_W + HEART_W / 2;
+          return { x: heartCenterX, y: p.y + p.h };
+        }
+        // Solo: no horizontal padding, card center = p.x + CARD_W/2
+        return { x: p.x + CARD_W / 2, y: p.y + p.h };
+      }
+
+      // Top-center entry point for connector lines: lands on the individual card top
+      // (below the box's top padding, so the line visually meets the card).
+      function nodeCT(id) {
+        const u = unitByNode[id];
+        const p = unitPos.get(u);
+        if (u.ids.length === 2) {
+          const idx = u.ids.indexOf(id);
+          // Card 0 left: p.x + BOX_PAD_X
+          // Card 1 left: p.x + BOX_PAD_X + CARD_W + HEART_W
+          const cardX = p.x + BOX_PAD_X + idx * (CARD_W + HEART_W);
+          return { x: cardX + CARD_W / 2, y: p.y + BOX_PAD_Y };
+        }
+        // Solo: no horizontal padding, card starts at p.x
+        return { x: p.x + CARD_W / 2, y: p.y + BOX_PAD_Y };
+      }
+
+      /* ── 5. RENDER SVG CONNECTORS (all smooth bezier curves) ── */
+      const svg = document.getElementById('treeSvg');
+      svg.setAttribute('width',  canvasW);
+      svg.setAttribute('height', canvasH);
+      svg.innerHTML = '';
+
+      // Draw a smooth cubic bezier from (x1,y1) to (x2,y2).
+      // Control points are anchored vertically so the curve flows naturally
+      // from parent bottom to child top without sharp corners.
+      function mkBezier(x1, y1, x2, y2, stroke) {
+        const cy = (y1 + y2) / 2;  // common vertical midpoint for both control pts
+        const d  = `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        el.setAttribute('d', d);
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', stroke);
+        el.setAttribute('stroke-width', '1.8');
+        el.setAttribute('stroke-dasharray', '5 3');
+        el.setAttribute('stroke-linecap', 'round');
+        el.setAttribute('opacity', '0.78');
+        svg.appendChild(el);
+      }
+
+      const SIDE_STROKE = {
+        Paternal: 'rgba(92,215,234,0.75)',
+        Maternal: 'rgba(154,126,200,0.75)',
+        Gursez:   'rgba(201,169,110,0.75)',
+      };
+
+      units.forEach(u => {
+        // Collect ALL children referenced by either member of this unit
+        const childIds = [];
+        u.ids.forEach(id => {
+          (nodeMap[id].rels.children || []).forEach(cid => {
+            if (!childIds.includes(cid)) childIds.push(cid);
+          });
+        });
+        if (!childIds.length) return;
+
+        const stroke = SIDE_STROKE[u.side] || SIDE_STROKE.Paternal;
+        const pb     = unitCB(u);  // bottom-center exit point of this couple/solo
+
+        // Draw one smooth bezier per child, from couple-bottom → child-top-center
+        childIds.forEach(cid => {
+          const ct = nodeCT(cid);  // top-center of this specific child card
+          mkBezier(pb.x, pb.y, ct.x, ct.y, stroke);
+        });
+      });
+
+      /* ── 6. RENDER HTML NODES (family-tree-1 card styling) ─── */
+      const container = document.getElementById('treeNodes');
+      container.innerHTML = '';
+
+      units.forEach(u => {
+        const pos    = unitPos.get(u);
+        const isStar   = u.ids.includes('node-gursez');
+        const isCouple = u.ids.length === 2;
+        const isParentCouple = u.ids.includes('node-dad') || u.ids.includes('node-mum');
+
+        // Wrapper: couple border box, sized exactly to contain cards + heart
+        const box = document.createElement('div');
+        box.className = 'ft-couple-box' +
+          (isCouple   ? ' ft-couple-box--pair' : ' ft-couple-box--solo') +
+          (isStar     ? ' ft-couple-box--star' : '') +
+          (u.side === 'Paternal' ? ' ft-couple-box--pat' : '') +
+          (u.side === 'Maternal' ? ' ft-couple-box--mat' : '') +
+          (isParentCouple ? ' ft-couple-box--parents' : '');
+        box.style.left = pos.x + 'px';
+        box.style.top  = pos.y + 'px';
+        // Do NOT set explicit width — global CSS applies box-sizing:border-box
+        // which would cause any fixed width to eat into the flex content.
+        // Instead let display:flex auto-shrink-wrap to exactly the cards + heart.
+
+        u.ids.forEach((id, idx) => {
+          const n = nodeMap[id];
+          const isMember = (id === 'node-gursez');
+
+          // Card
+          const card = document.createElement('div');
+          card.className = 'ft-node' +
+            (isMember                              ? ' ft-node--gursez ft-node--star' : '') +
+            (n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
+            (n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
+            (isParentCouple                        ? ' ft-node--parent' : '');
+          // Card width is fixed; box-sizing border-box so padding won't push width out
+          card.style.width = CARD_W + 'px';
+          card.style.flex  = '0 0 ' + CARD_W + 'px';
+          card.setAttribute('tabindex','0');
+          card.setAttribute('role','button');
+          card.setAttribute('aria-label', n.data.name);
+          card.innerHTML = `
+            <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
+            <div class="ft-name ${isMember ? 'ft-name--hero' : ''}">${n.data.name}</div>
+            <div class="ft-relation ${isMember ? 'ft-relation--hero' : ''}">${n.data.relation}</div>
+            ${n.data.born ? `<div class="ft-born">Born · ${n.data.born}</div>` : ''}
+            ${isMember ? '<div class="ft-star-ring" aria-hidden="true"></div>' : ''}
+          `;
+          card.onclick = () => openFamilyPanel(n);
+          card.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFamilyPanel(n); }
+          });
+          box.appendChild(card);
+
+          // Heart connector between couple members (inserted after first card)
+          if (isCouple && idx === 0) {
+            const heart = document.createElement('div');
+            heart.className = 'ft-connector-heart' + (isParentCouple ? ' ft-connector-heart--parents' : '');
+            heart.setAttribute('aria-hidden','true');
+            heart.textContent = isParentCouple ? '💑' : '🤝';
+            box.appendChild(heart);
+          }
+        });
+
+        container.appendChild(box);
+      });
+
+      /* ── 7. SIZE THE CANVAS & CENTRE ON GURSEZ ──────────────── */
+      const canvas = document.getElementById('treeCanvas');
+      canvas.style.width  = canvasW + 'px';
+      canvas.style.height = canvasH + 'px';
+
+      const gUnit = unitByNode['node-gursez'];
+      if (gUnit) {
+        const gPos = unitPos.get(gUnit);
+        const vp   = document.getElementById('treeViewport');
+        treeState.scale = 0.82;
+        treeState.x = vp.clientWidth  / 2 - (gPos.x + gPos.w/2) * treeState.scale;
+        treeState.y = vp.clientHeight / 2 - (gPos.y + gPos.h/2) * treeState.scale;
+        applyTreeTransform();
+      }
+
+      renderFamilyGrid(rawNodes);
+      // Trigger fade-up reveals
+      document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
     }
 
-    document.querySelectorAll('.ft-node[id], .ft-mobile-member[id]').forEach(function(node) {
-      node.addEventListener('click', function() { openMemberPanel(node.id); });
-      node.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMemberPanel(node.id); }
+    /* ─── PAN & ZOOM ──────────────────────────────────────────── */
+    const treeState = { x: 0, y: 0, scale: 0.85, dragging: false, startX: 0, startY: 0 };
+
+    function applyTreeTransform() {
+      const canvas = document.getElementById('treeCanvas');
+      if (canvas) canvas.style.transform = `translate(${treeState.x}px,${treeState.y}px) scale(${treeState.scale})`;
+    }
+
+    function treeZoom(delta) {
+      treeState.scale = Math.max(0.3, Math.min(2.0, treeState.scale + delta));
+      applyTreeTransform();
+    }
+
+    function treeReset() {
+      const gUnit = document.querySelector('.ft-node--gursez');
+      const vp    = document.getElementById('treeViewport');
+      treeState.scale = 0.82;
+      if (gUnit && vp) {
+        const vpRect = vp.getBoundingClientRect();
+        const box    = gUnit.closest('.ft-couple-box');
+        if (box) {
+          const bx = parseFloat(box.style.left) + box.offsetWidth / 2;
+          const by = parseFloat(box.style.top) + box.offsetHeight / 2;
+          treeState.x = vpRect.width  / 2 - bx * treeState.scale;
+          treeState.y = vpRect.height / 2 - by * treeState.scale;
+        } else {
+          treeState.x = 0; treeState.y = 0;
+        }
+      } else {
+        treeState.x = 0; treeState.y = 0;
+      }
+      applyTreeTransform();
+    }
+
+    function initTreeDrag() {
+      const vp = document.getElementById('treeViewport');
+      if (!vp) return;
+      vp.addEventListener('mousedown', e => {
+        treeState.dragging = true;
+        treeState.startX = e.clientX - treeState.x;
+        treeState.startY = e.clientY - treeState.y;
+        e.preventDefault();
       });
-    });
+      window.addEventListener('mousemove', e => {
+        if (!treeState.dragging) return;
+        treeState.x = e.clientX - treeState.startX;
+        treeState.y = e.clientY - treeState.startY;
+        applyTreeTransform();
+      });
+      window.addEventListener('mouseup', () => { treeState.dragging = false; });
 
-    // ── Draw child lines from couple boxes to child nodes ──────
-    // Stroke colours match each side's CSS theme:
-    //   paternal → cyan  (#5cd7ea)
-    //   maternal → purple (#9a7ec8)
-    //   parents  → sage  (#16cbdc)
-    var SIDE_STROKE = {
-      paternal: 'rgba(92,215,234,0.55)',
-      maternal: 'rgba(154,126,200,0.55)',
-      parents:  'rgba(22,203,220,0.65)',
-    };
+      vp.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+          treeState.dragging = true;
+          treeState.startX = e.touches[0].clientX - treeState.x;
+          treeState.startY = e.touches[0].clientY - treeState.y;
+        }
+      }, { passive: true });
+      vp.addEventListener('touchmove', e => {
+        if (!treeState.dragging || e.touches.length !== 1) return;
+        treeState.x = e.touches[0].clientX - treeState.startX;
+        treeState.y = e.touches[0].clientY - treeState.startY;
+        applyTreeTransform();
+      }, { passive: true });
+      vp.addEventListener('touchend', () => { treeState.dragging = false; });
 
-    function drawChildLines() {
-      var canvas = document.querySelector('.ft-canvas');
-      if (!canvas) return;
+      vp.addEventListener('wheel', e => {
+        e.preventDefault();
+        treeZoom(e.deltaY < 0 ? 0.08 : -0.08);
+      }, { passive: false });
+    }
 
-      canvas.querySelectorAll('.ft-child-line').forEach(function(el) { el.remove(); });
+    // Expose to window for HTML onclick attributes
+    window.treeZoom = treeZoom;
+    window.treeReset = treeReset;
 
-      var canvasRect = canvas.getBoundingClientRect();
+    /* ─── DETAIL PANEL ───────────────────────────────────────── */
+    function openFamilyPanel(node) {
+      const d = node.data;
+      const r = node.rels;
+      const panel   = document.getElementById('familyPanel');
+      const content = document.getElementById('familyPanelContent');
+      
+      const getName = (id) => TREE_DATA.treeData.find(n => n.id === id)?.data.name || 'Unknown';
+      
+      const sideColors = { Paternal: '#dff8fc', Maternal: '#ede4f8', Gursez: '#f8e8d8' };
+      const bgColor = sideColors[d.side] || '#f8f4f0';
 
-      document.querySelectorAll('[data-parent-couple-id]').forEach(function(childEl) {
-        var parentCoupleId = childEl.getAttribute('data-parent-couple-id');
-        var parentEl = document.querySelector('[data-couple-id="' + parentCoupleId + '"]');
-        if (!parentEl) return;
+      // 1. Surname
+      let surname = d.familyName || "";
+      if (!surname) {
+        if (d.side === 'Paternal') surname = "Hira";
+        else if (d.side === 'Maternal') surname = "Ghuman";
+        else if (d.side === 'Gursez') surname = "Hira";
+      }
 
-        // Pick stroke colour from the parent couple's data-side attribute
-        var side   = parentEl.getAttribute('data-side') || 'paternal';
-        var stroke = SIDE_STROKE[side] || SIDE_STROKE.paternal;
+      // 2. Spouse
+      const spouses = r.spouses && r.spouses.length > 0 
+        ? r.spouses.map(getName).join(", ") 
+        : "Single and/or unknown";
 
-        var pRect = parentEl.getBoundingClientRect();
-        var cRect = childEl.getBoundingClientRect();
+      // 3. Parents
+      const fatherNode = (r.parents || []).map(id => TREE_DATA.treeData.find(n => n.id === id)).find(n => n?.data.gender === 'M');
+      const motherNode = (r.parents || []).map(id => TREE_DATA.treeData.find(n => n.id === id)).find(n => n?.data.gender === 'F');
+      const fatherName = fatherNode ? fatherNode.data.name : "Unknown";
+      const motherName = motherNode ? motherNode.data.name : "Unknown";
+      const hasParents = (r.parents || []).length > 0;
 
-        var x1 = pRect.left + pRect.width / 2 - canvasRect.left;
-        var y1 = pRect.bottom - canvasRect.top;
-        var x2 = cRect.left + cRect.width / 2 - canvasRect.left;
-        var y2 = cRect.top - canvasRect.top;
+      // 4. Children
+      const children = r.children && r.children.length > 0 
+        ? r.children.map(getName).join(", ") 
+        : "None";
 
-        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add('ft-child-line');
-        svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
+      content.innerHTML = `
+        <div class="fp-header">
+          <div class="fp-emoji" style="background:${bgColor}">${d.emoji}</div>
+          <div>
+            <div class="fp-name">
+              ${d.name} 
+              ${surname ? `<span class="fp-surname">(${surname})</span>` : ''}
+            </div>
+            <div class="fp-relation">${d.relation}</div>
+          </div>
+        </div>
+        <div class="fp-divider"></div>
+        
+        <div class="fp-body">
+          <div class="fp-info-row">
+            <span class="fp-info-label">💍 Married to</span>
+            <span class="fp-info-value">${spouses}</span>
+          </div>
+          <div class="fp-info-row">
+            <span class="fp-info-label">👨‍👩‍👦 Parents</span>
+            <span class="fp-info-value">${hasParents ? `${fatherName} & ${motherName}` : 'Unknown'}</span>
+          </div>
+          <div class="fp-info-row">
+            <span class="fp-info-label">👶 Children</span>
+            <span class="fp-info-value">${children}</span>
+          </div>
+        </div>
 
-        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        var midY = (y1 + y2) / 2;
-        path.setAttribute('d', 'M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + midY + ', ' + x2 + ' ' + midY + ', ' + x2 + ' ' + y2);
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', stroke);
-        path.setAttribute('stroke-width', '1.5');
-        path.setAttribute('stroke-dasharray', '4 3');
+        <div class="fp-divider" style="opacity:0.5"></div>
+        <div class="fp-note">"${d.note}"</div>
+        ${d.born ? `<div class="fp-born">🎂 Born: ${d.born}</div>` : ''}
+      `;
+      panel.style.display = 'block';
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 
-        svg.appendChild(path);
-        canvas.appendChild(svg);
+    function closeFamilyPanel() {
+      document.getElementById('familyPanel').style.display = 'none';
+    }
+
+    // Expose to window for HTML onclick attributes
+    window.openFamilyPanel = openFamilyPanel;
+    window.closeFamilyPanel = closeFamilyPanel;
+
+    /* ─── FAMILY GRID ────────────────────────────────────────── */
+    function renderFamilyGrid(nodes) {
+      const grid = document.getElementById('familyGrid');
+      grid.innerHTML = '';
+      const sorted = [...nodes].sort((a, b) => {
+        const order = { Gursez: 0, Paternal: 1, Maternal: 2 };
+        return (order[a.data.side] ?? 3) - (order[b.data.side] ?? 3);
+      });
+      sorted.forEach((n, i) => {
+        const d = n.data;
+        const card = document.createElement('div');
+        card.className = `family-member-card side-${d.side} fade-up`;
+        card.style.transitionDelay = (i * 0.04) + 's';
+        card.innerHTML = `
+          <div class="fmc-emoji">${d.emoji}</div>
+          <div class="fmc-name">${d.name}</div>
+          <div class="fmc-relation">${d.relation}</div>
+          <span class="fmc-side side-${d.side}">${d.side}</span>
+        `;
+        card.onclick = () => openFamilyPanel(n);
+        grid.appendChild(card);
       });
     }
 
-    window.addEventListener('load', drawChildLines);
-    window.addEventListener('resize', drawChildLines);
-
-    // Fade-up observer
-    var revealObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
-          if (entry.target.classList.contains('ft-canvas')) drawChildLines();
+    /* ─── REVEAL OBSERVER ────────────────────────────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
         }
       });
     }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-up').forEach(function(el) { revealObserver.observe(el); });
-  </script>
 
+    /* ─── BOOT ───────────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Observe static fade-up elements
+      document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
+      initTreeDrag();
+      initFamilyTree();
+
+      // Wire up mobile click handlers
+      const mobileMap = {
+        'mobile-node-dad': 'node-dad',
+        'mobile-node-mum': 'node-mum',
+        'mobile-node-gursez': 'node-gursez'
+      };
+      Object.entries(mobileMap).forEach(([mId, tId]) => {
+        const el = document.getElementById(mId);
+        const node = TREE_DATA.treeData.find(n => n.id === tId);
+        if (el && node) {
+          el.onclick = () => openFamilyPanel(node);
+          el.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFamilyPanel(node); }
+          });
+        }
+      });
+    });
+  </script>
 </Layout>
 
-<style>
-  /* ── Dynamic generation row layout ───────────────────────── */
-  .ft-gen--dyn {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  /* Left / right column inside a dynamic gen row */
-  .ft-gen-col {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    flex: 1;
-  }
-
-  /* Spacer between paternal and maternal columns */
-  .ft-gen--dyn .ft-spacer {
-    flex: 0 0 48px;
-  }
-  .container { max-width: 100vw!important; width: 100vw!important; }
-</style>

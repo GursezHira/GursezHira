@@ -27,27 +27,7 @@ const blogCollection = defineCollection({
   })
 });
 
-const familyCollection = defineCollection({
-  loader: glob({ pattern: "*.json", base: "./src/content/family" }),
-  schema: z.object({
-    nodeId: z.string(),
-    name: z.string(),
-    relation: z.string(),
-    side: z.string(),
-    emoji: z.string(),
-    color: z.string(),
-    generation: z.number(),
-    born: z.string().optional(),
-    note: z.string(),
-    // Optional: give two people the same coupleId to render them as a pair
-    coupleId: z.string().optional(),
-    // Optional: reference a coupleId from the generation above to draw lineage
-    parentCoupleId: z.string().optional(),
-  })
-});
-
 export const collections = {
   'milestones': milestonesCollection,
   'blog': blogCollection,
-  'family': familyCollection,
 };
