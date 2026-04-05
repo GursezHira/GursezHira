@@ -1,0 +1,425 @@
+---
+// FamilyTree.astro
+// Drop this in src/pages/family-tree.astro (or as a page component)
+---
+
+<!-- PAGE WRAPPER -->
+<div id="page-family-tree" class="page active">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <span class="section-label">Our Roots</span>
+    <h1 class="section-title">Gursez's <em>Family Tree</em></h1>
+    <p class="section-sub" style="margin: 0 auto;">
+      Every branch of this tree carries a little piece of who you are. From Amritsar to Auckland, this is where you come from.
+    </p>
+  </div>
+
+  <!-- TREE CONTAINER -->
+  <div class="ft-page">
+
+    <!-- GURSEZ (Root) -->
+    <div class="ft-root-row">
+      <div class="ft-node ft-node--gursez fade-up">
+        <div class="ft-avatar ft-avatar--gursez">👶</div>
+        <div class="ft-name">Gursez</div>
+        <div class="ft-role">Born January 13, 2026</div>
+        <div class="ft-location">📍 Auckland, New Zealand</div>
+      </div>
+    </div>
+
+    <!-- CONNECTOR: root to parents -->
+    <div class="ft-connector-v"></div>
+    <div class="ft-branch-h ft-branch-h--parents"></div>
+
+    <!-- PARENTS ROW -->
+    <div class="ft-row ft-row--parents">
+
+      <!-- DAD SIDE -->
+      <div class="ft-subtree fade-up" style="--delay:0.1s">
+        <div class="ft-connector-v ft-connector-v--up"></div>
+        <div class="ft-node ft-node--dad">
+          <div class="ft-avatar ft-avatar--dad">👨</div>
+          <div class="ft-name">Harman</div>
+          <div class="ft-role">Dad</div>
+          <div class="ft-location">📍 Auckland, NZ</div>
+        </div>
+        <!-- connector to dada-dadi -->
+        <div class="ft-connector-v"></div>
+        <div class="ft-branch-h"></div>
+        <!-- Dada & Dadi -->
+        <div class="ft-row ft-row--grandparents">
+          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.2s">
+            <div class="ft-avatar ft-avatar--gp">👴</div>
+            <div class="ft-name">Deep</div>
+            <div class="ft-role">Dada</div>
+            <div class="ft-location">📍 India</div>
+          </div>
+          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.25s">
+            <div class="ft-avatar ft-avatar--gp">👵</div>
+            <div class="ft-name">Dadi</div>
+            <div class="ft-role">Dadi</div>
+            <div class="ft-location">📍 India</div>
+          </div>
+        </div>
+        <!-- connector to great-grandparents -->
+        <div class="ft-connector-v"></div>
+        <div class="ft-pardada-row">
+          <div class="ft-node ft-node--great fade-up" style="--delay:0.3s">
+            <div class="ft-avatar ft-avatar--great">🧓</div>
+            <div class="ft-name">Nand</div>
+            <div class="ft-role">Par-dada</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUM SIDE -->
+      <div class="ft-subtree fade-up" style="--delay:0.1s">
+        <div class="ft-connector-v ft-connector-v--up"></div>
+        <div class="ft-node ft-node--mum">
+          <div class="ft-avatar ft-avatar--mum">👩</div>
+          <div class="ft-name">Jastinder</div>
+          <div class="ft-role">Mum</div>
+          <div class="ft-location">📍 Auckland, NZ</div>
+        </div>
+        <!-- connector to nana-nani -->
+        <div class="ft-connector-v"></div>
+        <div class="ft-branch-h"></div>
+        <!-- Nana & Nani -->
+        <div class="ft-row ft-row--grandparents">
+          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.2s">
+            <div class="ft-avatar ft-avatar--gp">👴</div>
+            <div class="ft-name">Nana</div>
+            <div class="ft-role">Nana</div>
+            <div class="ft-location">📍 India</div>
+          </div>
+          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.25s">
+            <div class="ft-avatar ft-avatar--gp">👵</div>
+            <div class="ft-name">Nani</div>
+            <div class="ft-role">Nani</div>
+            <div class="ft-location">📍 India</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAAMI SECTION -->
+    <div class="ft-extended-row">
+      <div class="ft-extended-label fade-up">Extended Family</div>
+      <div class="ft-extended-nodes">
+        <div class="ft-node ft-node--extended fade-up" style="--delay:0.1s">
+          <div class="ft-avatar ft-avatar--ext">👩</div>
+          <div class="ft-name">Maami</div>
+          <div class="ft-role">Mum's Sister</div>
+          <div class="ft-location">📍 Visiting</div>
+        </div>
+        <div class="ft-node ft-node--extended fade-up" style="--delay:0.2s">
+          <div class="ft-avatar ft-avatar--ext">👩</div>
+          <div class="ft-name">Bhuaji</div>
+          <div class="ft-role">Dad's Sister</div>
+          <div class="ft-location">📍 India</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOVE NOTE -->
+    <div class="ft-love-note fade-up">
+      <span class="ft-love-script">You are loved across oceans</span>
+      <p>From Middlemore Hospital to every corner of the world your family calls home, you have people who were overjoyed the moment you arrived.</p>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ─── FAMILY TREE PAGE ──────────────────────────────────── */
+
+.ft-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ROOT ROW */
+.ft-root-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+/* VERTICAL CONNECTOR */
+.ft-connector-v {
+  width: 2px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--blush), var(--sage));
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+.ft-connector-v--up {
+  height: 40px;
+  background: linear-gradient(to top, var(--blush), var(--sage));
+}
+
+/* HORIZONTAL BRANCH */
+.ft-branch-h {
+  height: 2px;
+  width: 60%;
+  background: linear-gradient(90deg, var(--blush-deep), var(--sage));
+  margin: 0 auto;
+  border-radius: 99px;
+}
+.ft-branch-h--parents {
+  width: 55%;
+}
+
+/* PARENTS ROW */
+.ft-row--parents {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  width: 100%;
+  margin-top: 0;
+}
+
+/* SUBTREE */
+.ft-subtree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation-delay: var(--delay, 0s);
+}
+
+/* GRANDPARENTS ROW */
+.ft-row--grandparents {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* PAR-DADA ROW */
+.ft-pardada-row {
+  display: flex;
+  justify-content: center;
+}
+
+/* ─── NODE ──────────────────────────────────────────────── */
+.ft-node {
+  background: white;
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(200,160,140,0.1);
+  text-align: center;
+  transition: all 0.3s;
+  position: relative;
+  min-width: 130px;
+}
+.ft-node:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Gursez node */
+.ft-node--gursez {
+  border-top: 3px solid var(--blush-deep);
+  padding: 28px 36px;
+  min-width: 180px;
+}
+
+/* Dad node */
+.ft-node--dad {
+  border-top: 3px solid var(--blush-deep);
+}
+
+/* Mum node */
+.ft-node--mum {
+  border-top: 3px solid var(--sage-deep);
+}
+
+/* Grandparent nodes */
+.ft-node--grandparent {
+  border-top: 3px solid var(--gold);
+  min-width: 120px;
+}
+
+/* Great-grandparent */
+.ft-node--great {
+  border-top: 3px solid var(--text-faint);
+  opacity: 0.85;
+  min-width: 120px;
+}
+
+/* Extended */
+.ft-node--extended {
+  border-top: 3px solid var(--sage);
+  min-width: 140px;
+}
+
+/* AVATAR */
+.ft-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 12px;
+}
+.ft-avatar--gursez {
+  width: 64px; height: 64px; font-size: 2rem;
+  background: linear-gradient(135deg, var(--blush-light), var(--sage-light));
+  box-shadow: 0 0 0 4px rgba(92,215,234,0.15);
+}
+.ft-avatar--dad {
+  background: var(--blush-light);
+}
+.ft-avatar--mum {
+  background: var(--sage-light);
+}
+.ft-avatar--gp {
+  background: linear-gradient(135deg, var(--gold-light), var(--cream));
+}
+.ft-avatar--great {
+  background: var(--cream);
+  border: 1.5px dashed var(--text-faint);
+}
+.ft-avatar--ext {
+  background: var(--sage-light);
+}
+
+/* TEXT */
+.ft-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+}
+.ft-node--gursez .ft-name {
+  font-size: 1.4rem;
+}
+.ft-role {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blush-deep);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.ft-node--mum .ft-role { color: var(--sage-deep); }
+.ft-node--grandparent .ft-role { color: var(--gold); }
+.ft-node--great .ft-role { color: var(--text-soft); }
+.ft-node--extended .ft-role { color: var(--sage-deep); }
+
+.ft-location {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+/* ─── EXTENDED SECTION ──────────────────────────────────── */
+.ft-extended-row {
+  width: 100%;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.ft-extended-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+.ft-extended-label::before,
+.ft-extended-label::after {
+  content: '';
+  flex: 1;
+  max-width: 180px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,160,140,0.3));
+}
+.ft-extended-label::after {
+  background: linear-gradient(270deg, transparent, rgba(200,160,140,0.3));
+}
+.ft-extended-nodes {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ─── LOVE NOTE ─────────────────────────────────────────── */
+.ft-love-note {
+  margin-top: 64px;
+  text-align: center;
+  padding: 48px 40px;
+  background: linear-gradient(135deg, var(--blush-light) 0%, var(--lavender-light) 50%, var(--sky-light) 100%);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 640px;
+}
+.ft-love-script {
+  font-family: var(--font-script);
+  font-size: 2rem;
+  color: var(--sage-light);
+  display: block;
+  margin-bottom: 14px;
+}
+.ft-love-note p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--sage-light);
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ft-row--parents {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .ft-branch-h--parents {
+    display: none;
+  }
+  .ft-row--grandparents {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ft-node {
+    min-width: unset;
+    width: 100%;
+    max-width: 260px;
+  }
+  .ft-branch-h {
+    width: 2px;
+    height: 40px;
+  }
+  .ft-love-note {
+    padding: 40px 24px;
+  }
+}
+</style>
+
+<script>
+  // Fade-up on scroll (reuses the existing .fade-up pattern from global.css)
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('#page-family-tree .fade-up').forEach(el => observer.observe(el));
+</script>

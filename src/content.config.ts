@@ -27,7 +27,23 @@ const blogCollection = defineCollection({
   })
 });
 
+const familyCollection = defineCollection({
+  loader: glob({ pattern: "*.json", base: "./src/content/family" }),
+  schema: z.object({
+    nodeId: z.string(),
+    name: z.string(),
+    relation: z.string(),
+    side: z.string(),
+    emoji: z.string(),
+    color: z.string(),
+    generation: z.number(),
+    born: z.string().optional(),
+    note: z.string(),
+  })
+});
+
 export const collections = {
   'milestones': milestonesCollection,
   'blog': blogCollection,
-};
+  'family': familyCollection,
+};

@@ -1,0 +1,10 @@
+{
+  "nodeId": "node-dad",
+  "name": "Dad",
+  "relation": "Father",
+  "side": "Paternal",
+  "emoji": "👨",
+  "color": "linear-gradient(135deg, #dff8fc, #d0f5f8)",
+  "generation": 3,
+  "note": "Dad — the one who stays up late, holds Gursez tight, and already talks about teaching him everything. His heart grew ten sizes the day Gursez arrived."
+}

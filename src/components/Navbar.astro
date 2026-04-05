@@ -3,6 +3,7 @@ const pathname = Astro.url.pathname;
 const isHome = pathname === '/';
 const isMilestones = pathname.startsWith('/milestones');
 const isStories = pathname.startsWith('/stories');
+const isTree = pathname.startsWith('/family-tree');
 ---
 
 <nav role="navigation" aria-label="Main navigation">
@@ -11,6 +12,7 @@ const isStories = pathname.startsWith('/stories');
     <li><a href="/" class={isHome ? 'active' : ''}>Home</a></li>
     <li><a href="/milestones" class={isMilestones ? 'active' : ''}>Milestones</a></li>
     <li><a href="/stories" class={isStories ? 'active' : ''}>Stories</a></li>
+    <li><a href="/family-tree" class={isTree ? 'active' : ''}>Family Tree</a></li>
   </ul>
   <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
     <span></span><span></span><span></span>
@@ -22,6 +24,7 @@ const isStories = pathname.startsWith('/stories');
   <a href="/" onclick="toggleMobileMenu()">Home</a>
   <a href="/milestones" onclick="toggleMobileMenu()">Milestones</a>
   <a href="/stories" onclick="toggleMobileMenu()">Stories</a>
+  <a href="/family-tree" onclick="toggleMobileMenu()">Family Tree</a>
 </div>
 
 <script is:inline>
