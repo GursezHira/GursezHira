@@ -1,425 +1,283 @@
 ---
-// FamilyTree.astro
-// Drop this in src/pages/family-tree.astro (or as a page component)
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const family = await getCollection('family');
+
+// Build a lookup map keyed by nodeId for the inline script
+const membersMap = Object.fromEntries(
+  family.map(m => [m.data.nodeId, m.data])
+);
+const membersJSON = JSON.stringify(membersMap);
+
+// Helpers: pull specific members for typed access
+const dad    = family.find(m => m.data.nodeId === 'node-dad')?.data;
+const mum    = family.find(m => m.data.nodeId === 'node-mum')?.data;
+const gursez = family.find(m => m.data.nodeId === 'node-gursez')?.data;
 ---
 
-<!-- PAGE WRAPPER -->
-<div id="page-family-tree" class="page active">
+<Layout
+  title="Family Tree"
+  description="The beautiful family tree of Gursez Singh Hira — a tapestry of love across generations."
+  image="/og/home.png"
+>
+  <main id="page-family-tree" class="page active" aria-label="Family Tree">
+    <div class="container">
 
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <span class="section-label">Our Roots</span>
-    <h1 class="section-title">Gursez's <em>Family Tree</em></h1>
-    <p class="section-sub" style="margin: 0 auto;">
-      Every branch of this tree carries a little piece of who you are. From Amritsar to Auckland, this is where you come from.
-    </p>
-  </div>
-
-  <!-- TREE CONTAINER -->
-  <div class="ft-page">
-
-    <!-- GURSEZ (Root) -->
-    <div class="ft-root-row">
-      <div class="ft-node ft-node--gursez fade-up">
-        <div class="ft-avatar ft-avatar--gursez">👶</div>
-        <div class="ft-name">Gursez</div>
-        <div class="ft-role">Born January 13, 2026</div>
-        <div class="ft-location">📍 Auckland, New Zealand</div>
-      </div>
-    </div>
-
-    <!-- CONNECTOR: root to parents -->
-    <div class="ft-connector-v"></div>
-    <div class="ft-branch-h ft-branch-h--parents"></div>
-
-    <!-- PARENTS ROW -->
-    <div class="ft-row ft-row--parents">
-
-      <!-- DAD SIDE -->
-      <div class="ft-subtree fade-up" style="--delay:0.1s">
-        <div class="ft-connector-v ft-connector-v--up"></div>
-        <div class="ft-node ft-node--dad">
-          <div class="ft-avatar ft-avatar--dad">👨</div>
-          <div class="ft-name">Harman</div>
-          <div class="ft-role">Dad</div>
-          <div class="ft-location">📍 Auckland, NZ</div>
-        </div>
-        <!-- connector to dada-dadi -->
-        <div class="ft-connector-v"></div>
-        <div class="ft-branch-h"></div>
-        <!-- Dada & Dadi -->
-        <div class="ft-row ft-row--grandparents">
-          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.2s">
-            <div class="ft-avatar ft-avatar--gp">👴</div>
-            <div class="ft-name">Deep</div>
-            <div class="ft-role">Dada</div>
-            <div class="ft-location">📍 India</div>
-          </div>
-          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.25s">
-            <div class="ft-avatar ft-avatar--gp">👵</div>
-            <div class="ft-name">Dadi</div>
-            <div class="ft-role">Dadi</div>
-            <div class="ft-location">📍 India</div>
-          </div>
-        </div>
-        <!-- connector to great-grandparents -->
-        <div class="ft-connector-v"></div>
-        <div class="ft-pardada-row">
-          <div class="ft-node ft-node--great fade-up" style="--delay:0.3s">
-            <div class="ft-avatar ft-avatar--great">🧓</div>
-            <div class="ft-name">Nand</div>
-            <div class="ft-role">Par-dada</div>
-          </div>
-        </div>
+      <div class="page-header fade-up">
+        <span class="section-label">Rooted in Love</span>
+        <h1 class="section-title">Gursez's <em>Family Tree</em></h1>
+        <p class="section-sub" style="margin:0 auto">Every branch a story, every leaf a heartbeat. This is where Gursez belongs.</p>
       </div>
 
-      <!-- MUM SIDE -->
-      <div class="ft-subtree fade-up" style="--delay:0.1s">
-        <div class="ft-connector-v ft-connector-v--up"></div>
-        <div class="ft-node ft-node--mum">
-          <div class="ft-avatar ft-avatar--mum">👩</div>
-          <div class="ft-name">Jastinder</div>
-          <div class="ft-role">Mum</div>
-          <div class="ft-location">📍 Auckland, NZ</div>
+      <!-- ── MOBILE VIEW (≤768px) ──────────────────────────── -->
+      <div class="ft-mobile-view fade-up" style="transition-delay:0.1s">
+
+        <div class="ft-desktop-hint">
+          <div class="ft-desktop-hint-icon">🌳</div>
+          <p>
+            The full family tree is best explored on a larger screen.<br>
+            <strong>Visit on desktop</strong> to see all generations and every branch of the tree.
+          </p>
         </div>
-        <!-- connector to nana-nani -->
-        <div class="ft-connector-v"></div>
-        <div class="ft-branch-h"></div>
-        <!-- Nana & Nani -->
-        <div class="ft-row ft-row--grandparents">
-          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.2s">
-            <div class="ft-avatar ft-avatar--gp">👴</div>
-            <div class="ft-name">Nana</div>
-            <div class="ft-role">Nana</div>
-            <div class="ft-location">📍 India</div>
+
+        <div class="ft-mobile-parents">
+
+          <!-- Dad & Mum couple row -->
+          <div class="ft-mobile-couple">
+            {dad && (
+              <div
+                class="ft-mobile-member"
+                id={`mobile-${dad.nodeId}`}
+                tabindex="0" role="button"
+                aria-label={dad.name}
+              >
+                <div class="ft-avatar ft-avatar--lg">{dad.emoji}</div>
+                <div class="ft-name">{dad.name}</div>
+                <div class="ft-relation">{dad.relation}</div>
+              </div>
+            )}
+            <div class="ft-mobile-heart">💑</div>
+            {mum && (
+              <div
+                class="ft-mobile-member"
+                id={`mobile-${mum.nodeId}`}
+                tabindex="0" role="button"
+                aria-label={mum.name}
+              >
+                <div class="ft-avatar ft-avatar--lg">{mum.emoji}</div>
+                <div class="ft-name">{mum.name}</div>
+                <div class="ft-relation">{mum.relation}</div>
+              </div>
+            )}
           </div>
-          <div class="ft-node ft-node--grandparent fade-up" style="--delay:0.25s">
-            <div class="ft-avatar ft-avatar--gp">👵</div>
-            <div class="ft-name">Nani</div>
-            <div class="ft-role">Nani</div>
-            <div class="ft-location">📍 India</div>
-          </div>
+
+          <!-- Connector line -->
+          <div class="ft-mobile-connector" aria-hidden="true"></div>
+
+          <!-- Gursez -->
+          {gursez && (
+            <div
+              class="ft-mobile-member ft-mobile-gursez"
+              id={`mobile-${gursez.nodeId}`}
+              tabindex="0" role="button"
+              aria-label={gursez.name}
+            >
+              <div class="ft-avatar ft-avatar--hero">{gursez.emoji}</div>
+              <div class="ft-name ft-name--hero">{gursez.name}</div>
+              <div class="ft-relation ft-relation--hero">Singh Hira</div>
+              {gursez.born && <div class="ft-born">Born · {gursez.born}</div>}
+            </div>
+          )}
+
         </div>
+      </div><!-- /ft-mobile-view -->
+
+      <!-- ── LEGEND (desktop only) ─────────────────────────── -->
+      <div class="ft-legend fade-up" style="transition-delay:0.1s" aria-label="Legend">
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Gursez</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--parents"></span> Parents</div>
       </div>
 
-    </div>
+      <!-- ── TREE CANVAS (desktop only) ─────────────────────── -->
+      <div class="ft-canvas fade-up" style="transition-delay:0.2s" role="img" aria-label="Family tree diagram">
 
-    <!-- MAAMI SECTION -->
-    <div class="ft-extended-row">
-      <div class="ft-extended-label fade-up">Extended Family</div>
-      <div class="ft-extended-nodes">
-        <div class="ft-node ft-node--extended fade-up" style="--delay:0.1s">
-          <div class="ft-avatar ft-avatar--ext">👩</div>
-          <div class="ft-name">Maami</div>
-          <div class="ft-role">Mum's Sister</div>
-          <div class="ft-location">📍 Visiting</div>
+        <!-- ── GENERATION 1: GREAT-GRANDPARENTS ──────────────── -->
+        <div class="ft-gen ft-gen--1">
+          <div class="ft-node ft-node--paternal" id="node-ggf-p" tabindex="0" role="button" aria-label="Paternal Great-Grandfather">
+            <div class="ft-avatar">👴</div>
+            <div class="ft-name">Great-Grandpa</div>
+            <div class="ft-relation">Dada's Father</div>
+          </div>
+          <div class="ft-node ft-node--paternal" id="node-ggm-p" tabindex="0" role="button" aria-label="Paternal Great-Grandmother">
+            <div class="ft-avatar">👵</div>
+            <div class="ft-name">Great-Grandma</div>
+            <div class="ft-relation">Dada's Mother</div>
+          </div>
+          <div class="ft-spacer"></div>
+          <div class="ft-node ft-node--paternal" id="node-ggf-p2" tabindex="0" role="button" aria-label="Paternal Great-Grandfather 2">
+            <div class="ft-avatar">👴</div>
+            <div class="ft-name">Great-Grandpa</div>
+            <div class="ft-relation">Dadi's Father</div>
+          </div>
+          <div class="ft-node ft-node--paternal" id="node-ggm-p2" tabindex="0" role="button" aria-label="Paternal Great-Grandmother 2">
+            <div class="ft-avatar">👵</div>
+            <div class="ft-name">Great-Grandma</div>
+            <div class="ft-relation">Dadi's Mother</div>
+          </div>
         </div>
-        <div class="ft-node ft-node--extended fade-up" style="--delay:0.2s">
-          <div class="ft-avatar ft-avatar--ext">👩</div>
-          <div class="ft-name">Bhuaji</div>
-          <div class="ft-role">Dad's Sister</div>
-          <div class="ft-location">📍 India</div>
+
+        <!-- ── GENERATION 2: GRANDPARENTS ─────────────────────── -->
+        <div class="ft-gen ft-gen--2">
+          <div class="ft-couple ft-couple--paternal">
+            <div class="ft-node ft-node--paternal" id="node-dada" tabindex="0" role="button" aria-label="Dada">
+              <div class="ft-avatar ft-avatar--lg">👴</div>
+              <div class="ft-name">Dada</div>
+              <div class="ft-relation">Paternal Grandfather</div>
+            </div>
+            <div class="ft-connector-heart" aria-hidden="true">🤝</div>
+            <div class="ft-node ft-node--paternal" id="node-dadi" tabindex="0" role="button" aria-label="Dadi">
+              <div class="ft-avatar ft-avatar--lg">👵</div>
+              <div class="ft-name">Dadi</div>
+              <div class="ft-relation">Paternal Grandmother</div>
+            </div>
+          </div>
+
+          <div class="ft-couple ft-couple--maternal">
+            <div class="ft-node ft-node--maternal" id="node-nana" tabindex="0" role="button" aria-label="Nana">
+              <div class="ft-avatar ft-avatar--lg">👴</div>
+              <div class="ft-name">Nana</div>
+              <div class="ft-relation">Maternal Grandfather</div>
+            </div>
+            <div class="ft-connector-heart" aria-hidden="true">🤝</div>
+            <div class="ft-node ft-node--maternal" id="node-nani" tabindex="0" role="button" aria-label="Nani">
+              <div class="ft-avatar ft-avatar--lg">👵</div>
+              <div class="ft-name">Nani</div>
+              <div class="ft-relation">Maternal Grandmother</div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <!-- ── GENERATION 3: PARENTS + SIBLINGS ───────────────── -->
+        <div class="ft-gen ft-gen--3">
+          <div class="ft-node ft-node--paternal ft-node--sibling" id="node-bhua" tabindex="0" role="button" aria-label="Bhua">
+            <div class="ft-avatar">👩</div>
+            <div class="ft-name">Bhua</div>
+            <div class="ft-relation">Paternal Aunt</div>
+          </div>
+
+          <div class="ft-couple ft-couple--parents">
+            <div class="ft-node ft-node--paternal ft-node--parent" id="node-dad" tabindex="0" role="button" aria-label="Dad">
+              <div class="ft-avatar ft-avatar--xl">👨</div>
+              <div class="ft-name">Dad</div>
+              <div class="ft-relation">Father</div>
+            </div>
+            <div class="ft-connector-heart ft-connector-heart--parents" aria-hidden="true">💑</div>
+            <div class="ft-node ft-node--maternal ft-node--parent" id="node-mum" tabindex="0" role="button" aria-label="Mum">
+              <div class="ft-avatar ft-avatar--xl">👩</div>
+              <div class="ft-name">Mum</div>
+              <div class="ft-relation">Mother</div>
+            </div>
+          </div>
+
+          <div class="ft-node ft-node--maternal ft-node--sibling" id="node-mama" tabindex="0" role="button" aria-label="Mama-Mami">
+            <div class="ft-avatar">👨‍👩</div>
+            <div class="ft-name">Mama &amp; Mami</div>
+            <div class="ft-relation">Maternal Uncle &amp; Aunt</div>
+          </div>
+        </div>
+
+        <!-- ── GENERATION 4: GURSEZ ───────────────────────────── -->
+        <div class="ft-gen ft-gen--4">
+          <div class="ft-node ft-node--gursez ft-node--star" id="node-gursez" tabindex="0" role="button" aria-label="Gursez Singh Hira">
+            <div class="ft-avatar ft-avatar--hero">👶</div>
+            <div class="ft-name ft-name--hero">Gursez</div>
+            <div class="ft-relation ft-relation--hero">Singh Hira</div>
+            <div class="ft-star-ring" aria-hidden="true"></div>
+            <div class="ft-born">Born · January 13, 2026</div>
+          </div>
+        </div>
+
+      </div><!-- /ft-canvas -->
+
+    </div><!-- /container -->
+
+    <!-- MEMBER DETAIL PANEL (shared desktop + mobile) -->
+    <div class="ft-panel" id="ftPanel" role="dialog" aria-modal="true" aria-label="Family member details">
+      <div class="ft-panel-inner" id="ftPanelContent"></div>
+      <button class="ft-panel-close" id="ftPanelClose" aria-label="Close panel">✕</button>
     </div>
+    <div class="ft-panel-overlay" id="ftOverlay"></div>
 
-    <!-- LOVE NOTE -->
-    <div class="ft-love-note fade-up">
-      <span class="ft-love-script">You are loved across oceans</span>
-      <p>From Middlemore Hospital to every corner of the world your family calls home, you have people who were overjoyed the moment you arrived.</p>
-    </div>
+  </main>
 
-  </div>
-</div>
+  <script is:inline define:vars={{ membersJSON }}>
+    var MEMBERS = JSON.parse(membersJSON);
 
-<style>
-/* ─── FAMILY TREE PAGE ──────────────────────────────────── */
+    var panel    = document.getElementById('ftPanel');
+    var overlay  = document.getElementById('ftOverlay');
+    var content  = document.getElementById('ftPanelContent');
+    var closeBtn = document.getElementById('ftPanelClose');
 
-.ft-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 24px 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
+    function openPanel(id) {
+      // strip mobile- prefix if coming from mobile cards
+      var key = id.replace(/^mobile-/, '');
+      if (!Object.prototype.hasOwnProperty.call(MEMBERS, key)) return;
+      var m = MEMBERS[key];
+      if (!content || !panel || !overlay || !closeBtn) return;
+      content.innerHTML =
+        '<div class="fp-avatar-wrap" style="background:' + m.color + '">' + m.emoji + '</div>' +
+        '<span class="fp-relation">' + m.side + ' Family</span>' +
+        '<h2 class="fp-name">' + m.name + '</h2>' +
+        '<div class="fp-divider"></div>' +
+        '<div class="fp-fact"><span class="fp-fact-icon">🌿</span><div>' +
+          '<span class="fp-fact-label">Role in the Tree</span>' +
+          '<span class="fp-fact-val">' + m.relation + '</span>' +
+        '</div></div>' +
+        (m.born
+          ? '<div class="fp-fact"><span class="fp-fact-icon">🎂</span><div>' +
+            '<span class="fp-fact-label">Born</span>' +
+            '<span class="fp-fact-val">' + m.born + '</span>' +
+            '</div></div>'
+          : '') +
+        '<div class="fp-love-note">"' + m.note + '"</div>';
+      panel.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
 
-/* ROOT ROW */
-.ft-root-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0;
-}
+    function closePanel() {
+      if (!panel || !overlay) return;
+      panel.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-/* VERTICAL CONNECTOR */
-.ft-connector-v {
-  width: 2px;
-  height: 40px;
-  background: linear-gradient(to bottom, var(--blush), var(--sage));
-  flex-shrink: 0;
-  margin: 0 auto;
-}
-.ft-connector-v--up {
-  height: 40px;
-  background: linear-gradient(to top, var(--blush), var(--sage));
-}
+    if (closeBtn) closeBtn.addEventListener('click', closePanel);
+    if (overlay)  overlay.addEventListener('click', closePanel);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
 
-/* HORIZONTAL BRANCH */
-.ft-branch-h {
-  height: 2px;
-  width: 60%;
-  background: linear-gradient(90deg, var(--blush-deep), var(--sage));
-  margin: 0 auto;
-  border-radius: 99px;
-}
-.ft-branch-h--parents {
-  width: 55%;
-}
+    // Desktop nodes + mobile cards both use the same openPanel handler
+    document.querySelectorAll('.ft-node[id], .ft-mobile-member[id]').forEach(function(node) {
+      node.addEventListener('click', function() { openPanel(node.id); });
+      node.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel(node.id); }
+      });
+    });
 
-/* PARENTS ROW */
-.ft-row--parents {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  width: 100%;
-  margin-top: 0;
-}
+    // Fade-up observer
+    var revealObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(function(el) { revealObserver.observe(el); });
+  </script>
 
-/* SUBTREE */
-.ft-subtree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation-delay: var(--delay, 0s);
-}
-
-/* GRANDPARENTS ROW */
-.ft-row--grandparents {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-}
-
-/* PAR-DADA ROW */
-.ft-pardada-row {
-  display: flex;
-  justify-content: center;
-}
-
-/* ─── NODE ──────────────────────────────────────────────── */
-.ft-node {
-  background: white;
-  border-radius: var(--radius-md);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(200,160,140,0.1);
-  text-align: center;
-  transition: all 0.3s;
-  position: relative;
-  min-width: 130px;
-}
-.ft-node:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-/* Gursez node */
-.ft-node--gursez {
-  border-top: 3px solid var(--blush-deep);
-  padding: 28px 36px;
-  min-width: 180px;
-}
-
-/* Dad node */
-.ft-node--dad {
-  border-top: 3px solid var(--blush-deep);
-}
-
-/* Mum node */
-.ft-node--mum {
-  border-top: 3px solid var(--sage-deep);
-}
-
-/* Grandparent nodes */
-.ft-node--grandparent {
-  border-top: 3px solid var(--gold);
-  min-width: 120px;
-}
-
-/* Great-grandparent */
-.ft-node--great {
-  border-top: 3px solid var(--text-faint);
-  opacity: 0.85;
-  min-width: 120px;
-}
-
-/* Extended */
-.ft-node--extended {
-  border-top: 3px solid var(--sage);
-  min-width: 140px;
-}
-
-/* AVATAR */
-.ft-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  margin: 0 auto 12px;
-}
-.ft-avatar--gursez {
-  width: 64px; height: 64px; font-size: 2rem;
-  background: linear-gradient(135deg, var(--blush-light), var(--sage-light));
-  box-shadow: 0 0 0 4px rgba(92,215,234,0.15);
-}
-.ft-avatar--dad {
-  background: var(--blush-light);
-}
-.ft-avatar--mum {
-  background: var(--sage-light);
-}
-.ft-avatar--gp {
-  background: linear-gradient(135deg, var(--gold-light), var(--cream));
-}
-.ft-avatar--great {
-  background: var(--cream);
-  border: 1.5px dashed var(--text-faint);
-}
-.ft-avatar--ext {
-  background: var(--sage-light);
-}
-
-/* TEXT */
-.ft-name {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text-dark);
-  margin-bottom: 3px;
-}
-.ft-node--gursez .ft-name {
-  font-size: 1.4rem;
-}
-.ft-role {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--blush-deep);
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-.ft-node--mum .ft-role { color: var(--sage-deep); }
-.ft-node--grandparent .ft-role { color: var(--gold); }
-.ft-node--great .ft-role { color: var(--text-soft); }
-.ft-node--extended .ft-role { color: var(--sage-deep); }
-
-.ft-location {
-  font-size: 0.72rem;
-  color: var(--text-faint);
-}
-
-/* ─── EXTENDED SECTION ──────────────────────────────────── */
-.ft-extended-row {
-  width: 100%;
-  margin-top: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-.ft-extended-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-soft);
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  justify-content: center;
-}
-.ft-extended-label::before,
-.ft-extended-label::after {
-  content: '';
-  flex: 1;
-  max-width: 180px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200,160,140,0.3));
-}
-.ft-extended-label::after {
-  background: linear-gradient(270deg, transparent, rgba(200,160,140,0.3));
-}
-.ft-extended-nodes {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-/* ─── LOVE NOTE ─────────────────────────────────────────── */
-.ft-love-note {
-  margin-top: 64px;
-  text-align: center;
-  padding: 48px 40px;
-  background: linear-gradient(135deg, var(--blush-light) 0%, var(--lavender-light) 50%, var(--sky-light) 100%);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 640px;
-}
-.ft-love-script {
-  font-family: var(--font-script);
-  font-size: 2rem;
-  color: var(--sage-light);
-  display: block;
-  margin-bottom: 14px;
-}
-.ft-love-note p {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1rem;
-  color: var(--sage-light);
-  line-height: 1.7;
-  opacity: 0.9;
-}
-
-/* ─── RESPONSIVE ────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .ft-row--parents {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .ft-branch-h--parents {
-    display: none;
-  }
-  .ft-row--grandparents {
-    flex-direction: column;
-    align-items: center;
-  }
-  .ft-node {
-    min-width: unset;
-    width: 100%;
-    max-width: 260px;
-  }
-  .ft-branch-h {
-    width: 2px;
-    height: 40px;
-  }
-  .ft-love-note {
-    padding: 40px 24px;
-  }
-}
-</style>
-
-<script>
-  // Fade-up on scroll (reuses the existing .fade-up pattern from global.css)
-  const observer = new IntersectionObserver(
-    (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
-    { threshold: 0.12 }
-  );
-  document.querySelectorAll('#page-family-tree .fade-up').forEach(el => observer.observe(el));
-</script>
+</Layout>
