@@ -43,11 +43,8 @@ import { TREE_DATA } from '../data/family-tree';
         </div>
       </div>
 
-      <!-- FAMILY DETAIL PANEL (inline, no separate component) -->
-      <div class="family-detail-panel" id="familyPanel" style="display:none">
-        <button class="family-panel-close" onclick="closeFamilyPanel()" aria-label="Close">✕</button>
-        <div id="familyPanelContent"></div>
-      </div>
+      <!-- HOVER CARD (floating tooltip) - Maintained globally for grid/tree consistency -->
+      <div id="ftHoverCard" class="ft-hover-card" style="display:none"></div>
 
       <!-- MOBILE-ONLY VIEW (visible when tree-outer is hidden) -->
       <div class="ft-mobile-view fade-up">
@@ -319,12 +316,17 @@ import { TREE_DATA } from '../data/family-tree';
             (n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
             (n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
             (isParentCouple                        ? ' ft-node--parent' : '');
-          // Card width is fixed; box-sizing border-box so padding won't push width out
           card.style.width = CARD_W + 'px';
           card.style.flex  = '0 0 ' + CARD_W + 'px';
           card.setAttribute('tabindex','0');
           card.setAttribute('role','button');
           card.setAttribute('aria-label', n.data.name);
+
+          // Interaction
+          card.onmouseenter = (e) => showHoverCard(n, e);
+          card.onmousemove  = (e) => updateHoverPosition(e);
+          card.onmouseleave = () => hideHoverCard();
+
           card.innerHTML = `
             <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
             <div class="ft-name ${isMember ? 'ft-name--hero' : ''}">${n.data.name}</div>
@@ -448,81 +450,83 @@ import { TREE_DATA } from '../data/family-tree';
     window.treeZoom = treeZoom;
     window.treeReset = treeReset;
 
-    /* ─── DETAIL PANEL ───────────────────────────────────────── */
-    function openFamilyPanel(node) {
+    /* ─── HOVER CARD LOGIC ────────────────────────────────────── */
+    function showHoverCard(node, event) {
+      const card = document.getElementById('ftHoverCard');
+      if (!card) return;
       const d = node.data;
-      const r = node.rels;
-      const panel   = document.getElementById('familyPanel');
-      const content = document.getElementById('familyPanelContent');
+
+      // Relational data
+      const allNodes = TREE_DATA.treeData;
+      const spouseNames = (node.rels.spouses || []).map(sid => allNodes.find(n => n.id === sid)?.data.name).filter(Boolean).join(', ');
       
-      const getName = (id) => TREE_DATA.treeData.find(n => n.id === id)?.data.name || 'Unknown';
-      
-      const sideColors = { Paternal: '#dff8fc', Maternal: '#ede4f8', Gursez: '#f8e8d8' };
-      const bgColor = sideColors[d.side] || '#f8f4f0';
+      const fatherNode = (node.rels.parents || []).map(id => allNodes.find(n => n.id === id)).find(n => n?.data.gender === 'M');
+      const motherNode = (node.rels.parents || []).map(id => allNodes.find(n => n.id === id)).find(n => n?.data.gender === 'F');
+      const fatherName = fatherNode ? fatherNode.data.name : null;
+      const motherName = motherNode ? motherNode.data.name : null;
+      const parentsStr = (fatherName && motherName) ? `${fatherName} & ${motherName}` : (fatherName || motherName || null);
 
-      // 1. Surname
-      let surname = d.familyName || "";
-      if (!surname) {
-        if (d.side === 'Paternal') surname = "Hira";
-        else if (d.side === 'Maternal') surname = "Ghuman";
-        else if (d.side === 'Gursez') surname = "Hira";
-      }
+      const childrenNames = (node.rels.children || []).map(cid => allNodes.find(n => n.id === cid)?.data.name).filter(Boolean).join(', ');
+      const familyName = d.familyName || (d.side === 'Paternal' ? 'Hira' : 'Ghuman');
 
-      // 2. Spouse
-      const spouses = r.spouses && r.spouses.length > 0 
-        ? r.spouses.map(getName).join(", ") 
-        : "Single and/or unknown";
-
-      // 3. Parents
-      const fatherNode = (r.parents || []).map(id => TREE_DATA.treeData.find(n => n.id === id)).find(n => n?.data.gender === 'M');
-      const motherNode = (r.parents || []).map(id => TREE_DATA.treeData.find(n => n.id === id)).find(n => n?.data.gender === 'F');
-      const fatherName = fatherNode ? fatherNode.data.name : "Unknown";
-      const motherName = motherNode ? motherNode.data.name : "Unknown";
-      const hasParents = (r.parents || []).length > 0;
-
-      // 4. Children
-      const children = r.children && r.children.length > 0 
-        ? r.children.map(getName).join(", ") 
-        : "None";
-
-      content.innerHTML = `
-        <div class="fp-header">
-          <div class="fp-emoji" style="background:${bgColor}">${d.emoji}</div>
-          <div>
-            <div class="fp-name">
-              ${d.name} 
-              ${surname ? `<span class="fp-surname">(${surname})</span>` : ''}
-            </div>
-            <div class="fp-relation">${d.relation}</div>
+      card.innerHTML = `
+        <div class="fhc-header">
+          <div class="fhc-emoji" style="background:${d.color || 'var(--cream)'}">${d.emoji}</div>
+          <div class="fhc-name-box">
+            <span class="fhc-name">${d.name}</span>
+            <span class="fhc-relation">${d.relation}</span>
+            <span class="fhc-surname">${familyName}</span>
           </div>
         </div>
-        <div class="fp-divider"></div>
-        
-        <div class="fp-body">
-          <div class="fp-info-row">
-            <span class="fp-info-label">💍 Married to</span>
-            <span class="fp-info-value">${spouses}</span>
-          </div>
-          <div class="fp-info-row">
-            <span class="fp-info-label">👨‍👩‍👦 Parents</span>
-            <span class="fp-info-value">${hasParents ? `${fatherName} & ${motherName}` : 'Unknown'}</span>
-          </div>
-          <div class="fp-info-row">
-            <span class="fp-info-label">👶 Children</span>
-            <span class="fp-info-value">${children}</span>
-          </div>
+        <div class="fhc-body">
+          ${spouseNames ? `<div class="fhc-info-row"><span class="fhc-label">Married to</span><span class="fhc-value">${spouseNames}</span></div>` : ''}
+          ${parentsStr ? `<div class="fhc-info-row"><span class="fhc-label">Parents</span><span class="fhc-value">${parentsStr}</span></div>` : ''}
+          ${childrenNames ? `<div class="fhc-info-row"><span class="fhc-label">Children</span><span class="fhc-value">${childrenNames}</span></div>` : ''}
+          ${d.note ? `<div class="fhc-note">${d.note}</div>` : ''}
         </div>
-
-        <div class="fp-divider" style="opacity:0.5"></div>
-        <div class="fp-note">"${d.note}"</div>
-        ${d.born ? `<div class="fp-born">🎂 Born: ${d.born}</div>` : ''}
       `;
-      panel.style.display = 'block';
-      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      card.style.display = 'block';
+      updateHoverPosition(event);
     }
 
-    function closeFamilyPanel() {
-      document.getElementById('familyPanel').style.display = 'none';
+    function updateHoverPosition(e) {
+      const card = document.getElementById('ftHoverCard');
+      if (!card || card.style.display === 'none') return;
+      
+      const xOffset = 20;
+      const yOffset = 20;
+      
+      const isFullscreen = !!document.fullscreenElement;
+      let x, y;
+
+      if (isFullscreen) {
+        // When in fullscreen, card is a child of .tree-outer (which might have a transform)
+        const container = document.querySelector('.tree-outer');
+        const rect = container.getBoundingClientRect();
+        x = e.clientX - rect.left + xOffset;
+        y = e.clientY - rect.top + yOffset;
+
+        const cardRect = card.getBoundingClientRect();
+        if (x + cardRect.width > rect.width) x = e.clientX - rect.left - cardRect.width - xOffset;
+        if (y + cardRect.height > rect.height) y = e.clientY - rect.top - cardRect.height - yOffset;
+      } else {
+        // Normal mode (fixed relative to window)
+        x = e.clientX + xOffset;
+        y = e.clientY + yOffset;
+
+        const cardRect = card.getBoundingClientRect();
+        if (x + cardRect.width > window.innerWidth) x = e.clientX - cardRect.width - xOffset;
+        if (y + cardRect.height > window.innerHeight) y = e.clientY - cardRect.height - yOffset;
+      }
+
+      card.style.left = x + 'px';
+      card.style.top = y + 'px';
+    }
+
+    function hideHoverCard() {
+      const card = document.getElementById('ftHoverCard');
+      if (card) card.style.display = 'none';
     }
 
     function toggleFullScreen() {
@@ -536,21 +540,29 @@ import { TREE_DATA } from '../data/family-tree';
 
     document.addEventListener('fullscreenchange', () => {
       const treeOuter = document.querySelector('.tree-outer');
+      const hoverCard = document.getElementById('ftHoverCard');
+
       if (document.fullscreenElement) {
         treeOuter.classList.add('is-fullscreen');
+        // Move hover card inside to ensure visibility in fullscreen mode
+        if (hoverCard) treeOuter.appendChild(hoverCard);
         treeReset();
       } else {
         treeOuter.classList.remove('is-fullscreen');
+        // Move hover card back to main container (original layout place)
+        const mainContent = document.querySelector('.container');
+        if (hoverCard && mainContent) mainContent.appendChild(hoverCard);
         treeReset();
       }
     });
 
     // Expose to window for HTML onclick attributes
-    window.openFamilyPanel = openFamilyPanel;
-    window.closeFamilyPanel = closeFamilyPanel;
     window.treeZoom = treeZoom;
     window.treeReset = treeReset;
     window.toggleFullScreen = toggleFullScreen;
+    window.showHoverCard = showHoverCard;
+    window.updateHoverPosition = updateHoverPosition;
+    window.hideHoverCard = hideHoverCard;
 
     /* ─── FAMILY GRID ────────────────────────────────────────── */
     function renderFamilyGrid(nodes) {
@@ -571,7 +583,9 @@ import { TREE_DATA } from '../data/family-tree';
           <div class="fmc-relation">${d.relation}</div>
           <span class="fmc-side side-${d.side}">${d.side}</span>
         `;
-        card.onclick = () => openFamilyPanel(n);
+        card.onmouseenter = (e) => showHoverCard(n, e);
+        card.onmousemove  = (e) => updateHoverPosition(e);
+        card.onmouseleave = () => hideHoverCard();
         grid.appendChild(card);
       });
     }
@@ -603,10 +617,13 @@ import { TREE_DATA } from '../data/family-tree';
         const el = document.getElementById(mId);
         const node = TREE_DATA.treeData.find(n => n.id === tId);
         if (el && node) {
-          el.onclick = () => openFamilyPanel(node);
-          el.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFamilyPanel(node); }
-          });
+          el.onclick = (e) => {
+            if (document.getElementById('ftHoverCard').style.display === 'block') {
+              hideHoverCard();
+            } else {
+              showHoverCard(node, e);
+            }
+          };
         }
       });
     });

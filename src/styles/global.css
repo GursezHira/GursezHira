@@ -985,42 +985,47 @@ footer {
   letter-spacing: 0.04em;
 }
 
-/* ── DETAIL PANEL ────────────────────────────────────────── */
-.family-detail-panel {
-  background: white; border-radius: var(--radius-lg);
-  padding: 32px; box-shadow: var(--shadow-card);
-  border: 1px solid rgba(200,160,140,0.15);
-  margin-bottom: 48px; position: relative;
-  animation: ftModalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+/* ── HOVER CARD ──────────────────────────────────────────── */
+.ft-hover-card {
+  position: fixed;
+  z-index: 10000;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  padding: 20px;
+  pointer-events: none; /* don't interfere with tree interaction */
+  animation: ftHoverScale 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.1s ease-out;
 }
-.family-panel-close {
-  position: absolute; top: 20px; right: 20px;
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--cream); border: none; font-size: 0.9rem;
-  cursor: pointer; color: var(--text-mid); transition: all 0.2s;
+
+@keyframes ftHoverScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.fhc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.fhc-emoji {
+  font-size: 2.2rem; min-width: 48px; height: 48px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
 }
-.family-panel-close:hover { background: var(--blush-light); color: var(--text-dark); }
-.fp-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
-.fp-emoji {
-  font-size: 3rem; width: 72px; height: 72px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+.fhc-name-box { flex: 1; min-width: 0; }
+.fhc-name {
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 600;
+  color: var(--text-dark); line-height: 1.1; display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.fp-name { font-family: var(--font-display); font-size: 1.8rem; font-weight: 400; color: var(--text-dark); line-height: 1.1; display: flex; align-items: baseline; }
-.fp-surname { font-size: 0.9rem; color: var(--text-soft); font-weight: 300; margin-left: 10px; font-family: var(--font-base); opacity: 0.7; }
-.fp-relation { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-soft); margin-top: 4px; }
-.fp-divider { height: 1px; background: rgba(200,160,140,0.15); margin-bottom: 16px; }
-.fp-body { margin: 16px 0 24px; display: flex; flex-direction: column; gap: 10px; }
-.fp-info-row { display: flex; align-items: baseline; gap: 8px; }
-.fp-info-label { font-size: 0.68rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.08em; min-width: 90px; flex-shrink: 0; }
-.fp-info-value { font-size: 0.92rem; color: var(--text-dark); font-weight: 500; }
-.fp-note { font-size: 0.97rem; color: var(--text-mid); line-height: 1.75; font-style: italic; }
-.fp-born { margin-top: 14px; font-size: 0.78rem; color: var(--text-faint); }
+.fhc-relation { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); display: block; margin-top: 2px; }
+.fhc-surname { font-size: 0.72rem; color: var(--text-faint); margin-top: 2px; font-weight: 500; }
 
-@keyframes ftModalIn {
-  from { opacity: 0; transform: scale(0.88) translateY(24px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+.fhc-body { display: flex; flex-direction: column; gap: 6px; }
+.fhc-info-row { display: flex; align-items: baseline; gap: 8px; font-size: 0.78rem; line-height: 1.4; }
+.fhc-label { font-size: 0.58rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; min-width: 65px; flex-shrink: 0; }
+.fhc-value { color: var(--text-dark); font-weight: 500; }
+.fhc-note { margin-top: 8px; font-size: 0.85rem; color: var(--text-mid); border-top: 1px solid rgba(200,160,140,0.1); padding-top: 8px; line-height: 1.5; font-style: italic; }
 
 /* ── FAMILY MEMBERS GRID ─────────────────────────────────── */
 .family-grid {
