@@ -516,8 +516,6 @@ import { TREE_DATA } from '../data/family-tree';
           applyTreeTransform();
         }
       }
-
-      renderFamilyGrid(rawNodes);
     }
 
     /* ─── PAN & ZOOM ──────────────────────────────────────────── */
@@ -770,6 +768,11 @@ import { TREE_DATA } from '../data/family-tree';
     document.addEventListener('DOMContentLoaded', () => {
       // Observe static fade-up elements
       document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
+      
+      // Render static grid once and observe its items
+      renderFamilyGrid(TREE_DATA.treeData);
+      document.querySelectorAll('#familyGrid .fade-up').forEach(el => revealObserver.observe(el));
+
       initTreeDrag();
       renderTree(true);
 
