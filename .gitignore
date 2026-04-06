@@ -27,3 +27,4 @@ pnpm-debug.log*
 package-lock.json
 bun.lock
 index.html
+implementation_plan.docx

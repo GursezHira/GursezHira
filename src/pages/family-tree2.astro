@@ -1,0 +1,673 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { TREE_DATA } from '../data/family-tree';
+---
+
+<Layout
+  title="Family Tree"
+  description="Gursez's Family Tree — a tapestry of love across generations."
+  image="/og/home.png"
+>
+  <main id="page-family-tree" class="page active" aria-label="Family Tree">
+    <div class="container">
+
+      <div class="page-header fade-up">
+        <span class="section-label">Rooted in Love</span>
+        <h1 class="section-title">Gursez's <em>Family Tree</em></h1>
+        <p class="section-sub" style="margin:0 auto">Every branch a story, every leaf a heartbeat. This is where Gursez belongs.</p>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="ft-legend fade-up" aria-label="Legend">
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
+      </div>
+
+      <!-- TREE CANVAS AREA (pan/zoom from family-tree-2) -->
+      <div class="tree-outer fade-up">
+        <div class="tree-hint">✦ Click any card to learn more · Scroll or pinch to explore</div>
+        <div class="tree-viewport" id="treeViewport">
+          <div class="tree-canvas" id="treeCanvas">
+            <svg id="treeSvg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>
+            <div id="treeNodes"></div>
+          </div>
+        </div>
+        <!-- Pan/zoom controls -->
+        <div class="tree-controls">
+          <button class="tree-ctrl-btn" onclick="treeZoom(0.15)" aria-label="Zoom in">＋</button>
+          <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)" aria-label="Zoom out">−</button>
+          <button class="tree-ctrl-btn" onclick="treeReset()" aria-label="Reset view">↻</button>
+          <button class="tree-ctrl-btn" onclick="toggleFullScreen()" aria-label="Full screen" title="Full Screen">⛶</button>
+        </div>
+      </div>
+
+      <!-- HOVER CARD (floating tooltip) - Maintained globally for grid/tree consistency -->
+      <div id="ftHoverCard" class="ft-hover-card" style="display:none"></div>
+
+      <!-- MOBILE-ONLY VIEW (visible when tree-outer is hidden) -->
+      <div class="ft-mobile-view fade-up">
+        <div class="ft-desktop-hint">
+          <div class="ft-desktop-hint-icon">🌳</div>
+          <p>
+            The full family tree is best explored on a larger screen.<br/>
+            <strong>Visit on desktop</strong> to see all generations and every branch of the tree.
+          </p>
+        </div>
+
+        <div class="ft-mobile-parents">
+          <div class="ft-mobile-couple">
+            <div class="ft-mobile-member" id="mobile-node-dad" tabindex="0" role="button" aria-label="Harman Singh">
+              <div class="ft-avatar ft-avatar--lg">👨</div>
+              <div class="ft-name">Harman Singh</div>
+              <div class="ft-relation">Papa</div>
+            </div>
+            <div class="ft-mobile-heart">💑</div>
+            <div class="ft-mobile-member" id="mobile-node-mum" tabindex="0" role="button" aria-label="Jastinder Kaur">
+              <div class="ft-avatar ft-avatar--lg">👩</div>
+              <div class="ft-name">Jastinder Kaur</div>
+              <div class="ft-relation">Muma</div>
+            </div>
+          </div>
+          <div class="ft-mobile-child-line"></div>
+          <div class="ft-mobile-member ft-mobile-member--star" id="mobile-node-gursez" tabindex="0" role="button" aria-label="Gursez">
+            <div class="ft-avatar ft-avatar--xl">👶</div>
+            <div class="ft-name">Gursez Singh Hira</div>
+            <div class="ft-relation">The Star of Our World</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVERYONE WHO LOVES GURSEZ GRID (from family-tree-2) -->
+      <section class="section" aria-label="Family members">
+        <div class="fade-up">
+          <span class="section-label">The Whole Family</span>
+          <h2 class="section-title">Everyone Who <em>Loves</em> Gursez</h2>
+        </div>
+        <div class="family-grid" id="familyGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script is:inline define:vars={{ TREE_DATA }}>
+    /* ─── DATA ───────────────────────────────────────────────────
+       To add a new family member, edit src/data/family-tree.js
+    ──────────────────────────────────────────────────────────── */
+
+    /* ─── FAMILY TREE ENGINE ───────────────────────────────────── */
+    /* ─── PROGRESSIVE DISCOVERY STATE ────────────────────────── */
+    const expandedNodeIds = new Set([
+      'node-gursez',
+      'node-dad', 'node-mum',
+      'node-dada', 'node-dadi',
+      'node-nana', 'node-nani'
+    ]);
+
+    // Constant for "core" nodes that cannot be collapsed
+    const CORE_NODES = new Set([...expandedNodeIds]);
+
+    function renderTree(isInitial = false) {
+      const rawNodes = TREE_DATA.treeData;
+      const nodeMap  = {};
+      rawNodes.forEach(n => nodeMap[n.id] = n);
+
+      /* ── 1. ASSIGN GENERATION ──────────────────────────────── */
+      const genMap = {};
+      function assignGen(id, g) {
+        if (id in genMap) return;
+        genMap[id] = g;
+        const n = nodeMap[id];
+        if (!n) return;
+        (n.rels.spouses  || []).forEach(s  => assignGen(s,  g));
+        (n.rels.parents  || []).forEach(p  => assignGen(p,  g - 1));
+        (n.rels.children || []).forEach(c  => assignGen(c,  g + 1));
+      }
+      assignGen('node-gursez', 0);
+      rawNodes.forEach(n => {
+        if (!(n.id in genMap)) {
+          const pg = (n.rels.parents||[]).map(p=>genMap[p]).filter(x=>x!=null);
+          const sg = (n.rels.spouses||[]).map(s=>genMap[s]).filter(x=>x!=null);
+          genMap[n.id] = pg.length ? pg[0]+1 : sg.length ? sg[0] : -4;
+        }
+      });
+
+      /* ── 2. BUILD COUPLE-UNITS ──────────────────────────────── */
+      const unitByNode = {};
+      const units = [];
+      const paired = new Set();
+      rawNodes.forEach(n => {
+        if (paired.has(n.id)) return;
+        const spouses = (n.rels.spouses || []).filter(s => nodeMap[s]);
+        if (spouses.length) {
+          const sp = spouses[0];
+          paired.add(n.id); paired.add(sp);
+          const unit = { ids: [n.id, sp], gen: genMap[n.id], side: n.data.side };
+          units.push(unit);
+          unitByNode[n.id] = unit;
+          unitByNode[sp]   = unit;
+        }
+      });
+      rawNodes.forEach(n => {
+        if (paired.has(n.id)) return;
+        const unit = { ids: [n.id], gen: genMap[n.id], side: n.data.side };
+        units.push(unit);
+        unitByNode[n.id] = unit;
+      });
+
+      /* ── 3. GROUP UNITS BY GENERATION ──────────────────────── */
+      const byGen = {};
+      units.forEach(u => {
+        if (!byGen[u.gen]) byGen[u.gen] = [];
+        byGen[u.gen].push(u);
+      });
+
+      const gens = Object.keys(byGen).map(Number).sort((a,b)=>a-b);
+      const sideOrder = { Paternal:0, Gursez:1, Maternal:2 };
+      gens.forEach(g => {
+        byGen[g].sort((a,b) => (sideOrder[a.side]??1) - (sideOrder[b.side]??1));
+      });
+
+      /* ── 4. ASSIGN PIXEL POSITIONS ──────────────────────────── */
+      const CARD_W      = 150;
+      const CARD_H      = 100;
+      const GHOST_W     = 44;   // Matches CSS .ft-node--ghost
+      const GHOST_H     = 44;
+      const HEART_W     = 24;
+      const BOX_PAD_X   = 10;
+      const BOX_PAD_Y   = 8;
+      const UNIT_GAP    = 44;
+      const ROW_H       = 210;
+      const PAD_X       = 70;
+      const PAD_Y       = 70;
+
+      function isExpanded(id) { return expandedNodeIds.has(id); }
+
+      function unitWidth(u) {
+        const expandedIds = u.ids.filter(isExpanded);
+        const ghostCount  = u.ids.length - expandedIds.length;
+        
+        if (u.ids.length === 2) {
+          // If both are ghosts
+          if (ghostCount === 2) return BOX_PAD_X * 2 + GHOST_W * 2 + HEART_W;
+          // If one is ghost, one is card
+          if (ghostCount === 1) return BOX_PAD_X * 2 + CARD_W + GHOST_W + HEART_W;
+          // Both are cards
+          return BOX_PAD_X * 2 + CARD_W * 2 + HEART_W;
+        }
+        // Solo
+        return expandedIds.length ? CARD_W : GHOST_W;
+      }
+
+      function unitHeight(u) {
+        const hasExpanded = u.ids.some(isExpanded);
+        return BOX_PAD_Y * 2 + (hasExpanded ? CARD_H : GHOST_H);
+      }
+
+      function rowTotalWidth(row) {
+        return row.reduce((s,u) => s + unitWidth(u), 0) + (row.length-1) * UNIT_GAP;
+      }
+
+      const maxRowW = Math.max(...gens.map(g => rowTotalWidth(byGen[g])));
+      const canvasW  = maxRowW + PAD_X * 2;
+      const canvasH  = gens.length * ROW_H + PAD_Y * 2;
+      const unitPos  = new Map();
+
+      gens.forEach((g, rowIdx) => {
+        const row  = byGen[g];
+        const rowW = rowTotalWidth(row);
+        const startX = (canvasW - rowW) / 2;
+        let cx = startX;
+        const y = PAD_Y + rowIdx * ROW_H;
+        row.forEach(u => {
+          const w = unitWidth(u);
+          unitPos.set(u, { x: cx, y, w, h: unitHeight(u) });
+          cx += w + UNIT_GAP;
+        });
+      });
+
+      function unitCB(u) {
+        const p = unitPos.get(u);
+        const hasExpanded = u.ids.some(isExpanded);
+        
+        if (u.ids.length === 2) {
+          const w1 = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+          const heartCenterX = p.x + BOX_PAD_X + w1 + HEART_W / 2;
+          return { x: heartCenterX, y: p.y + p.h };
+        }
+        const w = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+        return { x: p.x + w / 2, y: p.y + p.h };
+      }
+
+      function nodeCT(id) {
+        const u = unitByNode[id];
+        if (!u) return { x: 0, y: 0 };
+        const p = unitPos.get(u);
+        const w = isExpanded(id) ? CARD_W : GHOST_W;
+        
+        if (u.ids.length === 2) {
+          const idx = u.ids.indexOf(id);
+          const w0 = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+          const cardX = p.x + BOX_PAD_X + (idx === 0 ? 0 : w0 + HEART_W);
+          return { x: cardX + w / 2, y: p.y + BOX_PAD_Y };
+        }
+        return { x: p.x + w / 2, y: p.y + BOX_PAD_Y };
+      }
+
+      /* ── 5. RENDER SVG CONNECTORS ── */
+      const svg = document.getElementById('treeSvg');
+      svg.setAttribute('width',  canvasW);
+      svg.setAttribute('height', canvasH);
+      svg.innerHTML = '';
+
+      function mkBezier(x1, y1, x2, y2, stroke) {
+        const cy = (y1 + y2) / 2;
+        const d  = `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+        const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        el.setAttribute('d', d);
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', stroke);
+        el.setAttribute('stroke-width', '1.8');
+        el.setAttribute('stroke-dasharray', '5 3');
+        el.setAttribute('stroke-linecap', 'round');
+        el.setAttribute('opacity', '0.78');
+        svg.appendChild(el);
+      }
+
+      const SIDE_STROKE = {
+        Paternal: 'rgba(92,215,234,0.75)',
+        Maternal: 'rgba(154,126,200,0.75)',
+        Gursez:   'rgba(201,169,110,0.75)',
+      };
+
+      units.forEach(u => {
+        const childIds = [];
+        u.ids.forEach(id => {
+          (nodeMap[id].rels.children || []).forEach(cid => {
+            if (!childIds.includes(cid)) childIds.push(cid);
+          });
+        });
+        if (!childIds.length) return;
+
+        const stroke = SIDE_STROKE[u.side] || SIDE_STROKE.Paternal;
+        const pb     = unitCB(u);
+
+        childIds.forEach(cid => {
+          const ct = nodeCT(cid);
+          mkBezier(pb.x, pb.y, ct.x, ct.y, stroke);
+        });
+      });
+
+      /* ── 6. RENDER HTML NODES ─── */
+      const container = document.getElementById('treeNodes');
+      container.innerHTML = '';
+
+      units.forEach(u => {
+        const pos    = unitPos.get(u);
+        const hasExpanded = u.ids.some(isExpanded);
+        const isStar   = u.ids.includes('node-gursez');
+        const isCouple = u.ids.length === 2;
+        const isParentCouple = u.ids.includes('node-dad') || u.ids.includes('node-mum');
+
+        const box = document.createElement('div');
+        box.className = 'ft-couple-box' +
+          (!hasExpanded ? ' ft-couple-box--ghost' : (isCouple ? ' ft-couple-box--pair' : ' ft-couple-box--solo')) +
+          (isStar     ? ' ft-couple-box--star' : '') +
+          (u.side === 'Paternal' ? ' ft-couple-box--pat' : '') +
+          (u.side === 'Maternal' ? ' ft-couple-box--mat' : '') +
+          (isParentCouple ? ' ft-couple-box--parents' : '');
+        box.style.left = pos.x + 'px';
+        box.style.top  = pos.y + 'px';
+
+        u.ids.forEach((id, idx) => {
+          const n = nodeMap[id];
+          const isExp = isExpanded(id);
+          const isMember = (id === 'node-gursez');
+
+          const card = document.createElement('div');
+          card.className = 'ft-node' +
+            (!isExp                                  ? ' ft-node--ghost' : '') +
+            (isExp && isMember                       ? ' ft-node--gursez ft-node--star' : '') +
+            (isExp && n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
+            (isExp && n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
+            (isExp && isParentCouple                 ? ' ft-node--parent' : '');
+          
+          if (isExp) {
+            card.style.width = CARD_W + 'px';
+            card.style.flex  = '0 0 ' + CARD_W + 'px';
+          } else {
+            card.style.width = GHOST_W + 'px';
+            card.style.flex  = '0 0 ' + GHOST_W + 'px';
+          }
+          
+          card.setAttribute('tabindex','0');
+          card.setAttribute('role','button');
+          card.setAttribute('aria-label', n.data.name);
+
+          if (isExp) {
+            card.onmouseenter = (e) => showHoverCard(n, e);
+            card.onmousemove  = (e) => updateHoverPosition(e);
+            card.onmouseleave = () => hideHoverCard();
+            
+            card.innerHTML = `
+              <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
+              <div class="ft-name ${isMember ? 'ft-name--hero' : ''}">${n.data.name}</div>
+              <div class="ft-relation ${isMember ? 'ft-relation--hero' : ''}">${n.data.relation}</div>
+              ${n.data.born ? `<div class="ft-born">Born · ${n.data.born}</div>` : ''}
+              ${isMember ? '<div class="ft-star-ring" aria-hidden="true"></div>' : ''}
+            `;
+            
+            card.onclick = () => {
+              if (!CORE_NODES.has(id)) {
+                expandedNodeIds.delete(id);
+                renderTree();
+              } else {
+                openFamilyPanel(n);
+              }
+            };
+          } else {
+            // Ghost node content
+            const initials = n.data.name.split(' ').map(s => s[0]).join('').toUpperCase().substring(0, 2);
+            card.innerHTML = `<span>${initials}</span>`;
+            
+            card.onclick = () => {
+              expandedNodeIds.add(id);
+              // Expand immediate family too
+              (n.rels.spouses || []).forEach(sid => expandedNodeIds.add(sid));
+              (n.rels.parents || []).forEach(pid => expandedNodeIds.add(pid));
+              (n.rels.children || []).forEach(cid => expandedNodeIds.add(cid));
+              renderTree();
+            };
+          }
+
+          box.appendChild(card);
+
+          if (isCouple && idx === 0) {
+            const heart = document.createElement('div');
+            heart.className = 'ft-connector-heart' + (isParentCouple ? ' ft-connector-heart--parents' : '');
+            heart.setAttribute('aria-hidden','true');
+            heart.textContent = isParentCouple ? '💑' : '🤝';
+            box.appendChild(heart);
+          }
+        });
+
+        container.appendChild(box);
+      });
+
+      const canvas = document.getElementById('treeCanvas');
+      canvas.style.width  = canvasW + 'px';
+      canvas.style.height = canvasH + 'px';
+
+      if (isInitial) {
+        const gUnit = unitByNode['node-gursez'];
+        if (gUnit) {
+          const gPos = unitPos.get(gUnit);
+          const vp   = document.getElementById('treeViewport');
+          treeState.scale = 0.82;
+          treeState.x = vp.clientWidth  / 2 - (gPos.x + gPos.w/2) * treeState.scale;
+          treeState.y = vp.clientHeight / 2 - (gPos.y + gPos.h/2) * treeState.scale;
+          applyTreeTransform();
+        }
+      }
+
+      renderFamilyGrid(rawNodes);
+    }
+
+    /* ─── PAN & ZOOM ──────────────────────────────────────────── */
+    const treeState = { x: 0, y: 0, scale: 0.85, dragging: false, startX: 0, startY: 0 };
+
+    function applyTreeTransform() {
+      const canvas = document.getElementById('treeCanvas');
+      if (canvas) canvas.style.transform = `translate(${treeState.x}px,${treeState.y}px) scale(${treeState.scale})`;
+    }
+
+    function treeZoom(delta) {
+      treeState.scale = Math.max(0.3, Math.min(2.0, treeState.scale + delta));
+      applyTreeTransform();
+    }
+
+    function treeReset() {
+      const gUnit = document.querySelector('.ft-node--gursez');
+      const vp    = document.getElementById('treeViewport');
+      // "little bigger than normal" in fullscreen
+      treeState.scale = document.fullscreenElement ? 1.05 : 0.82;
+      if (gUnit && vp) {
+        const vpRect = vp.getBoundingClientRect();
+        const box    = gUnit.closest('.ft-couple-box');
+        if (box) {
+          const bx = parseFloat(box.style.left) + box.offsetWidth / 2;
+          const by = parseFloat(box.style.top) + box.offsetHeight / 2;
+          treeState.x = vpRect.width  / 2 - bx * treeState.scale;
+          treeState.y = vpRect.height / 2 - by * treeState.scale;
+        } else {
+          treeState.x = 0; treeState.y = 0;
+        }
+      } else {
+        treeState.x = 0; treeState.y = 0;
+      }
+      applyTreeTransform();
+    }
+
+    function initTreeDrag() {
+      const vp = document.getElementById('treeViewport');
+      if (!vp) return;
+      vp.addEventListener('mousedown', e => {
+        treeState.dragging = true;
+        treeState.startX = e.clientX - treeState.x;
+        treeState.startY = e.clientY - treeState.y;
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!treeState.dragging) return;
+        treeState.x = e.clientX - treeState.startX;
+        treeState.y = e.clientY - treeState.startY;
+        applyTreeTransform();
+      });
+      window.addEventListener('mouseup', () => { treeState.dragging = false; });
+
+      vp.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+          treeState.dragging = true;
+          treeState.startX = e.touches[0].clientX - treeState.x;
+          treeState.startY = e.touches[0].clientY - treeState.y;
+        }
+      }, { passive: true });
+      vp.addEventListener('touchmove', e => {
+        if (!treeState.dragging || e.touches.length !== 1) return;
+        treeState.x = e.touches[0].clientX - treeState.startX;
+        treeState.y = e.touches[0].clientY - treeState.startY;
+        applyTreeTransform();
+      }, { passive: true });
+      vp.addEventListener('touchend', () => { treeState.dragging = false; });
+
+      vp.addEventListener('wheel', e => {
+        e.preventDefault();
+        treeZoom(e.deltaY < 0 ? 0.08 : -0.08);
+      }, { passive: false });
+    }
+
+    // Expose to window for HTML onclick attributes
+    window.treeZoom = treeZoom;
+    window.treeReset = treeReset;
+
+    /* ─── HOVER CARD LOGIC ────────────────────────────────────── */
+    function showHoverCard(node, event) {
+      const card = document.getElementById('ftHoverCard');
+      if (!card) return;
+      const d = node.data;
+
+      // Relational data
+      const allNodes = TREE_DATA.treeData;
+      const spouseNames = (node.rels.spouses || []).map(sid => allNodes.find(n => n.id === sid)?.data.name).filter(Boolean).join(', ');
+      
+      const fatherNode = (node.rels.parents || []).map(id => allNodes.find(n => n.id === id)).find(n => n?.data.gender === 'M');
+      const motherNode = (node.rels.parents || []).map(id => allNodes.find(n => n.id === id)).find(n => n?.data.gender === 'F');
+      const fatherName = fatherNode ? fatherNode.data.name : null;
+      const motherName = motherNode ? motherNode.data.name : null;
+      const parentsStr = (fatherName && motherName) ? `${fatherName} & ${motherName}` : (fatherName || motherName || null);
+
+      const childrenNames = (node.rels.children || []).map(cid => allNodes.find(n => n.id === cid)?.data.name).filter(Boolean).join(', ');
+      const familyName = d.familyName || (d.side === 'Paternal' ? 'Hira' : 'Ghuman');
+
+      card.innerHTML = `
+        <div class="fhc-header">
+          <div class="fhc-emoji" style="background:${d.color || 'var(--cream)'}">${d.emoji}</div>
+          <div class="fhc-name-box">
+            <span class="fhc-name">${d.name}</span>
+            <span class="fhc-relation">${d.relation}</span>
+            <span class="fhc-surname">${familyName}</span>
+          </div>
+        </div>
+        <div class="fhc-body">
+          ${spouseNames ? `<div class="fhc-info-row"><span class="fhc-label">Married to</span><span class="fhc-value">${spouseNames}</span></div>` : ''}
+          ${parentsStr ? `<div class="fhc-info-row"><span class="fhc-label">Parents</span><span class="fhc-value">${parentsStr}</span></div>` : ''}
+          ${childrenNames ? `<div class="fhc-info-row"><span class="fhc-label">Children</span><span class="fhc-value">${childrenNames}</span></div>` : ''}
+          ${d.note ? `<div class="fhc-note">${d.note}</div>` : ''}
+        </div>
+      `;
+
+      card.style.display = 'block';
+      updateHoverPosition(event);
+    }
+
+    function updateHoverPosition(e) {
+      const card = document.getElementById('ftHoverCard');
+      if (!card || card.style.display === 'none') return;
+      
+      const xOffset = 20;
+      const yOffset = 20;
+      
+      const isFullscreen = !!document.fullscreenElement;
+      let x, y;
+
+      if (isFullscreen) {
+        // When in fullscreen, card is a child of .tree-outer (which might have a transform)
+        const container = document.querySelector('.tree-outer');
+        const rect = container.getBoundingClientRect();
+        x = e.clientX - rect.left + xOffset;
+        y = e.clientY - rect.top + yOffset;
+
+        const cardRect = card.getBoundingClientRect();
+        if (x + cardRect.width > rect.width) x = e.clientX - rect.left - cardRect.width - xOffset;
+        if (y + cardRect.height > rect.height) y = e.clientY - rect.top - cardRect.height - yOffset;
+      } else {
+        // Normal mode (fixed relative to window)
+        x = e.clientX + xOffset;
+        y = e.clientY + yOffset;
+
+        const cardRect = card.getBoundingClientRect();
+        if (x + cardRect.width > window.innerWidth) x = e.clientX - cardRect.width - xOffset;
+        if (y + cardRect.height > window.innerHeight) y = e.clientY - cardRect.height - yOffset;
+      }
+
+      card.style.left = x + 'px';
+      card.style.top = y + 'px';
+    }
+
+    function hideHoverCard() {
+      const card = document.getElementById('ftHoverCard');
+      if (card) card.style.display = 'none';
+    }
+
+    function toggleFullScreen() {
+      const treeOuter = document.querySelector('.tree-outer');
+      if (!document.fullscreenElement) {
+        treeOuter.requestFullscreen().catch(err => console.error(err));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const treeOuter = document.querySelector('.tree-outer');
+      const hoverCard = document.getElementById('ftHoverCard');
+
+      if (document.fullscreenElement) {
+        treeOuter.classList.add('is-fullscreen');
+        // Move hover card inside to ensure visibility in fullscreen mode
+        if (hoverCard) treeOuter.appendChild(hoverCard);
+        treeReset();
+      } else {
+        treeOuter.classList.remove('is-fullscreen');
+        // Move hover card back to main container (original layout place)
+        const mainContent = document.querySelector('.container');
+        if (hoverCard && mainContent) mainContent.appendChild(hoverCard);
+        treeReset();
+      }
+    });
+
+    // Expose to window for HTML onclick attributes
+    window.treeZoom = treeZoom;
+    window.treeReset = treeReset;
+    window.toggleFullScreen = toggleFullScreen;
+    window.showHoverCard = showHoverCard;
+    window.updateHoverPosition = updateHoverPosition;
+    window.hideHoverCard = hideHoverCard;
+
+    /* ─── FAMILY GRID ────────────────────────────────────────── */
+    function renderFamilyGrid(nodes) {
+      const grid = document.getElementById('familyGrid');
+      grid.innerHTML = '';
+      const sorted = [...nodes].sort((a, b) => {
+        const order = { Gursez: 0, Paternal: 1, Maternal: 2 };
+        return (order[a.data.side] ?? 3) - (order[b.data.side] ?? 3);
+      });
+      sorted.forEach((n, i) => {
+        const d = n.data;
+        const card = document.createElement('div');
+        card.className = `family-member-card side-${d.side} fade-up`;
+        card.style.transitionDelay = (i * 0.04) + 's';
+        card.innerHTML = `
+          <div class="fmc-emoji">${d.emoji}</div>
+          <div class="fmc-name">${d.name}</div>
+          <div class="fmc-relation">${d.relation}</div>
+          <span class="fmc-side side-${d.side}">${d.side}</span>
+        `;
+        card.onmouseenter = (e) => showHoverCard(n, e);
+        card.onmousemove  = (e) => updateHoverPosition(e);
+        card.onmouseleave = () => hideHoverCard();
+        grid.appendChild(card);
+      });
+    }
+
+    /* ─── REVEAL OBSERVER ────────────────────────────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    /* ─── BOOT ───────────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      // Observe static fade-up elements
+      document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
+      initTreeDrag();
+      renderTree(true);
+
+      // Wire up mobile click handlers
+      const mobileMap = {
+        'mobile-node-dad': 'node-dad',
+        'mobile-node-mum': 'node-mum',
+        'mobile-node-gursez': 'node-gursez'
+      };
+      Object.entries(mobileMap).forEach(([mId, tId]) => {
+        const el = document.getElementById(mId);
+        const node = TREE_DATA.treeData.find(n => n.id === tId);
+        if (el && node) {
+          el.onclick = (e) => {
+            if (document.getElementById('ftHoverCard').style.display === 'block') {
+              hideHoverCard();
+            } else {
+              showHoverCard(node, e);
+            }
+          };
+        }
+      });
+    });
+  </script>
+</Layout>
+
