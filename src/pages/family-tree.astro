@@ -37,8 +37,9 @@ import { TREE_DATA } from '../data/family-tree';
         <!-- Pan/zoom controls -->
         <div class="tree-controls">
           <button class="tree-ctrl-btn" onclick="treeZoom(0.15)" aria-label="Zoom in">＋</button>
-          <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)" aria-label="Zoom out">－</button>
-          <button class="tree-ctrl-btn" onclick="treeReset()" aria-label="Reset view" style="font-size:0.75rem;padding:0 12px;">Reset</button>
+          <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)" aria-label="Zoom out">−</button>
+          <button class="tree-ctrl-btn" onclick="treeReset()" aria-label="Reset view">↻</button>
+          <button class="tree-ctrl-btn" onclick="toggleFullScreen()" aria-label="Full screen" title="Full Screen">⛶</button>
         </div>
       </div>
 
@@ -386,7 +387,8 @@ import { TREE_DATA } from '../data/family-tree';
     function treeReset() {
       const gUnit = document.querySelector('.ft-node--gursez');
       const vp    = document.getElementById('treeViewport');
-      treeState.scale = 0.82;
+      // "little bigger than normal" in fullscreen
+      treeState.scale = document.fullscreenElement ? 1.05 : 0.82;
       if (gUnit && vp) {
         const vpRect = vp.getBoundingClientRect();
         const box    = gUnit.closest('.ft-couple-box');
@@ -523,9 +525,32 @@ import { TREE_DATA } from '../data/family-tree';
       document.getElementById('familyPanel').style.display = 'none';
     }
 
+    function toggleFullScreen() {
+      const treeOuter = document.querySelector('.tree-outer');
+      if (!document.fullscreenElement) {
+        treeOuter.requestFullscreen().catch(err => console.error(err));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const treeOuter = document.querySelector('.tree-outer');
+      if (document.fullscreenElement) {
+        treeOuter.classList.add('is-fullscreen');
+        treeReset();
+      } else {
+        treeOuter.classList.remove('is-fullscreen');
+        treeReset();
+      }
+    });
+
     // Expose to window for HTML onclick attributes
     window.openFamilyPanel = openFamilyPanel;
     window.closeFamilyPanel = closeFamilyPanel;
+    window.treeZoom = treeZoom;
+    window.treeReset = treeReset;
+    window.toggleFullScreen = toggleFullScreen;
 
     /* ─── FAMILY GRID ────────────────────────────────────────── */
     function renderFamilyGrid(nodes) {

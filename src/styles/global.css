@@ -835,6 +835,26 @@ footer {
 }
 .tree-ctrl-btn:hover { background: var(--cream); box-shadow: var(--shadow-card); transform: scale(1.05); }
 
+/* Fullscreen mode for tree-outer */
+.tree-outer.is-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999;
+  background: var(--warm-white);
+  margin: 0;
+  border-radius: 0;
+  width: 100vw;
+  height: 100vh;
+}
+.tree-outer.is-fullscreen .tree-viewport {
+  height: 100vh;
+  border-radius: 0;
+}
+.tree-outer.is-fullscreen .tree-hint {
+  background: white;
+  border-bottom: 1px solid rgba(200,160,140,0.1);
+}
+
 /* ── COUPLE WRAPPER BOX ──────────────────────────────────── */
 .ft-couple-box {
   position: absolute;
