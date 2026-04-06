@@ -1,4 +1,3 @@
-
 /* ─── RESET & BASE ─────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -788,8 +787,9 @@ footer {
   border: 1.5px solid rgba(100,70,60,0.12); flex-shrink: 0;
 }
 .ft-dot--paternal { background: linear-gradient(135deg,#dff8fc,#c9f4f8); }
-.ft-dot--maternal { background: linear-gradient(135deg,#ede4f8,#f8f0ff); }
+.ft-dot--maternal { background: linear-gradient(135deg,#bda2df,#f8f0ff); }
 .ft-dot--gursez   { background: linear-gradient(135deg,#f8e8d8,#dff8fc); }
+.ft-dot--dadi-side   { background: linear-gradient(135deg,#f8e8d8,#dff8fc); }
 .ft-dot--line {
   background: none !important; border-radius: 99px;
   width: 28px; height: 2px;
@@ -880,6 +880,10 @@ footer {
   background: rgba(237,228,248,0.45);
   border-color: rgba(154,126,200,0.38);
 }
+.ft-couple-box--pair.ft-couple-box--dadi {
+  background: rgba(254,243,226,0.55);
+  border-color: rgba(230,160,80,0.38);
+}
 .ft-couple-box--parents {
   background: rgba(248,232,216,0.45);
   border: 2px solid rgba(201,169,110,0.32);
@@ -936,6 +940,10 @@ footer {
 .ft-node--maternal {
   border-top: 3px solid #9a7ec8;
   background: linear-gradient(to bottom, rgba(237,228,248,0.18), white);
+}
+.ft-node--dadi {
+  border-top: 3px solid #e6a050;
+  background: linear-gradient(to bottom, rgba(254,243,226,0.25), white);
 }
 .ft-node--parent {
   border-top: 3px solid #c9a96e;
@@ -1091,6 +1099,7 @@ footer {
 .family-member-card.side-Paternal::before { background: linear-gradient(90deg,var(--sky),var(--sage-light)); }
 .family-member-card.side-Maternal::before { background: linear-gradient(90deg,var(--lavender),var(--blush-light)); }
 .family-member-card.side-Gursez::before   { background: linear-gradient(90deg,var(--gold-light),var(--blush)); }
+.family-member-card.side-Dadi-Side::before { background: linear-gradient(90deg,#fde8c8,#fef3e2); }
 .family-member-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .fmc-emoji { font-size: 2rem; margin-bottom: 10px; }
 .fmc-name {
@@ -1105,6 +1114,7 @@ footer {
 .fmc-side.side-Paternal { background: var(--blush-light);      color: #3a6e8a; }
 .fmc-side.side-Maternal { background: #d0c8e0;  color: #6a4ea0; }
 .fmc-side.side-Gursez   { background: var(--gold-light);      color: #8a6020; }
+.fmc-side.side-Dadi-Side { background: #fde8c8;               color: #a05a10; }
 
 /* ── MOBILE SIMPLE TREE ──────────────────────────────────── */
 .ft-mobile-view {

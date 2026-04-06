@@ -22,6 +22,7 @@ import { TREE_DATA } from '../data/family-tree';
         <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
         <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
         <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
+        <div class="ft-legend-item"><span class="ft-dot ft-dot--dadi-side"></span> Dadi's Side</div>
         <div class="ft-legend-item"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
       </div>
 
@@ -182,7 +183,7 @@ import { TREE_DATA } from '../data/family-tree';
           const isCenter = u.ids.some(id => CENTER_NODES.has(id));
           if (isCenter) {
             ctrUnits.push(u);
-          } else if (u.side === 'Paternal') {
+          } else if (u.side === 'Paternal' || u.side === 'Dadi-Side') {
             patUnits.push(u);
           } else if (u.side === 'Maternal') {
             matUnits.push(u);
@@ -362,9 +363,10 @@ import { TREE_DATA } from '../data/family-tree';
       }
 
       const SIDE_STROKE = {
-        Paternal: 'rgba(92,215,234,0.75)',
-        Maternal: 'rgba(154,126,200,0.75)',
-        Gursez:   'rgba(201,169,110,0.75)',
+        Paternal:  'rgba(92,215,234,0.75)',
+        Maternal:  'rgba(154,126,200,0.75)',
+        Gursez:    'rgba(201,169,110,0.75)',
+        'Dadi-Side': 'rgba(230,160,80,0.75)',
       };
 
       // Branch Color Logic
@@ -422,6 +424,7 @@ import { TREE_DATA } from '../data/family-tree';
           (isStar     ? ' ft-couple-box--star' : '') +
           (u.side === 'Paternal' ? ' ft-couple-box--pat' : '') +
           (u.side === 'Maternal' ? ' ft-couple-box--mat' : '') +
+          (u.side === 'Dadi-Side' ? ' ft-couple-box--dadi' : '') +
           (isParentCouple ? ' ft-couple-box--parents' : '');
         box.style.left = pos.x + 'px';
         box.style.top  = pos.y + 'px';
@@ -437,6 +440,7 @@ import { TREE_DATA } from '../data/family-tree';
             (isExp && isMember                       ? ' ft-node--gursez ft-node--star' : '') +
             (isExp && n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
             (isExp && n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
+            (isExp && n.data.side === 'Dadi-Side' && !isMember ? ' ft-node--dadi' : '') +
             (isExp && isParentCouple                 ? ' ft-node--parent' : '');
           
           if (isExp) {
@@ -798,4 +802,3 @@ import { TREE_DATA } from '../data/family-tree';
     });
   </script>
 </Layout>
-
