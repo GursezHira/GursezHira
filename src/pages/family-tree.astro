@@ -40,6 +40,7 @@ import { TREE_DATA } from '../data/family-tree';
           <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)" aria-label="Zoom out">−</button>
           <button class="tree-ctrl-btn" onclick="treeReset()" aria-label="Reset view">↻</button>
           <button class="tree-ctrl-btn" onclick="toggleFullScreen()" aria-label="Full screen" title="Full Screen">⛶</button>
+          <button class="tree-ctrl-btn" onclick="toggleAllMembers()" id="toggleAllBtn" title="Show All Members">👁</button>
         </div>
       </div>
 
@@ -97,7 +98,21 @@ import { TREE_DATA } from '../data/family-tree';
     ──────────────────────────────────────────────────────────── */
 
     /* ─── FAMILY TREE ENGINE ───────────────────────────────────── */
-    function initFamilyTree() {
+    /* ─── PROGRESSIVE DISCOVERY STATE ────────────────────────── */
+    const expandedNodeIds = new Set([
+      'node-gursez',
+      'node-dad', 'node-mum',
+      'node-dada', 'node-dadi',
+      'node-nana', 'node-nani',
+      'node-ggf-p', 'node-ggf-p2', 'node-gggf-p',
+      'node-ggm-p', 'node-ggm-p2', 'node-par-par-nana', 'node-par-par-nani',
+      'node-par-nana', 'node-par-nani'
+    ]);
+
+    // Constant for "core" nodes that cannot be collapsed
+    const CORE_NODES = new Set([...expandedNodeIds]);
+
+    function renderTree(isInitial = false) {
       const rawNodes = TREE_DATA.treeData;
       const nodeMap  = {};
       rawNodes.forEach(n => nodeMap[n.id] = n);
@@ -154,95 +169,186 @@ import { TREE_DATA } from '../data/family-tree';
 
       const gens = Object.keys(byGen).map(Number).sort((a,b)=>a-b);
       const sideOrder = { Paternal:0, Gursez:1, Maternal:2 };
+      const CENTER_NODES = new Set(['node-gursez', 'node-dad', 'node-mum']);
+
       gens.forEach(g => {
-        byGen[g].sort((a,b) => (sideOrder[a.side]??1) - (sideOrder[b.side]??1));
+        const row = byGen[g];
+        // Segregate units into segments
+        const patUnits = [];
+        const ctrUnits = [];
+        const matUnits = [];
+
+        row.forEach(u => {
+          const isCenter = u.ids.some(id => CENTER_NODES.has(id));
+          if (isCenter) {
+            ctrUnits.push(u);
+          } else if (u.side === 'Paternal') {
+            patUnits.push(u);
+          } else if (u.side === 'Maternal') {
+            matUnits.push(u);
+          } else {
+            // Default based on side property
+            if (u.side === 'Maternal') matUnits.push(u);
+            else if (u.side === 'Gursez') ctrUnits.push(u);
+            else patUnits.push(u);
+          }
+        });
+
+        // Reconstruct row: Paternal units (left) | Center units (middle) | Maternal units (right)
+        byGen[g] = [...patUnits, ...ctrUnits, ...matUnits];
       });
 
       /* ── 4. ASSIGN PIXEL POSITIONS ──────────────────────────── */
-      const CARD_W     = 150;
-      const CARD_H     = 100;
-      const HEART_W    = 24;  // approximate width of 🤝 element
-      const BOX_PAD_X  = 10;  // horizontal padding inside couple box
-      const BOX_PAD_Y  = 8;   // vertical padding inside couple box
-      const UNIT_GAP   = 44;
-      const ROW_H      = 210;
-      const PAD_X      = 70;
-      const PAD_Y      = 70;
+      const CARD_W      = 150;
+      const CARD_H      = 100;
+      const GHOST_W     = 44;   // Matches CSS .ft-node--ghost
+      const GHOST_H     = 44;
+      const HEART_W     = 24;
+      const BOX_PAD_X   = 10;
+      const BOX_PAD_Y   = 8;
+      const UNIT_GAP    = 44;
+      const ROW_H       = 210;
+      const PAD_X       = 70;
+      const PAD_Y       = 70;
 
-      // Total width of a unit for layout spacing purposes.
-      // For couples: outer box = pad + card + heart + card + pad
-      // For solos:   solo box has NO horizontal padding, so outer = card width
+      function isExpanded(id) { return expandedNodeIds.has(id); }
+
       function unitWidth(u) {
+        const expandedIds = u.ids.filter(isExpanded);
+        const ghostCount  = u.ids.length - expandedIds.length;
+        
         if (u.ids.length === 2) {
-          return BOX_PAD_X * 2 + CARD_W * 2 + HEART_W;  // = 300
+          // If both are ghosts
+          if (ghostCount === 2) return BOX_PAD_X * 2 + GHOST_W * 2 + HEART_W;
+          // If one is ghost, one is card
+          if (ghostCount === 1) return BOX_PAD_X * 2 + CARD_W + GHOST_W + HEART_W;
+          // Both are cards
+          return BOX_PAD_X * 2 + CARD_W * 2 + HEART_W;
         }
-        return CARD_W;  // solo: no horizontal padding
+        // Solo
+        return expandedIds.length ? CARD_W : GHOST_W;
       }
-      // Height with padding
-      const UNIT_H = BOX_PAD_Y * 2 + CARD_H;
+
+      function unitHeight(u) {
+        const hasExpanded = u.ids.some(isExpanded);
+        return BOX_PAD_Y * 2 + (hasExpanded ? CARD_H : GHOST_H);
+      }
 
       function rowTotalWidth(row) {
+        if (!row || !row.length) return 0;
         return row.reduce((s,u) => s + unitWidth(u), 0) + (row.length-1) * UNIT_GAP;
       }
 
-      const maxRowW = Math.max(...gens.map(g => rowTotalWidth(byGen[g])));
-      const canvasW  = maxRowW + PAD_X * 2;
+      const DIRECT_PATS = new Set(['node-dada', 'node-dadi', 'node-ggf-p', 'node-ggm-p', 'node-ggf-p2', 'node-ggm-p2', 'node-gggf-p']);
+      const DIRECT_MATS = new Set(['node-nana', 'node-nani', 'node-par-nana', 'node-par-nani', 'node-par-par-nana', 'node-par-par-nani']);
+
+      const rowLayouts = gens.map(g => {
+        const row = byGen[g];
+        // We already segregated them into byGen[g], but let's read them out explicitly
+        const pUnits = row.filter(u => u.side !== 'Maternal' && !u.ids.some(id => CENTER_NODES.has(id)));
+        const cUnits = row.filter(u => u.ids.some(id => CENTER_NODES.has(id)));
+        const mUnits = row.filter(u => u.side === 'Maternal' && !u.ids.some(id => CENTER_NODES.has(id)));
+
+        // Keep direct paternal ancestors on the right side of the paternal group (closest to center)
+        pUnits.sort((a,b) => {
+          const aDirect = a.ids.some(id => DIRECT_PATS.has(id)) ? 1 : 0;
+          const bDirect = b.ids.some(id => DIRECT_PATS.has(id)) ? 1 : 0;
+          return aDirect - bDirect; 
+        });
+
+        // Keep direct maternal ancestors on the left side of the maternal group (closest to center)
+        mUnits.sort((a,b) => {
+          const aDirect = a.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
+          const bDirect = b.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
+          return bDirect - aDirect;
+        });
+
+        return { g, pUnits, cUnits, mUnits };
+      });
+
+      let maxPW = 0, maxMW = 0, maxCW = 0;
+      rowLayouts.forEach(rl => {
+        const pw = rowTotalWidth(rl.pUnits);
+        const cw = rowTotalWidth(rl.cUnits);
+        const mw = rowTotalWidth(rl.mUnits);
+        if (pw > maxPW) maxPW = pw;
+        if (cw > maxCW) maxCW = cw;
+        if (mw > maxMW) maxMW = mw;
+      });
+
+      const CENTER_X = PAD_X + Math.max(maxPW + UNIT_GAP, maxCW / 2);
+      const canvasW  = CENTER_X + Math.max(maxMW + UNIT_GAP, maxCW / 2) + PAD_X;
       const canvasH  = gens.length * ROW_H + PAD_Y * 2;
       const unitPos  = new Map();
 
-      gens.forEach((g, rowIdx) => {
-        const row  = byGen[g];
-        const rowW = rowTotalWidth(row);
-        const startX = (canvasW - rowW) / 2;
-        let cx = startX;
+      rowLayouts.forEach((rl, rowIdx) => {
         const y = PAD_Y + rowIdx * ROW_H;
-        row.forEach(u => {
+        
+        // Center Units
+        const cW = rowTotalWidth(rl.cUnits);
+        let cx = CENTER_X - (cW / 2);
+        rl.cUnits.forEach(u => {
           const w = unitWidth(u);
-          unitPos.set(u, { x: cx, y, w, h: UNIT_H });
+          unitPos.set(u, { x: cx, y, w, h: unitHeight(u) });
           cx += w + UNIT_GAP;
+        });
+
+        // Paternal Units (grow leftwards from center)
+        const pW = rowTotalWidth(rl.pUnits);
+        const pBound = rl.cUnits.length > 0 ? (CENTER_X - cW/2 - UNIT_GAP) : (CENTER_X - UNIT_GAP);
+        let px = pBound - pW;
+        rl.pUnits.forEach(u => {
+          const w = unitWidth(u);
+          unitPos.set(u, { x: px, y, w, h: unitHeight(u) });
+          px += w + UNIT_GAP;
+        });
+
+        // Maternal Units (grow rightwards from center)
+        const mBound = rl.cUnits.length > 0 ? (CENTER_X + cW/2 + UNIT_GAP) : (CENTER_X + UNIT_GAP);
+        let mx = mBound;
+        rl.mUnits.forEach(u => {
+          const w = unitWidth(u);
+          unitPos.set(u, { x: mx, y, w, h: unitHeight(u) });
+          mx += w + UNIT_GAP;
         });
       });
 
-      // Bottom-center exit point for connector lines.
-      // For couples: exits from the heart connector midpoint (between the two cards).
-      // For solos:   exits from the center-bottom of the single card.
       function unitCB(u) {
         const p = unitPos.get(u);
+        const hasExpanded = u.ids.some(isExpanded);
+        
         if (u.ids.length === 2) {
-          const heartCenterX = p.x + BOX_PAD_X + CARD_W + HEART_W / 2;
+          const w1 = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+          const heartCenterX = p.x + BOX_PAD_X + w1 + HEART_W / 2;
           return { x: heartCenterX, y: p.y + p.h };
         }
-        // Solo: no horizontal padding, card center = p.x + CARD_W/2
-        return { x: p.x + CARD_W / 2, y: p.y + p.h };
+        const w = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+        return { x: p.x + w / 2, y: p.y + p.h };
       }
 
-      // Top-center entry point for connector lines: lands on the individual card top
-      // (below the box's top padding, so the line visually meets the card).
       function nodeCT(id) {
         const u = unitByNode[id];
+        if (!u) return { x: 0, y: 0 };
         const p = unitPos.get(u);
+        const w = isExpanded(id) ? CARD_W : GHOST_W;
+        
         if (u.ids.length === 2) {
           const idx = u.ids.indexOf(id);
-          // Card 0 left: p.x + BOX_PAD_X
-          // Card 1 left: p.x + BOX_PAD_X + CARD_W + HEART_W
-          const cardX = p.x + BOX_PAD_X + idx * (CARD_W + HEART_W);
-          return { x: cardX + CARD_W / 2, y: p.y + BOX_PAD_Y };
+          const w0 = isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
+          const cardX = p.x + BOX_PAD_X + (idx === 0 ? 0 : w0 + HEART_W);
+          return { x: cardX + w / 2, y: p.y + BOX_PAD_Y };
         }
-        // Solo: no horizontal padding, card starts at p.x
-        return { x: p.x + CARD_W / 2, y: p.y + BOX_PAD_Y };
+        return { x: p.x + w / 2, y: p.y + BOX_PAD_Y };
       }
 
-      /* ── 5. RENDER SVG CONNECTORS (all smooth bezier curves) ── */
+      /* ── 5. RENDER SVG CONNECTORS ── */
       const svg = document.getElementById('treeSvg');
       svg.setAttribute('width',  canvasW);
       svg.setAttribute('height', canvasH);
       svg.innerHTML = '';
 
-      // Draw a smooth cubic bezier from (x1,y1) to (x2,y2).
-      // Control points are anchored vertically so the curve flows naturally
-      // from parent bottom to child top without sharp corners.
       function mkBezier(x1, y1, x2, y2, stroke) {
-        const cy = (y1 + y2) / 2;  // common vertical midpoint for both control pts
+        const cy = (y1 + y2) / 2;
         const d  = `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
         const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         el.setAttribute('d', d);
@@ -261,8 +367,27 @@ import { TREE_DATA } from '../data/family-tree';
         Gursez:   'rgba(201,169,110,0.75)',
       };
 
+      // Branch Color Logic
+      function getUnitStroke(u) {
+        if (u.side === 'Gursez') return SIDE_STROKE.Gursez;
+        
+        // If it's a "growing branch" (descendant families of uncles/aunts)
+        const isGrowingBranch = u.ids.some(id => {
+          const n = nodeMap[id];
+          return n && (n.data.relation.includes('Veer') || n.data.relation.includes('Didi') || n.data.relation.includes('Maama') || n.data.relation.includes('Maasi'));
+        });
+
+        if (isGrowingBranch) {
+          // Unique hue based on first ID's hash for variety
+          const hash = u.ids[0].split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
+          const hue = Math.abs(hash % 360);
+          return `hsla(${hue}, 60%, 65%, 0.8)`;
+        }
+
+        return SIDE_STROKE[u.side] || SIDE_STROKE.Paternal;
+      }
+
       units.forEach(u => {
-        // Collect ALL children referenced by either member of this unit
         const childIds = [];
         u.ids.forEach(id => {
           (nodeMap[id].rels.children || []).forEach(cid => {
@@ -271,76 +396,99 @@ import { TREE_DATA } from '../data/family-tree';
         });
         if (!childIds.length) return;
 
-        const stroke = SIDE_STROKE[u.side] || SIDE_STROKE.Paternal;
-        const pb     = unitCB(u);  // bottom-center exit point of this couple/solo
+        const stroke = getUnitStroke(u);
+        const pb     = unitCB(u);
 
-        // Draw one smooth bezier per child, from couple-bottom → child-top-center
         childIds.forEach(cid => {
-          const ct = nodeCT(cid);  // top-center of this specific child card
+          const ct = nodeCT(cid);
           mkBezier(pb.x, pb.y, ct.x, ct.y, stroke);
         });
       });
 
-      /* ── 6. RENDER HTML NODES (family-tree-1 card styling) ─── */
+      /* ── 6. RENDER HTML NODES ─── */
       const container = document.getElementById('treeNodes');
       container.innerHTML = '';
 
       units.forEach(u => {
         const pos    = unitPos.get(u);
+        const hasExpanded = u.ids.some(isExpanded);
         const isStar   = u.ids.includes('node-gursez');
         const isCouple = u.ids.length === 2;
         const isParentCouple = u.ids.includes('node-dad') || u.ids.includes('node-mum');
 
-        // Wrapper: couple border box, sized exactly to contain cards + heart
         const box = document.createElement('div');
         box.className = 'ft-couple-box' +
-          (isCouple   ? ' ft-couple-box--pair' : ' ft-couple-box--solo') +
+          (!hasExpanded ? ' ft-couple-box--ghost' : (isCouple ? ' ft-couple-box--pair' : ' ft-couple-box--solo')) +
           (isStar     ? ' ft-couple-box--star' : '') +
           (u.side === 'Paternal' ? ' ft-couple-box--pat' : '') +
           (u.side === 'Maternal' ? ' ft-couple-box--mat' : '') +
           (isParentCouple ? ' ft-couple-box--parents' : '');
         box.style.left = pos.x + 'px';
         box.style.top  = pos.y + 'px';
-        // Do NOT set explicit width — global CSS applies box-sizing:border-box
-        // which would cause any fixed width to eat into the flex content.
-        // Instead let display:flex auto-shrink-wrap to exactly the cards + heart.
 
         u.ids.forEach((id, idx) => {
           const n = nodeMap[id];
+          const isExp = isExpanded(id);
           const isMember = (id === 'node-gursez');
 
-          // Card
           const card = document.createElement('div');
           card.className = 'ft-node' +
-            (isMember                              ? ' ft-node--gursez ft-node--star' : '') +
-            (n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
-            (n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
-            (isParentCouple                        ? ' ft-node--parent' : '');
-          card.style.width = CARD_W + 'px';
-          card.style.flex  = '0 0 ' + CARD_W + 'px';
+            (!isExp                                  ? ' ft-node--ghost' : '') +
+            (isExp && isMember                       ? ' ft-node--gursez ft-node--star' : '') +
+            (isExp && n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
+            (isExp && n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
+            (isExp && isParentCouple                 ? ' ft-node--parent' : '');
+          
+          if (isExp) {
+            card.style.width = CARD_W + 'px';
+            card.style.flex  = '0 0 ' + CARD_W + 'px';
+          } else {
+            card.style.width = GHOST_W + 'px';
+            card.style.flex  = '0 0 ' + GHOST_W + 'px';
+          }
+          
           card.setAttribute('tabindex','0');
           card.setAttribute('role','button');
           card.setAttribute('aria-label', n.data.name);
 
-          // Interaction
-          card.onmouseenter = (e) => showHoverCard(n, e);
-          card.onmousemove  = (e) => updateHoverPosition(e);
-          card.onmouseleave = () => hideHoverCard();
+          if (isExp) {
+            card.onmouseenter = (e) => showHoverCard(n, e);
+            card.onmousemove  = (e) => updateHoverPosition(e);
+            card.onmouseleave = () => hideHoverCard();
+            
+            card.innerHTML = `
+              <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
+              <div class="ft-name ${isMember ? 'ft-name--hero' : ''}">${n.data.name}</div>
+              <div class="ft-relation ${isMember ? 'ft-relation--hero' : ''}">${n.data.relation}</div>
+              ${n.data.born ? `<div class="ft-born">Born · ${n.data.born}</div>` : ''}
+              ${isMember ? '<div class="ft-star-ring" aria-hidden="true"></div>' : ''}
+            `;
+            
+            card.onclick = () => {
+              if (!CORE_NODES.has(id)) {
+                expandedNodeIds.delete(id);
+                renderTree();
+              } else {
+                openFamilyPanel(n);
+              }
+            };
+          } else {
+            // Ghost node content
+            const initials = n.data.name.split(' ').map(s => s[0]).join('').toUpperCase().substring(0, 2);
+            card.innerHTML = `<span>${initials}</span>`;
+            
+            card.onclick = () => {
+              expandedNodeIds.add(id);
+              // Expand immediate family too
+              (n.rels.spouses || []).forEach(sid => expandedNodeIds.add(sid));
+              (n.rels.parents || []).forEach(pid => expandedNodeIds.add(pid));
+              (n.rels.children || []).forEach(cid => expandedNodeIds.add(cid));
+              renderTree();
+            };
+          }
 
-          card.innerHTML = `
-            <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
-            <div class="ft-name ${isMember ? 'ft-name--hero' : ''}">${n.data.name}</div>
-            <div class="ft-relation ${isMember ? 'ft-relation--hero' : ''}">${n.data.relation}</div>
-            ${n.data.born ? `<div class="ft-born">Born · ${n.data.born}</div>` : ''}
-            ${isMember ? '<div class="ft-star-ring" aria-hidden="true"></div>' : ''}
-          `;
-          card.onclick = () => openFamilyPanel(n);
-          card.addEventListener('keydown', e => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFamilyPanel(n); }
-          });
           box.appendChild(card);
 
-          // Heart connector between couple members (inserted after first card)
           if (isCouple && idx === 0) {
             const heart = document.createElement('div');
             heart.className = 'ft-connector-heart' + (isParentCouple ? ' ft-connector-heart--parents' : '');
@@ -353,24 +501,23 @@ import { TREE_DATA } from '../data/family-tree';
         container.appendChild(box);
       });
 
-      /* ── 7. SIZE THE CANVAS & CENTRE ON GURSEZ ──────────────── */
       const canvas = document.getElementById('treeCanvas');
       canvas.style.width  = canvasW + 'px';
       canvas.style.height = canvasH + 'px';
 
-      const gUnit = unitByNode['node-gursez'];
-      if (gUnit) {
-        const gPos = unitPos.get(gUnit);
-        const vp   = document.getElementById('treeViewport');
-        treeState.scale = 0.82;
-        treeState.x = vp.clientWidth  / 2 - (gPos.x + gPos.w/2) * treeState.scale;
-        treeState.y = vp.clientHeight / 2 - (gPos.y + gPos.h/2) * treeState.scale;
-        applyTreeTransform();
+      if (isInitial) {
+        const gUnit = unitByNode['node-gursez'];
+        if (gUnit) {
+          const gPos = unitPos.get(gUnit);
+          const vp   = document.getElementById('treeViewport');
+          treeState.scale = 0.82;
+          treeState.x = vp.clientWidth  / 2 - (gPos.x + gPos.w/2) * treeState.scale;
+          treeState.y = vp.clientHeight / 2 - (gPos.y + gPos.h/2) * treeState.scale;
+          applyTreeTransform();
+        }
       }
 
       renderFamilyGrid(rawNodes);
-      // Trigger fade-up reveals
-      document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
     }
 
     /* ─── PAN & ZOOM ──────────────────────────────────────────── */
@@ -406,6 +553,24 @@ import { TREE_DATA } from '../data/family-tree';
         treeState.x = 0; treeState.y = 0;
       }
       applyTreeTransform();
+    }
+
+    function toggleAllMembers() {
+      const allIds = TREE_DATA.treeData.map(n => n.id);
+      const isAllExpanded = allIds.every(id => expandedNodeIds.has(id));
+      const btn = document.getElementById('toggleAllBtn');
+
+      if (isAllExpanded) {
+        // Return to focus only
+        expandedNodeIds.clear();
+        CORE_NODES.forEach(id => expandedNodeIds.add(id));
+        if (btn) btn.textContent = '👁';
+      } else {
+        // Expand everything
+        allIds.forEach(id => expandedNodeIds.add(id));
+        if (btn) btn.textContent = '👁️‍🗨️';
+      }
+      renderTree();
     }
 
     function initTreeDrag() {
@@ -560,6 +725,7 @@ import { TREE_DATA } from '../data/family-tree';
     window.treeZoom = treeZoom;
     window.treeReset = treeReset;
     window.toggleFullScreen = toggleFullScreen;
+    window.toggleAllMembers = toggleAllMembers;
     window.showHoverCard = showHoverCard;
     window.updateHoverPosition = updateHoverPosition;
     window.hideHoverCard = hideHoverCard;
@@ -605,7 +771,7 @@ import { TREE_DATA } from '../data/family-tree';
       // Observe static fade-up elements
       document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
       initTreeDrag();
-      initFamilyTree();
+      renderTree(true);
 
       // Wire up mobile click handlers
       const mobileMap = {
