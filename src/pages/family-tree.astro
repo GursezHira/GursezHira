@@ -1,6 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { TREE_DATA } from '../data/family-tree';
+
+const branchCSS = TREE_DATA.branches.map(b => `
+  .ft-dot--${b.id} { background: ${b.theme.dot} !important; }
+  .ft-couple-box--${b.id} { background: ${b.theme.boxBg} !important; border-color: ${b.theme.boxBorder} !important; }
+  .ft-node--${b.id} { border-top: 3px solid ${b.theme.nodeBorder} !important; background: ${b.theme.nodeBg} !important; }
+  .family-member-card.side-${b.id}::before { background: ${b.theme.gridBefore} !important; }
+  .fmc-side.side-${b.id} { background: ${b.theme.gridBadgeBg} !important; color: ${b.theme.gridBadgeText} !important; }
+`).join('\n');
 ---
 
 <Layout
@@ -9,6 +17,7 @@ import { TREE_DATA } from '../data/family-tree';
   image="/og/home.png"
 >
   <main id="page-family-tree" class="page active" aria-label="Family Tree">
+    <style is:global set:html={branchCSS} />
     <div class="container">
 
       <div class="page-header fade-up">
@@ -19,10 +28,10 @@ import { TREE_DATA } from '../data/family-tree';
 
       <!-- LEGEND -->
       <div class="ft-legend fade-up" aria-label="Legend">
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--paternal"></span> Paternal Side</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--maternal"></span> Maternal Side</div>
+        {TREE_DATA.branches.map(b => (
+          <div class="ft-legend-item"><span class={`ft-dot ft-dot--${b.id}`}></span> {b.label}</div>
+        ))}
         <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--dadi-side"></span> Dadi's Side</div>
         <div class="ft-legend-item"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
       </div>
 
@@ -183,19 +192,14 @@ import { TREE_DATA } from '../data/family-tree';
           const isCenter = u.ids.some(id => CENTER_NODES.has(id));
           if (isCenter) {
             ctrUnits.push(u);
-          } else if (u.side === 'Paternal' || u.side === 'Dadi-Side') {
-            patUnits.push(u);
           } else if (u.side === 'Maternal') {
             matUnits.push(u);
           } else {
-            // Default based on side property
-            if (u.side === 'Maternal') matUnits.push(u);
-            else if (u.side === 'Gursez') ctrUnits.push(u);
-            else patUnits.push(u);
+            patUnits.push(u);
           }
         });
 
-        // Reconstruct row: Paternal units (left) | Center units (middle) | Maternal units (right)
+        // Reconstruct row: Paternal/Other units (left) | Center units (middle) | Maternal units (right)
         byGen[g] = [...patUnits, ...ctrUnits, ...matUnits];
       });
 
@@ -362,12 +366,10 @@ import { TREE_DATA } from '../data/family-tree';
         svg.appendChild(el);
       }
 
-      const SIDE_STROKE = {
-        Paternal:  'rgba(92,215,234,0.75)',
-        Maternal:  'rgba(154,126,200,0.75)',
-        Gursez:    'rgba(201,169,110,0.75)',
-        'Dadi-Side': 'rgba(230,160,80,0.75)',
-      };
+      const sideStrokeMap = { Gursez: 'rgba(201,169,110,0.75)' };
+      (TREE_DATA.branches || []).forEach(b => {
+        sideStrokeMap[b.id] = b.theme.stroke;
+      });
 
       // Branch Color Logic
       function getUnitStroke(u) {
@@ -386,7 +388,7 @@ import { TREE_DATA } from '../data/family-tree';
           return `hsla(${hue}, 60%, 65%, 0.8)`;
         }
 
-        return SIDE_STROKE[u.side] || SIDE_STROKE.Paternal;
+        return sideStrokeMap[u.side] || sideStrokeMap['Paternal'];
       }
 
       units.forEach(u => {
@@ -422,9 +424,7 @@ import { TREE_DATA } from '../data/family-tree';
         box.className = 'ft-couple-box' +
           (!hasExpanded ? ' ft-couple-box--ghost' : (isCouple ? ' ft-couple-box--pair' : ' ft-couple-box--solo')) +
           (isStar     ? ' ft-couple-box--star' : '') +
-          (u.side === 'Paternal' ? ' ft-couple-box--pat' : '') +
-          (u.side === 'Maternal' ? ' ft-couple-box--mat' : '') +
-          (u.side === 'Dadi-Side' ? ' ft-couple-box--dadi' : '') +
+          (u.side && u.side !== 'Gursez' ? ` ft-couple-box--${u.side}` : '') +
           (isParentCouple ? ' ft-couple-box--parents' : '');
         box.style.left = pos.x + 'px';
         box.style.top  = pos.y + 'px';
@@ -438,9 +438,7 @@ import { TREE_DATA } from '../data/family-tree';
           card.className = 'ft-node' +
             (!isExp                                  ? ' ft-node--ghost' : '') +
             (isExp && isMember                       ? ' ft-node--gursez ft-node--star' : '') +
-            (isExp && n.data.side === 'Paternal' && !isMember ? ' ft-node--paternal' : '') +
-            (isExp && n.data.side === 'Maternal' && !isMember ? ' ft-node--maternal' : '') +
-            (isExp && n.data.side === 'Dadi-Side' && !isMember ? ' ft-node--dadi' : '') +
+            (isExp && n.data.side && n.data.side !== 'Gursez' ? ` ft-node--${n.data.side}` : '') +
             (isExp && isParentCouple                 ? ' ft-node--parent' : '');
           
           if (isExp) {
@@ -737,8 +735,9 @@ import { TREE_DATA } from '../data/family-tree';
       const grid = document.getElementById('familyGrid');
       grid.innerHTML = '';
       const sorted = [...nodes].sort((a, b) => {
-        const order = { Gursez: 0, Paternal: 1, Maternal: 2 };
-        return (order[a.data.side] ?? 3) - (order[b.data.side] ?? 3);
+        const order = { Gursez: 0 };
+        (TREE_DATA.branches || []).forEach((br, idx) => order[br.id] = idx + 1);
+        return (order[a.data.side] ?? 99) - (order[b.data.side] ?? 99);
       });
       sorted.forEach((n, i) => {
         const d = n.data;

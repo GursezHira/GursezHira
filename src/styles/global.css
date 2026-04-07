@@ -872,18 +872,7 @@ footer {
   border: 1.5px solid rgba(200,160,140,0.22);
   box-shadow: 0 2px 16px rgba(100,70,60,0.07);
 }
-.ft-couple-box--pair.ft-couple-box--pat {
-  background: rgba(223,248,252,0.45);
-  border-color: rgba(92,215,234,0.38);
-}
-.ft-couple-box--pair.ft-couple-box--mat {
-  background: rgba(237,228,248,0.45);
-  border-color: rgba(154,126,200,0.38);
-}
-.ft-couple-box--pair.ft-couple-box--dadi {
-  background: rgba(254,243,226,0.55);
-  border-color: rgba(230,160,80,0.38);
-}
+
 .ft-couple-box--parents {
   background: rgba(248,232,216,0.45);
   border: 2px solid rgba(201,169,110,0.32);
@@ -933,18 +922,7 @@ footer {
   box-shadow: var(--shadow-hover);
   transform: translateY(-3px);
 }
-.ft-node--paternal {
-  border-top: 3px solid #5cd7ea;
-  background: linear-gradient(to bottom, rgba(223,248,252,0.18), white);
-}
-.ft-node--maternal {
-  border-top: 3px solid #9a7ec8;
-  background: linear-gradient(to bottom, rgba(237,228,248,0.18), white);
-}
-.ft-node--dadi {
-  border-top: 3px solid #e6a050;
-  background: linear-gradient(to bottom, rgba(254,243,226,0.25), white);
-}
+
 .ft-node--parent {
   border-top: 3px solid #c9a96e;
   background: linear-gradient(to bottom, rgba(248,232,216,0.2), white);
@@ -1096,10 +1074,7 @@ footer {
 .family-member-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
-.family-member-card.side-Paternal::before { background: linear-gradient(90deg,var(--sky),var(--sage-light)); }
-.family-member-card.side-Maternal::before { background: linear-gradient(90deg,var(--lavender),var(--blush-light)); }
 .family-member-card.side-Gursez::before   { background: linear-gradient(90deg,var(--gold-light),var(--blush)); }
-.family-member-card.side-Dadi-Side::before { background: linear-gradient(90deg,#fde8c8,#fef3e2); }
 .family-member-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .fmc-emoji { font-size: 2rem; margin-bottom: 10px; }
 .fmc-name {
@@ -1111,10 +1086,7 @@ footer {
   display: inline-block; margin-top: 8px; padding: 2px 8px; border-radius: 99px;
   font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
 }
-.fmc-side.side-Paternal { background: var(--blush-light);      color: #3a6e8a; }
-.fmc-side.side-Maternal { background: #d0c8e0;  color: #6a4ea0; }
 .fmc-side.side-Gursez   { background: var(--gold-light);      color: #8a6020; }
-.fmc-side.side-Dadi-Side { background: #fde8c8;               color: #a05a10; }
 
 /* ── MOBILE SIMPLE TREE ──────────────────────────────────── */
 .ft-mobile-view {
