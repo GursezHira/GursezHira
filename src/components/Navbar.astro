@@ -7,12 +7,12 @@ const isTree = pathname.startsWith('/family-tree');
 ---
 
 <nav role="navigation" aria-label="Main navigation">
-  <div class="nav-logo"><a href="/">Little Gursez</a></div>
+  <div class="nav-logo"><a href="/">Little Gursez's Book</a></div>
   <ul class="nav-links">
-    <li><a href="/" class={isHome ? 'active' : ''}>Home</a></li>
-    <li><a href="/milestones" class={isMilestones ? 'active' : ''}>Milestones</a></li>
-    <li><a href="/stories" class={isStories ? 'active' : ''}>Stories</a></li>
-    <li><a href="/family-tree" class={isTree ? 'active' : ''}>Family Tree</a></li>
+    <li><a href="/" class={isHome ? 'active' : ''}>🏠 Home</a></li>
+    <li><a href="/milestones" class={isMilestones ? 'active' : ''}>🚩 Milestones</a></li>
+    <li><a href="/stories" class={isStories ? 'active' : ''}>🧾 Stories</a></li>
+    <li><a href="/family-tree" class={isTree ? 'active' : ''}>🌳 Family Tree</a></li>
   </ul>
   <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
     <span></span><span></span><span></span>

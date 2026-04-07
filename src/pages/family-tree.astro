@@ -265,7 +265,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
           const isCenter = u.ids.some(id => CENTER_NODES.has(id));
           if (isCenter) {
             ctrUnits.push(u);
-          } else if (u.side === 'Maternal') {
+          } else if (u.side && u.side.startsWith('Maternal')) {
             matUnits.push(u);
           } else {
             patUnits.push(u);
@@ -323,9 +323,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
       const rowLayouts = gens.map(g => {
         const row = byGen[g];
         // We already segregated them into byGen[g], but let's read them out explicitly
-        const pUnits = row.filter(u => u.side !== 'Maternal' && !u.ids.some(id => CENTER_NODES.has(id)));
+        const pUnits = row.filter(u => (!u.side || !u.side.startsWith('Maternal')) && !u.ids.some(id => CENTER_NODES.has(id)));
         const cUnits = row.filter(u => u.ids.some(id => CENTER_NODES.has(id)));
-        const mUnits = row.filter(u => u.side === 'Maternal' && !u.ids.some(id => CENTER_NODES.has(id)));
+        const mUnits = row.filter(u => u.side && u.side.startsWith('Maternal') && !u.ids.some(id => CENTER_NODES.has(id)));
 
         // Keep direct paternal ancestors on the right side of the paternal group (closest to center)
         pUnits.sort((a,b) => {
@@ -444,24 +444,28 @@ const branchCSS = TREE_DATA.branches.map(b => `
         sideStrokeMap[b.id] = b.theme.stroke;
       });
 
-      // Branch Color Logic
       function getUnitStroke(u) {
-        if (u.side === 'Gursez') return SIDE_STROKE.Gursez;
+        if (u.side === 'Gursez') return sideStrokeMap.Gursez;
         
-        // If it's a "growing branch" (descendant families of uncles/aunts)
+        // Priority 1: Check if the branch has a registered ID in sideStrokeMap
+        if (u.side && sideStrokeMap[u.side]) {
+          return sideStrokeMap[u.side];
+        }
+
+        // Priority 2: Traditional "Growing Branch" color logic for unregistered descendants
         const isGrowingBranch = u.ids.some(id => {
           const n = nodeMap[id];
           return n && (n.data.relation.includes('Veer') || n.data.relation.includes('Didi') || n.data.relation.includes('Maama') || n.data.relation.includes('Maasi'));
         });
 
         if (isGrowingBranch) {
-          // Unique hue based on first ID's hash for variety
           const hash = u.ids[0].split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
           const hue = Math.abs(hash % 360);
           return `hsla(${hue}, 60%, 65%, 0.8)`;
         }
 
-        return sideStrokeMap[u.side] || sideStrokeMap['Paternal'];
+        // Fallback
+        return sideStrokeMap['Paternal'];
       }
 
       units.forEach(u => {
