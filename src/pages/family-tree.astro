@@ -18,6 +18,65 @@ const branchCSS = TREE_DATA.branches.map(b => `
 >
   <main id="page-family-tree" class="page active" aria-label="Family Tree">
     <style is:global set:html={branchCSS} />
+    <style>
+      .ft-search-wrapper {
+        position: relative;
+        max-width: 400px;
+        margin: 0 auto 2.5rem auto;
+      }
+      .ft-search-input {
+        width: 100%;
+        padding: 0.8rem 2.8rem 0.8rem 1.2rem;
+        border-radius: 24px;
+        border: 2px solid var(--box-border, #E2D9C8);
+        background: var(--box-bg, rgba(255, 255, 255, 0.6));
+        color: var(--text-dark, #333);
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+      .ft-search-input:focus {
+        border-color: #C9A96E;
+        box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.2);
+        background: var(--cream, #FDFBF7);
+      }
+      .ft-search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        color: #999;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        transition: color 0.2s;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+      }
+      .ft-search-clear:hover {
+        color: #333;
+        background: rgba(0,0,0,0.05);
+      }
+      .ft-no-results {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #666;
+        font-size: 1.1rem;
+      }
+      .ft-no-results-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+        opacity: 0.7;
+      }
+    </style>
     <div class="container">
 
       <div class="page-header fade-up">
@@ -96,7 +155,17 @@ const branchCSS = TREE_DATA.branches.map(b => `
           <span class="section-label">The Whole Family</span>
           <h2 class="section-title">Everyone Who <em>Loves</em> Gursez</h2>
         </div>
+        
+        <div class="ft-search-wrapper fade-up">
+          <input type="text" id="ftSearchInput" class="ft-search-input" placeholder="Search by name, relation or branch..." aria-label="Search family members">
+          <button id="ftSearchClear" class="ft-search-clear" aria-label="Clear search" style="display:none">×</button>
+        </div>
+
         <div class="family-grid" id="familyGrid"></div>
+        <div id="ftNoResults" class="ft-no-results fade-up" style="display: none;">
+          <div class="ft-no-results-icon">🔍</div>
+          <p>No family members found matching your search.</p>
+        </div>
       </section>
 
     </div>
@@ -108,6 +177,10 @@ const branchCSS = TREE_DATA.branches.map(b => `
     ──────────────────────────────────────────────────────────── */
 
     /* ─── FAMILY TREE ENGINE ───────────────────────────────────── */
+    /* ─── STATE ────────────────────────── */
+    let activeHoverNodeId = null;
+    let isTouchDevice = false;
+
     /* ─── PROGRESSIVE DISCOVERY STATE ────────────────────────── */
     const expandedNodeIds = new Set([
       'node-gursez',
@@ -454,9 +527,11 @@ const branchCSS = TREE_DATA.branches.map(b => `
           card.setAttribute('aria-label', n.data.name);
 
           if (isExp) {
-            card.onmouseenter = (e) => showHoverCard(n, e);
-            card.onmousemove  = (e) => updateHoverPosition(e);
-            card.onmouseleave = () => hideHoverCard();
+            if (!isTouchDevice) {
+              card.onmouseenter = (e) => showHoverCard(n, e);
+              card.onmousemove  = (e) => updateHoverPosition(e);
+              card.onmouseleave = () => hideHoverCard();
+            }
             
             card.innerHTML = `
               <div class="ft-avatar ${isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : ''}">${n.data.emoji}</div>
@@ -466,12 +541,23 @@ const branchCSS = TREE_DATA.branches.map(b => `
               ${isMember ? '<div class="ft-star-ring" aria-hidden="true"></div>' : ''}
             `;
             
-            card.onclick = () => {
+            card.onclick = (e) => {
+              e.stopPropagation();
+              if (isTouchDevice) {
+                if (activeHoverNodeId !== id) {
+                  showHoverCard(n, e);
+                  return; // First tap shows card
+                } else {
+                  hideHoverCard();
+                  // Second tap proceeds to collapse/expand
+                }
+              }
+
               if (!CORE_NODES.has(id)) {
                 expandedNodeIds.delete(id);
                 renderTree();
               } else {
-                openFamilyPanel(n);
+                if (typeof openFamilyPanel === 'function') openFamilyPanel(n);
               }
             };
           } else {
@@ -619,6 +705,8 @@ const branchCSS = TREE_DATA.branches.map(b => `
     function showHoverCard(node, event) {
       const card = document.getElementById('ftHoverCard');
       if (!card) return;
+      
+      activeHoverNodeId = node.id;
       const d = node.data;
 
       // Relational data
@@ -681,8 +769,16 @@ const branchCSS = TREE_DATA.branches.map(b => `
         y = e.clientY + yOffset;
 
         const cardRect = card.getBoundingClientRect();
-        if (x + cardRect.width > window.innerWidth) x = e.clientX - cardRect.width - xOffset;
-        if (y + cardRect.height > window.innerHeight) y = e.clientY - cardRect.height - yOffset;
+        
+        // Prevent horizontal overflow
+        if (x + cardRect.width > window.innerWidth) x = window.innerWidth - cardRect.width - 20;
+        if (x < 10) x = 10;
+
+        // Prevent vertical overflow by flipping above the touch/cursor if necessary
+        if (y + cardRect.height > window.innerHeight) {
+           y = e.clientY - cardRect.height - yOffset;
+           if (y < 10) y = 10;
+        }
       }
 
       card.style.left = x + 'px';
@@ -691,7 +787,10 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
     function hideHoverCard() {
       const card = document.getElementById('ftHoverCard');
-      if (card) card.style.display = 'none';
+      if (card) {
+        card.style.display = 'none';
+        activeHoverNodeId = null;
+      }
     }
 
     function toggleFullScreen() {
@@ -733,7 +832,15 @@ const branchCSS = TREE_DATA.branches.map(b => `
     /* ─── FAMILY GRID ────────────────────────────────────────── */
     function renderFamilyGrid(nodes) {
       const grid = document.getElementById('familyGrid');
+      const noResults = document.getElementById('ftNoResults');
+      if (!grid) return;
+      
       grid.innerHTML = '';
+      
+      if (noResults) {
+        noResults.style.display = nodes.length === 0 ? 'block' : 'none';
+      }
+
       const sorted = [...nodes].sort((a, b) => {
         const order = { Gursez: 0 };
         (TREE_DATA.branches || []).forEach((br, idx) => order[br.id] = idx + 1);
@@ -742,18 +849,62 @@ const branchCSS = TREE_DATA.branches.map(b => `
       sorted.forEach((n, i) => {
         const d = n.data;
         const card = document.createElement('div');
-        card.className = `family-member-card side-${d.side} fade-up`;
-        card.style.transitionDelay = (i * 0.04) + 's';
+        card.className = `family-member-card side-${d.side} fade-up visible`; // Keep visible since it might be searched
+        card.style.transitionDelay = (i * 0.03) + 's';
         card.innerHTML = `
           <div class="fmc-emoji">${d.emoji}</div>
           <div class="fmc-name">${d.name}</div>
           <div class="fmc-relation">${d.relation}</div>
           <span class="fmc-side side-${d.side}">${d.side}</span>
         `;
-        card.onmouseenter = (e) => showHoverCard(n, e);
-        card.onmousemove  = (e) => updateHoverPosition(e);
-        card.onmouseleave = () => hideHoverCard();
+        
+        if (isTouchDevice) {
+          card.onclick = (e) => {
+            e.stopPropagation();
+            if (activeHoverNodeId === n.id) {
+              hideHoverCard();
+            } else {
+              showHoverCard(n, e);
+            }
+          };
+        } else {
+          card.onmouseenter = (e) => showHoverCard(n, e);
+          card.onmousemove  = (e) => updateHoverPosition(e);
+          card.onmouseleave = () => hideHoverCard();
+        }
+
         grid.appendChild(card);
+      });
+    }
+
+    /* ─── SEARCH HANDLERS ────────────────────────────────────── */
+    function initSearch() {
+      const input = document.getElementById('ftSearchInput');
+      const clearBtn = document.getElementById('ftSearchClear');
+      if (!input || !clearBtn) return;
+
+      const handleSearch = () => {
+        const query = input.value.toLowerCase().trim();
+        if (query.length > 0) {
+          clearBtn.style.display = 'flex';
+          const filtered = TREE_DATA.treeData.filter(n => {
+            const d = n.data;
+            return (d.name && d.name.toLowerCase().includes(query)) ||
+                   (d.relation && d.relation.toLowerCase().includes(query)) ||
+                   (d.side && d.side.toLowerCase().includes(query));
+          });
+          renderFamilyGrid(filtered);
+        } else {
+          clearBtn.style.display = 'none';
+          renderFamilyGrid(TREE_DATA.treeData);
+        }
+      };
+
+      input.addEventListener('input', handleSearch);
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        handleSearch();
+        input.focus();
       });
     }
 
@@ -769,17 +920,29 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
     /* ─── BOOT ───────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
+      // Feature detection for touch
+      isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+
+      // Close hover card conditionally if user taps/clicks outside
+      document.addEventListener('click', (e) => {
+        const card = document.getElementById('ftHoverCard');
+        if (card && card.style.display === 'block') {
+          if (!card.contains(e.target)) {
+            hideHoverCard();
+          }
+        }
+      });
+
       // Observe static fade-up elements
       document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
       
-      // Render static grid once and observe its items
+      initSearch();
       renderFamilyGrid(TREE_DATA.treeData);
-      document.querySelectorAll('#familyGrid .fade-up').forEach(el => revealObserver.observe(el));
 
       initTreeDrag();
       renderTree(true);
 
-      // Wire up mobile click handlers
+      // Wire up mobile click handlers for the parent summary
       const mobileMap = {
         'mobile-node-dad': 'node-dad',
         'mobile-node-mum': 'node-mum',
@@ -790,7 +953,8 @@ const branchCSS = TREE_DATA.branches.map(b => `
         const node = TREE_DATA.treeData.find(n => n.id === tId);
         if (el && node) {
           el.onclick = (e) => {
-            if (document.getElementById('ftHoverCard').style.display === 'block') {
+            e.stopPropagation();
+            if (activeHoverNodeId === node.id) {
               hideHoverCard();
             } else {
               showHoverCard(node, e);
