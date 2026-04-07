@@ -34,10 +34,10 @@ export const BRANCHES = [
     label: 'Paternal Side',
     nodes: PATERNAL_NODES,
     theme: {
-      dot: 'linear-gradient(135deg,#dff8fc,#c9f4f8)',         // Replaces .ft-dot--paternal
-      boxBg: 'rgba(223,248,252,0.45)',                        // Replaces .ft-couple-box--pat
+      dot: 'linear-gradient(135deg,#dff8fc,#c9f4f8)',         
+      boxBg: 'rgba(223,248,252,0.45)',                       
       boxBorder: 'rgba(92,215,234,0.38)',                     
-      nodeBorder: '#5cd7ea',                                  // Replaces .ft-node--paternal
+      nodeBorder: '#5cd7ea',                                
       nodeBg: 'linear-gradient(to bottom, rgba(223,248,252,0.18), white)',
       stroke: 'rgba(92,215,234,0.75)',                        
       gridBefore: 'linear-gradient(90deg,var(--sky),var(--sage-light))', 
@@ -50,10 +50,10 @@ export const BRANCHES = [
     label: 'Maternal Side',
     nodes: MATERNAL_NODES,
     theme: {
-      dot: 'linear-gradient(135deg,#bda2df,#f8f0ff)',         // Replaces .ft-dot--maternal
-      boxBg: 'rgba(237,228,248,0.45)',                        // Replaces .ft-couple-box--mat
+      dot: 'linear-gradient(135deg,#bda2df,#f8f0ff)',      
+      boxBg: 'rgba(237,228,248,0.45)',                      
       boxBorder: 'rgba(154,126,200,0.38)',                     
-      nodeBorder: '#9a7ec8',                                  // Replaces .ft-node--maternal
+      nodeBorder: '#9a7ec8',                                 
       nodeBg: 'linear-gradient(to bottom, rgba(237,228,248,0.18), white)',
       stroke: 'rgba(154,126,200,0.75)',
       gridBefore: 'linear-gradient(90deg,var(--lavender),var(--blush-light))', 
@@ -66,10 +66,10 @@ export const BRANCHES = [
     label: "Dadi's Side",
     nodes: DADI_SIDE_NODES,
     theme: {
-      dot: 'linear-gradient(135deg,#f8e8d8,#dff8fc)',         // Replaces .ft-dot--dadi-side
-      boxBg: 'rgba(254,243,226,0.55)',                        // Replaces .ft-couple-box--dadi
+      dot: 'linear-gradient(135deg,#f8e8d8,#dff8fc)',         
+      boxBg: 'rgba(254,243,226,0.55)',                        
       boxBorder: 'rgba(230,160,80,0.38)',
-      nodeBorder: '#e6a050',                                  // Replaces .ft-node--dadi
+      nodeBorder: '#e6a050',                                 
       nodeBg: 'linear-gradient(to bottom, rgba(254,243,226,0.25), white)',
       stroke: 'rgba(230,160,80,0.75)',
       gridBefore: 'linear-gradient(90deg,#fde8c8,#fef3e2)', 
