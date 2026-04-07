@@ -183,13 +183,13 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
     /* ─── PROGRESSIVE DISCOVERY STATE ────────────────────────── */
     const expandedNodeIds = new Set([
-      'node-gursez',
-      'node-dad', 'node-mum',
-      'node-dada', 'node-dadi',
-      'node-nana', 'node-nani',
-      'node-ggf-p', 'node-ggf-p2', 'node-gggf-p',
-      'node-ggm-p', 'node-ggm-p2', 'node-par-par-nana', 'node-par-par-nani',
-      'node-par-nana', 'node-par-nani'
+      'aaaEJwni',
+      'aaaEJwnj', 'aaaEJwnk',
+      'aaaEJwnn', 'aaaEJwnp',
+      'aaaEJwnH', 'aaaEJwnJ',
+      'aaaEJwnq', 'aaaEJwns', 'aaaEJwnu',
+      'aaaEJwnr', 'aaaEJwnt', 'aaaEJwnM', 'aaaEJwnN',
+      'aaaEJwnK', 'aaaEJwnL'
     ]);
 
     // Constant for "core" nodes that cannot be collapsed
@@ -211,7 +211,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
         (n.rels.parents  || []).forEach(p  => assignGen(p,  g - 1));
         (n.rels.children || []).forEach(c  => assignGen(c,  g + 1));
       }
-      assignGen('node-gursez', 0);
+      assignGen('aaaEJwni', 0);
       rawNodes.forEach(n => {
         if (!(n.id in genMap)) {
           const pg = (n.rels.parents||[]).map(p=>genMap[p]).filter(x=>x!=null);
@@ -252,7 +252,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
       const gens = Object.keys(byGen).map(Number).sort((a,b)=>a-b);
       const sideOrder = { Paternal:0, Gursez:1, Maternal:2 };
-      const CENTER_NODES = new Set(['node-gursez', 'node-dad', 'node-mum']);
+      const CENTER_NODES = new Set(['aaaEJwni', 'aaaEJwnj', 'aaaEJwnk']);
 
       gens.forEach(g => {
         const row = byGen[g];
@@ -317,8 +317,8 @@ const branchCSS = TREE_DATA.branches.map(b => `
         return row.reduce((s,u) => s + unitWidth(u), 0) + (row.length-1) * UNIT_GAP;
       }
 
-      const DIRECT_PATS = new Set(['node-dada', 'node-dadi', 'node-ggf-p', 'node-ggm-p', 'node-ggf-p2', 'node-ggm-p2', 'node-gggf-p']);
-      const DIRECT_MATS = new Set(['node-nana', 'node-nani', 'node-par-nana', 'node-par-nani', 'node-par-par-nana', 'node-par-par-nani']);
+      const DIRECT_PATS = new Set(['aaaEJwnn', 'aaaEJwnp', 'aaaEJwnq', 'aaaEJwnr', 'aaaEJwns', 'aaaEJwnt', 'aaaEJwnu']);
+      const DIRECT_MATS = new Set(['aaaEJwnH', 'aaaEJwnJ', 'aaaEJwnK', 'aaaEJwnL', 'aaaEJwnM', 'aaaEJwnN']);
 
       const rowLayouts = gens.map(g => {
         const row = byGen[g];
@@ -489,9 +489,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
       units.forEach(u => {
         const pos    = unitPos.get(u);
         const hasExpanded = u.ids.some(isExpanded);
-        const isStar   = u.ids.includes('node-gursez');
+        const isStar   = u.ids.includes('aaaEJwni');
         const isCouple = u.ids.length === 2;
-        const isParentCouple = u.ids.includes('node-dad') || u.ids.includes('node-mum');
+        const isParentCouple = u.ids.includes('aaaEJwnj') || u.ids.includes('aaaEJwnk');
 
         const box = document.createElement('div');
         box.className = 'ft-couple-box' +
@@ -505,7 +505,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
         u.ids.forEach((id, idx) => {
           const n = nodeMap[id];
           const isExp = isExpanded(id);
-          const isMember = (id === 'node-gursez');
+          const isMember = (id === 'aaaEJwni');
 
           const card = document.createElement('div');
           card.className = 'ft-node' +
@@ -594,7 +594,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
       canvas.style.height = canvasH + 'px';
 
       if (isInitial) {
-        const gUnit = unitByNode['node-gursez'];
+        const gUnit = unitByNode['aaaEJwni'];
         if (gUnit) {
           const gPos = unitPos.get(gUnit);
           const vp   = document.getElementById('treeViewport');
@@ -944,9 +944,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
       // Wire up mobile click handlers for the parent summary
       const mobileMap = {
-        'mobile-node-dad': 'node-dad',
-        'mobile-node-mum': 'node-mum',
-        'mobile-node-gursez': 'node-gursez'
+        'mobile-node-dad': 'aaaEJwnj',
+        'mobile-node-mum': 'aaaEJwnk',
+        'mobile-node-gursez': 'aaaEJwni'
       };
       Object.entries(mobileMap).forEach(([mId, tId]) => {
         const el = document.getElementById(mId);

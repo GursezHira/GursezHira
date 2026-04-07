@@ -5,7 +5,7 @@ import { RANJEET_SIDE_NODES } from "./family-tree-ranjeet-side.js";
 
 // ── Gursez lives here as the shared centre node ──
 const GURSEZ_NODE = {
-  "id": "node-gursez",
+  "id": "aaaEJwni",
   "data": {
     "name": "Gursez Singh Hira",
     "relation": "Our Star ⭐",
@@ -18,7 +18,7 @@ const GURSEZ_NODE = {
   },
   "rels": {
     "spouses": [],
-    "parents": ["node-dad", "node-mum"],
+    "parents": ["aaaEJwnj", "aaaEJwnk"],
     "children": []
   }
 };
