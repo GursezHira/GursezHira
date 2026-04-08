@@ -1,6 +1,6 @@
 import { PATERNAL_NODES } from "./family-tree-paternal.js";
 import { MATERNAL_NODES } from "./family-tree-maternal.js";
-import { DADI_SIDE_NODES } from "./family-tree-dadi-side.js";
+import { DADI_BAJWA_NODES, DADI_KAHLON_NODES } from "./family-tree-dadi-side.js";
 import { RANJEET_SIDE_NODES } from "./family-tree-ranjeet-side.js";
 import { MATERNAL_SABARJEET_NODES } from "./family-tree-maternal-sabarjeet.js";
 import { MATERNAL_NORANG_NODES } from "./family-tree-maternal-norang.js";
@@ -62,9 +62,9 @@ export const BRANCHES = [
     },
   },
   {
-    id: "Dadi-Side",
-    label: "Dadi's Side",
-    nodes: DADI_SIDE_NODES,
+    id: "Dadi-Bajwa",
+    label: "Dadi's Side (Bajwa)",
+    nodes: DADI_BAJWA_NODES,
     theme: {
       dot: "linear-gradient(135deg,#f8e8d8,#dff8fc)",
       boxBg: "rgba(254,243,226,0.55)",
@@ -75,6 +75,22 @@ export const BRANCHES = [
       gridBefore: "linear-gradient(90deg,#fde8c8,#fef3e2)",
       gridBadgeBg: "#fde8c8",
       gridBadgeText: "#a05a10",
+    },
+  },
+  {
+    id: "Dadi-Kahlon",
+    label: "Kahlon Family",
+    nodes: DADI_KAHLON_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#ffe4e1,#ffc0cb)",
+      boxBg: "rgba(255,228,225,0.55)",
+      boxBorder: "rgba(255,182,193,0.38)",
+      nodeBorder: "#ffb6c1",
+      nodeBg: "linear-gradient(to bottom, rgba(255,228,225,0.25), white)",
+      stroke: "rgba(255,182,193,0.75)",
+      gridBefore: "linear-gradient(90deg,#fee2e2,#fecaca)",
+      gridBadgeBg: "#fee2e2",
+      gridBadgeText: "#b91c1c",
     },
   },
   {
