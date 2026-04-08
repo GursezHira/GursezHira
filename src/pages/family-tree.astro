@@ -196,6 +196,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
     const CORE_NODES = new Set([...expandedNodeIds]);
 
     function renderTree(isInitial = false) {
+      const branchOrder = {};
+      (TREE_DATA.branches || []).forEach((br, idx) => branchOrder[br.id] = idx);
+
       const rawNodes = TREE_DATA.treeData;
       const nodeMap  = {};
       rawNodes.forEach(n => nodeMap[n.id] = n);
@@ -331,14 +334,22 @@ const branchCSS = TREE_DATA.branches.map(b => `
         pUnits.sort((a,b) => {
           const aDirect = a.ids.some(id => DIRECT_PATS.has(id)) ? 1 : 0;
           const bDirect = b.ids.some(id => DIRECT_PATS.has(id)) ? 1 : 0;
-          return aDirect - bDirect; 
+          if (aDirect !== bDirect) return aDirect - bDirect;
+          
+          const aSide = a.side || 'Paternal';
+          const bSide = b.side || 'Paternal';
+          return (branchOrder[bSide] || 0) - (branchOrder[aSide] || 0);
         });
 
         // Keep direct maternal ancestors on the left side of the maternal group (closest to center)
         mUnits.sort((a,b) => {
           const aDirect = a.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
           const bDirect = b.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
-          return bDirect - aDirect;
+          if (aDirect !== bDirect) return bDirect - aDirect;
+          
+          const aSide = a.side || 'Maternal';
+          const bSide = b.side || 'Maternal';
+          return (branchOrder[aSide] || 0) - (branchOrder[bSide] || 0);
         });
 
         return { g, pUnits, cUnits, mUnits };
