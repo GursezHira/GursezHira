@@ -601,7 +601,7 @@ import { TREE_DATA } from '../data/family-tree';
     }, { threshold: 0.1 });
 
     /* ─── BOOT ───────────────────────────────────────────────── */
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('astro:page-load', () => {
       // Observe static fade-up elements
       document.querySelectorAll('.fade-up').forEach(el => revealObserver.observe(el));
       initTreeDrag();

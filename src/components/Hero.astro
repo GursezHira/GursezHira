@@ -37,17 +37,18 @@
 </div>
 
 <script>
-  function calcDays() {
-    const born = new Date('2026-01-13');
+  document.addEventListener('astro:page-load', () => {
+    const born = new Date('2026-01-13T00:00:00');
     const today = new Date();
-    const diff = Math.floor((today.getTime() - born.getTime()) / (1000 * 60 * 60 * 24));
+    if (today < born) return;
+
+    const diff = today.getTime() - born.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
     const el = document.getElementById('daysCount');
-    if (el) el.textContent = diff.toString();
-  }
-  
-  // Initial calculation
-  calcDays();
-  
-  // Recalculate if page reloads (Astro View Transitions etc.)
-  document.addEventListener('astro:page-load', calcDays);
+    if (el) {
+      el.style.fontSize = ""; // Reset inline size from interval version
+      el.innerHTML = days.toString();
+    }
+  });
 </script>

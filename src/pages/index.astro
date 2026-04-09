@@ -62,14 +62,16 @@ const posts = allPosts.sort((a, b) => new Date(b.data.date).valueOf() - new Date
 </Layout>
 
 <script>
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        revealObserver.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
+  document.addEventListener('astro:page-load', () => {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
 
-  document.querySelectorAll('.fade-up').forEach(e => revealObserver.observe(e));
+    document.querySelectorAll('.fade-up').forEach(e => revealObserver.observe(e));
+  });
 </script>

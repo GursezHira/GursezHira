@@ -204,6 +204,16 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
       if (typeof window['milestoneModal_open'] === 'function') {
         window['milestoneModal_open'](buildMilestoneHTML(m));
       }
+      if (m.category === "Celebration") {
+        import('https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm').then((confettiModule) => {
+          const confetti = confettiModule.default || confettiModule;
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        });
+      }
     };
 
     function loadNextBatch() {
@@ -264,7 +274,9 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
       curObserver.observe(document.getElementById('loadMoreTrigger'));
     }
     
-    initMilestones();
-    setupInfiniteScroll();
+    document.addEventListener('astro:page-load', () => {
+      initMilestones();
+      setupInfiniteScroll();
+    });
   </script>
 </Layout>

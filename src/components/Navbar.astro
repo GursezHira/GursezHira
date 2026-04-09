@@ -13,6 +13,12 @@ const isTree = pathname.startsWith('/family-tree');
     <li><a href="/milestones" class={isMilestones ? 'active' : ''}>🚩 Milestones</a></li>
     <li><a href="/stories" class={isStories ? 'active' : ''}>🧾 Stories</a></li>
     <li><a href="/family-tree" class={isTree ? 'active' : ''}>🌳 Family Tree</a></li>
+    <li>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" style="font-size: 1.2rem; margin-left: 10px;">
+        <span class="icon-light" style="display:none;">☀️</span>
+        <span class="icon-dark" style="display:none;">🌙</span>
+      </button>
+    </li>
   </ul>
   <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
     <span></span><span></span><span></span>
@@ -26,6 +32,39 @@ const isTree = pathname.startsWith('/family-tree');
   <a href="/stories" onclick="toggleMobileMenu()">Stories</a>
   <a href="/family-tree" onclick="toggleMobileMenu()">Family Tree</a>
 </div>
+
+<script>
+  function setupThemeToggle() {
+    const themeBtn = document.getElementById('themeToggle');
+    if (!themeBtn) return;
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    
+    const iconLight = themeBtn.querySelector('.icon-light') as HTMLElement;
+    const iconDark = themeBtn.querySelector('.icon-dark') as HTMLElement;
+    if (iconLight) iconLight.style.display = isDark ? 'inline' : 'none';
+    if (iconDark) iconDark.style.display = isDark ? 'none' : 'inline';
+
+    if (themeBtn.parentNode) {
+      const newBtn = themeBtn.cloneNode(true) as HTMLElement;
+      themeBtn.parentNode.replaceChild(newBtn, themeBtn);
+      
+      newBtn.addEventListener('click', () => {
+        const element = document.documentElement;
+        element.classList.toggle('dark-mode');
+        
+        const isDarkNow = element.classList.contains('dark-mode');
+        document.cookie = `theme=${isDarkNow ? 'dark' : 'light'}; path=/; max-age=31536000`;
+        
+        const newLight = newBtn.querySelector('.icon-light') as HTMLElement;
+        const newDark = newBtn.querySelector('.icon-dark') as HTMLElement;
+        if (newLight) newLight.style.display = isDarkNow ? 'inline' : 'none';
+        if (newDark) newDark.style.display = isDarkNow ? 'none' : 'inline';
+      });
+    }
+  }
+  
+  document.addEventListener('astro:page-load', setupThemeToggle);
+</script>
 
 <script is:inline>
   function toggleMobileMenu() {

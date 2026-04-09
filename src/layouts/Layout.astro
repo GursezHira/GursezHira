@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import BaseHead from '../components/BaseHead.astro';
 import Navbar from '../components/Navbar.astro';
@@ -21,6 +22,29 @@ const { title, description, image, type } = Astro.props;
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <BaseHead {title} {description} {image} {type} />
+  <ClientRouter />
+  <script is:inline>
+    const applyTheme = () => {
+      const theme = (() => {
+        if (typeof document !== 'undefined') {
+          const match = document.cookie.match(new RegExp('(^| )theme=([^;]+)'));
+          if (match) return match[2];
+        }
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+        return 'light';
+      })();
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+      }
+    };
+    
+    applyTheme();
+    document.addEventListener('astro:after-swap', applyTheme);
+  </script>
 </head>
 <body>
   <Decorations />

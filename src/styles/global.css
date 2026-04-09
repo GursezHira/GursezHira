@@ -389,7 +389,7 @@ nav {
 }
 .blog-card-excerpt {
   font-size: 0.83rem; color: var(--text-soft); line-height: 1.6;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 .blog-card-footer {
   padding: 12px 20px; border-top: 1px solid rgba(200,160,140,0.1);
@@ -1135,4 +1135,53 @@ footer {
   /* Hide interactive tree on mobile, show simple view */
   .tree-outer { display: none; }
   .ft-mobile-view { display: flex; }
+}
+
+/* ───────────────────────────────────────────────────────────────── */
+/* DARK MODE OVERRIDES */
+/* ───────────────────────────────────────────────────────────────── */
+html.dark-mode {
+  --cream: #0f172a;
+  --warm-white: #1e293b;
+  --surface: #1e293b;
+  --text-dark: #f8fafc;
+  --text-mid: #cbd5e1;
+  --text-soft: #94a3b8;
+  --text-faint: #64748b;
+  --blush-light: #1e293b;
+  --sage-light: #1e293b;
+  --gold-light: #1e293b;
+  --sky-light: #1e293b;
+  --lavender-light: #1e293b;
+  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-mode .milestone-preview-card,
+html.dark-mode .blog-card,
+html.dark-mode .filter-bar,
+html.dark-mode .tl-card,
+html.dark-mode .skeleton-card,
+html.dark-mode .tl-node,
+html.dark-mode .blog-card-lg,
+html.dark-mode .modal,
+html.dark-mode .modal-close,
+html.dark-mode .ft-hover-card,
+html.dark-mode .gallery-toolbar {
+  background: var(--surface) !important;
+  color: var(--text-dark) !important;
+}
+
+html.dark-mode .ft-search-input {
+  background: var(--surface);
+  color: var(--text-dark);
+}
+
+html.dark-mode [style*="background: white"],
+html.dark-mode [style*="background-color: white"] {
+  background-color: var(--surface) !important;
+}
+
+html.dark-mode nav {
+  background: rgba(30, 41, 59, 0.8) !important;
 }

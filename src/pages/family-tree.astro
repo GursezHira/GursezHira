@@ -88,10 +88,10 @@ const branchCSS = TREE_DATA.branches.map(b => `
       <!-- LEGEND -->
       <div class="ft-legend fade-up" aria-label="Legend">
         {TREE_DATA.branches.map(b => (
-          <div class="ft-legend-item"><span class={`ft-dot ft-dot--${b.id}`}></span> {b.label}</div>
+          <div class="ft-legend-item" onclick={`toggleBranchSpotlight('${b.id}', this)`} style="cursor:pointer; transition: opacity 0.3s;" title="Click to spotlight this branch"><span class={`ft-dot ft-dot--${b.id}`}></span> {b.label}</div>
         ))}
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
-        <div class="ft-legend-item"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
+        <div class="ft-legend-item" style="transition: opacity 0.3s;"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
+        <div class="ft-legend-item" style="transition: opacity 0.3s;"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
       </div>
 
       <!-- TREE CANVAS AREA (pan/zoom from family-tree-2) -->
@@ -180,6 +180,35 @@ const branchCSS = TREE_DATA.branches.map(b => `
     /* ─── STATE ────────────────────────── */
     let activeHoverNodeId = null;
     let isTouchDevice = false;
+    let activeSpotlight = null;
+
+    window.toggleBranchSpotlight = function(branchId, element) {
+      if (activeSpotlight === branchId) {
+        activeSpotlight = null;
+        document.querySelectorAll('.ft-node, .ft-couple-box').forEach(el => {
+          el.style.opacity = '1';
+          el.style.filter = 'none';
+        });
+        document.querySelectorAll('.ft-legend-item').forEach(el => el.style.opacity = '1');
+      } else {
+        activeSpotlight = branchId;
+        document.querySelectorAll('.ft-node, .ft-couple-box').forEach(el => {
+          const isMatch = el.classList.contains(`ft-node--${branchId}`) || 
+                          el.classList.contains(`ft-couple-box--${branchId}`) ||
+                          el.classList.contains('ft-node--gursez') ||
+                          el.classList.contains('ft-couple-box--star');
+          if (isMatch) {
+            el.style.opacity = '1';
+            el.style.filter = 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.4))';
+          } else {
+            el.style.opacity = '0.2';
+            el.style.filter = 'grayscale(80%)';
+          }
+        });
+        document.querySelectorAll('.ft-legend-item').forEach(el => el.style.opacity = '0.35');
+        if (element) element.style.opacity = '1';
+      }
+    };
 
     /* ─── PROGRESSIVE DISCOVERY STATE ────────────────────────── */
     const expandedNodeIds = new Set([
@@ -934,7 +963,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
     }, { threshold: 0.1 });
 
     /* ─── BOOT ───────────────────────────────────────────────── */
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('astro:page-load', () => {
       // Feature detection for touch
       isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
 
