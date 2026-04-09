@@ -76,6 +76,43 @@ const branchCSS = TREE_DATA.branches.map(b => `
         margin-bottom: 0.8rem;
         opacity: 0.7;
       }
+      .ft-filters {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+      .ft-filter-btn {
+        background: var(--box-bg, rgba(255, 255, 255, 0.6));
+        border: 2px solid var(--box-border, #E2D9C8);
+        border-radius: 24px;
+        padding: 0.6rem 1.2rem;
+        font-family: inherit;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        opacity: 0.6;
+        color: var(--text-dark, #333);
+      }
+      .ft-filter-btn.active {
+        opacity: 1;
+        border-color: #C9A96E;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: var(--cream, #FDFBF7);
+      }
+      .ft-legend-count {
+        font-size: 0.8rem;
+        opacity: 0.6;
+        margin-left: 0.3rem;
+        font-weight: 500;
+        background: rgba(0,0,0,0.05);
+        padding: 1px 6px;
+        border-radius: 10px;
+      }
     </style>
     <div class="container">
 
@@ -88,10 +125,24 @@ const branchCSS = TREE_DATA.branches.map(b => `
       <!-- LEGEND -->
       <div class="ft-legend fade-up" aria-label="Legend">
         {TREE_DATA.branches.map(b => (
-          <div class="ft-legend-item" onclick={`toggleBranchSpotlight('${b.id}', this)`} style="cursor:pointer; transition: opacity 0.3s;" title="Click to spotlight this branch"><span class={`ft-dot ft-dot--${b.id}`}></span> {b.label}</div>
+          <div class="ft-legend-item" onclick={`toggleBranchSpotlight('${b.id}', this)`} style="cursor:pointer; transition: opacity 0.3s;" title="Click to spotlight this branch">
+            <span class={`ft-dot ft-dot--${b.id}`}></span> 
+            {b.label}
+            <span class="ft-legend-count">{b.nodes.length}</span>
+          </div>
         ))}
         <div class="ft-legend-item" style="transition: opacity 0.3s;"><span class="ft-dot ft-dot--gursez"></span> Our Little Star</div>
         <div class="ft-legend-item" style="transition: opacity 0.3s;"><span class="ft-dot ft-dot--line"></span> Connected by Love</div>
+      </div>
+
+      <!-- BRANCH FILTERS -->
+      <div class="ft-filters fade-up" aria-label="Branch Filters">
+        <button id="filter-paternal" class="ft-filter-btn active" onclick="toggleTreeSide('paternal')" aria-pressed="true">
+          <span class="ft-dot ft-dot--Paternal"></span> Show Paternal
+        </button>
+        <button id="filter-maternal" class="ft-filter-btn active" onclick="toggleTreeSide('maternal')" aria-pressed="true">
+          <span class="ft-dot ft-dot--Maternal"></span> Show Maternal
+        </button>
       </div>
 
       <!-- TREE CANVAS AREA (pan/zoom from family-tree-2) -->
@@ -355,9 +406,12 @@ const branchCSS = TREE_DATA.branches.map(b => `
       const rowLayouts = gens.map(g => {
         const row = byGen[g];
         // We already segregated them into byGen[g], but let's read them out explicitly
-        const pUnits = row.filter(u => (!u.side || !u.side.startsWith('Maternal')) && !u.ids.some(id => CENTER_NODES.has(id)));
+        let pUnits = row.filter(u => (!u.side || !u.side.startsWith('Maternal')) && !u.ids.some(id => CENTER_NODES.has(id)));
         const cUnits = row.filter(u => u.ids.some(id => CENTER_NODES.has(id)));
-        const mUnits = row.filter(u => u.side && u.side.startsWith('Maternal') && !u.ids.some(id => CENTER_NODES.has(id)));
+        let mUnits = row.filter(u => u.side && u.side.startsWith('Maternal') && !u.ids.some(id => CENTER_NODES.has(id)));
+
+        if (!treeState.visibleSides.paternal) pUnits = [];
+        if (!treeState.visibleSides.maternal) mUnits = [];
 
         // Keep direct paternal ancestors on the right side of the paternal group (closest to center)
         pUnits.sort((a,b) => {
@@ -433,6 +487,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
       function unitCB(u) {
         const p = unitPos.get(u);
+        if (!p) return null;
         const hasExpanded = u.ids.some(isExpanded);
         
         if (u.ids.length === 2) {
@@ -446,8 +501,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
 
       function nodeCT(id) {
         const u = unitByNode[id];
-        if (!u) return { x: 0, y: 0 };
+        if (!u) return null;
         const p = unitPos.get(u);
+        if (!p) return null;
         const w = isExpanded(id) ? CARD_W : GHOST_W;
         
         if (u.ids.length === 2) {
@@ -517,11 +573,14 @@ const branchCSS = TREE_DATA.branches.map(b => `
         });
         if (!childIds.length) return;
 
+        const pb = unitCB(u);
+        if (!pb) return;
+        
         const stroke = getUnitStroke(u);
-        const pb     = unitCB(u);
 
         childIds.forEach(cid => {
           const ct = nodeCT(cid);
+          if (!ct) return;
           mkBezier(pb.x, pb.y, ct.x, ct.y, stroke);
         });
       });
@@ -531,7 +590,9 @@ const branchCSS = TREE_DATA.branches.map(b => `
       container.innerHTML = '';
 
       units.forEach(u => {
-        const pos    = unitPos.get(u);
+        const pos = unitPos.get(u);
+        if (!pos) return;
+        
         const hasExpanded = u.ids.some(isExpanded);
         const isStar   = u.ids.includes('aaaEJwni');
         const isCouple = u.ids.length === 2;
@@ -650,8 +711,29 @@ const branchCSS = TREE_DATA.branches.map(b => `
       }
     }
 
-    /* ─── PAN & ZOOM ──────────────────────────────────────────── */
-    const treeState = { x: 0, y: 0, scale: 0.85, dragging: false, startX: 0, startY: 0 };
+    /* ─── PAN & ZOOM & FILTER ─────────────────────────────────── */
+    const treeState = { x: 0, y: 0, scale: 0.85, dragging: false, startX: 0, startY: 0, visibleSides: { paternal: true, maternal: true } };
+
+    function toggleTreeSide(side) {
+      if (side === 'paternal') {
+        treeState.visibleSides.paternal = !treeState.visibleSides.paternal;
+        const btn = document.getElementById('filter-paternal');
+        if (btn) {
+          if (treeState.visibleSides.paternal) btn.classList.add('active'); else btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', treeState.visibleSides.paternal);
+        }
+      } else if (side === 'maternal') {
+        treeState.visibleSides.maternal = !treeState.visibleSides.maternal;
+        const btn = document.getElementById('filter-maternal');
+        if (btn) {
+          if (treeState.visibleSides.maternal) btn.classList.add('active'); else btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', treeState.visibleSides.maternal);
+        }
+      }
+      
+      renderTree();
+      treeReset();
+    }
 
     function applyTreeTransform() {
       const canvas = document.getElementById('treeCanvas');
@@ -867,6 +949,7 @@ const branchCSS = TREE_DATA.branches.map(b => `
     // Expose to window for HTML onclick attributes
     window.treeZoom = treeZoom;
     window.treeReset = treeReset;
+    window.toggleTreeSide = toggleTreeSide;
     window.toggleFullScreen = toggleFullScreen;
     window.toggleAllMembers = toggleAllMembers;
     window.showHoverCard = showHoverCard;
