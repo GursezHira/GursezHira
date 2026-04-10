@@ -1,0 +1,15 @@
+/* ─── FOOTER ────────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 60px 24px;
+  border-top: 1px solid rgba(200,160,140,0.12);
+  background: var(--warm-white);
+}
+.footer-script {
+  font-family: var(--font-script); font-size: 2.4rem; color: var(--blush-deep);
+  margin-bottom: 10px;
+}
+.footer-note {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 1rem; color: var(--text-soft); margin-bottom: 20px;
+}
+.footer-tiny { font-size: 0.72rem; color: var(--text-faint); letter-spacing: 0.08em; margin-bottom: 5px; }

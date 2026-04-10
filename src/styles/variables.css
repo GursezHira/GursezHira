@@ -1,0 +1,47 @@
+/* ─── VARIABLES & DESIGN TOKENS ─────────────────────────── */
+:root {
+  --cream: #f8f3ee;
+  --warm-white: #fffaf6;
+
+  /* Main accent from the blue flower/wrap */
+  --blush: #5cd7ea;
+  --blush-light: #dff8fc;
+  --blush-deep: #04b4cd;
+
+  /* Secondary aqua/teal family */
+  --sage: #16cbdc;
+  --sage-light: #c9f4f8;
+  --sage-deep: #0597b0;
+
+  /* Deep background / contrast tones */
+  --lavender: #1f2333;
+  --lavender-light: #2b3147;
+  --sky: #151822;
+  --sky-light: #2a3040;
+
+  /* Warm earthy accents from wood + skin */
+  --gold: #b98a74;
+  --gold-light: #e8c5b6;
+
+  /* Text colors tuned for elegant newborn theme */
+  --text-dark: #2f2a28;
+  --text-mid: #5e5550;
+  --text-soft: #8e817a;
+  --text-faint: #c5b8b0;
+
+  /* Shadows slightly cooler to match image */
+  --shadow-soft: 0 4px 24px rgba(20, 30, 45, 0.08);
+  --shadow-card: 0 8px 40px rgba(20, 30, 45, 0.12);
+  --shadow-hover: 0 16px 56px rgba(20, 30, 45, 0.18);
+
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-xl: 48px;
+
+  --font-display: 'Cormorant Garamond', serif;
+  --font-script: 'Pinyon Script', cursive;
+  --font-body: 'DM Sans', sans-serif;
+
+  --nav-h: 72px;
+}

@@ -1,0 +1,82 @@
+/* ─── DARK MODE ──────────────────────────────────────────── */
+html.dark-mode {
+  --cream: #0f172a;
+  --warm-white: #1e293b;
+  --surface: #1e293b;
+  --text-dark: #f8fafc;
+  --text-mid: #cbd5e1;
+  --text-soft: #94a3b8;
+  --text-faint: #64748b;
+  --blush-light: #1e293b;
+  --sage-light: #c8c9ca;
+  --gold-light: #1e293b;
+  --sky-light: #1e293b;
+  --lavender-light: #1e293b;
+  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-mode .blog-lg-img, .blog-card-img, .tl-card-img { filter: brightness(0.5); }
+html.dark-mode .blog-lg-img:hover, .blog-card-img:hover, .tl-card-img:hover { filter: brightness(0.6); }
+
+html.dark-mode .milestone-preview-card,
+html.dark-mode .blog-card,
+html.dark-mode .filter-bar,
+html.dark-mode .tl-card,
+html.dark-mode .skeleton-card,
+html.dark-mode .tl-node,
+html.dark-mode .blog-card-lg,
+html.dark-mode .modal,
+html.dark-mode .modal-close,
+html.dark-mode .ft-hover-card,
+html.dark-mode .family-member-card,
+html.dark-mode .gallery-toolbar {
+  background: var(--surface) !important;
+  color: var(--text-dark) !important;
+}
+
+html.dark-mode .ft-search-input {
+  background: var(--surface);
+  color: var(--text-dark);
+}
+
+html.dark-mode [style*="background: white"],
+html.dark-mode [style*="background-color: white"] {
+  background-color: var(--surface) !important;
+}
+
+html.dark-mode nav {
+  background: rgba(30, 41, 59, 0.8) !important;
+}
+
+html.dark-mode .mobile-menu {
+  background: rgba(30, 41, 59, 0.97);
+}
+
+html.dark-mode .mobile-menu-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .btn-soft {
+  background: var(--lavender-light);
+  border-color: var(--lavender);
+  color: var(--text-dark);
+}
+
+html.dark-mode .btn-soft:hover {
+  background: var(--sky-light);
+}
+
+html.dark-mode .blog-card-img-inner[style*="linear-gradient"],
+html.dark-mode .tl-card-img[style*="linear-gradient"],
+html.dark-mode .modal-img[style*="linear-gradient"] {
+  filter: brightness(0.8) saturate(1.2);
+}
+
+html.dark-mode .mobile-menu a:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-mode .theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

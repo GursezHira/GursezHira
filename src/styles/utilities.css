@@ -1,0 +1,52 @@
+/* ─── UTILITIES ─────────────────────────────────────────── */
+
+/* Layout helpers */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px 50px; }
+.section { padding: 80px 0; }
+
+/* Page system */
+.page { display: none; min-height: 100vh; padding-top: var(--nav-h); position: relative; z-index: 1; }
+.page.active { display: block; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 99px; font-size: 0.82rem;
+  letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  transition: all 0.25s; font-family: var(--font-body);
+}
+.btn-primary {
+  background: var(--text-dark); color: var(--cream);
+  box-shadow: 0 4px 16px rgba(58,46,40,0.2);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,46,40,0.28); }
+.btn-outline {
+  border: 1.5px solid var(--text-dark); color: var(--text-dark);
+}
+.btn-outline:hover { background: var(--text-dark); color: var(--cream); transform: translateY(-2px); }
+.btn-soft {
+  background: #e0dee6; color: var(--text-dark); border: 1.5px solid #d2cce6;
+}
+.btn-soft:hover { background: #d4d1db; transform: translateY(-2px); }
+
+/* Back button */
+.back-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-soft); margin-bottom: 48px; cursor: pointer;
+  transition: color 0.2s;
+}
+.back-btn:hover { color: var(--text-dark); }
+
+/* Fade-up scroll animation */
+.fade-up {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* Page header */
+.page-header {
+  text-align: center; padding: 60px 24px 48px;
+}
+.page-header .section-label { justify-content: center; display: block; }
