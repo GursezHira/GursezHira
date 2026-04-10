@@ -750,7 +750,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .tree-outer {
+  .tree-outer, .ft-legend, .ft-filters {
     display: none;
   }
 
