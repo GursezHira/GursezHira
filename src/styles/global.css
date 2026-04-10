@@ -46,6 +46,22 @@
 
   --nav-h: 72px;
 }
+html.dark-mode {
+  --cream: #0f172a;
+  --warm-white: #1e293b;
+  --surface: #1e293b;
+  --text-dark: #f8fafc;
+  --text-mid: #cbd5e1;
+  --text-soft: #94a3b8;
+  --text-faint: #64748b;
+  --blush-light: #1e293b;
+  --sage-light: #1e293b;
+  --gold-light: #1e293b;
+  --sky-light: #1e293b;
+  --lavender-light: #1e293b;
+  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
 html { scroll-behavior: smooth; font-size: 16px; }
 body {
   font-family: var(--font-body);
@@ -1140,22 +1156,6 @@ footer {
 /* ───────────────────────────────────────────────────────────────── */
 /* DARK MODE OVERRIDES */
 /* ───────────────────────────────────────────────────────────────── */
-html.dark-mode {
-  --cream: #0f172a;
-  --warm-white: #1e293b;
-  --surface: #1e293b;
-  --text-dark: #f8fafc;
-  --text-mid: #cbd5e1;
-  --text-soft: #94a3b8;
-  --text-faint: #64748b;
-  --blush-light: #1e293b;
-  --sage-light: #1e293b;
-  --gold-light: #1e293b;
-  --sky-light: #1e293b;
-  --lavender-light: #1e293b;
-  --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.4);
-  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
-}
 
 html.dark-mode .milestone-preview-card,
 html.dark-mode .blog-card,
@@ -1167,6 +1167,7 @@ html.dark-mode .blog-card-lg,
 html.dark-mode .modal,
 html.dark-mode .modal-close,
 html.dark-mode .ft-hover-card,
+html.dark-mode .family-member-card,
 html.dark-mode .gallery-toolbar {
   background: var(--surface) !important;
   color: var(--text-dark) !important;
@@ -1184,4 +1185,20 @@ html.dark-mode [style*="background-color: white"] {
 
 html.dark-mode nav {
   background: rgba(30, 41, 59, 0.8) !important;
+}
+
+html.dark-mode .btn-soft {
+  background: var(--lavender-light);
+  border-color: var(--lavender);
+  color: var(--text-dark);
+}
+
+html.dark-mode .btn-soft:hover {
+  background: var(--sky-light);
+}
+
+html.dark-mode .blog-card-img-inner[style*="linear-gradient"],
+html.dark-mode .tl-card-img[style*="linear-gradient"],
+html.dark-mode .modal-img[style*="linear-gradient"] {
+  filter: brightness(0.8) saturate(1.2);
 }
