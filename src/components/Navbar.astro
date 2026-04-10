@@ -9,24 +9,36 @@ const isTree = pathname.startsWith('/family-tree');
 <nav role="navigation" aria-label="Main navigation">
   <div class="nav-logo"><a href="/">Little Gursez's Book</a></div>
   <ul class="nav-links">
-    <li><a href="/" class={isHome ? 'active' : ''}>🏠 Home</a></li>
-    <li><a href="/milestones" class={isMilestones ? 'active' : ''}>🚩 Milestones</a></li>
-    <li><a href="/stories" class={isStories ? 'active' : ''}>🧾 Stories</a></li>
-    <li><a href="/family-tree" class={isTree ? 'active' : ''}>🌳 Family Tree</a></li>
+    <li><a href="/" class={isHome ? 'active' : ''}><span class="nav-icon"></span> Home</a></li>
+    <li><a href="/milestones" class={isMilestones ? 'active' : ''}><span class="nav-icon"></span> Milestones</a></li>
+    <li><a href="/stories" class={isStories ? 'active' : ''}><span class="nav-icon"></span> Stories</a></li>
+    <li><a href="/family-tree" class={isTree ? 'active' : ''}><span class="nav-icon"></span> Family Tree</a></li>
     <li>
-      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" style="font-size: 1.2rem; margin-left: 10px;">
-        <span class="icon-light" style="display:none;">☀️</span>
-        <span class="icon-dark" style="display:none;">🌙</span>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="icon-light">☀️</span>
+        <span class="icon-dark">🌙</span>
       </button>
     </li>
   </ul>
-  <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav-mobile-controls">
+    <button id="mobileThemeToggle" class="theme-toggle mobile-theme-toggle" aria-label="Toggle dark mode">
+      <span class="icon-light">☀️</span>
+      <span class="icon-dark">🌙</span>
+    </button>
+    <button class="nav-hamburger" aria-label="Open menu" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
-  <button class="mobile-menu-close" onclick="toggleMobileMenu()" aria-label="Close menu">✕</button>
+  <div class="mobile-menu-header">
+    <button class="mobile-menu-close" onclick="toggleMobileMenu()" aria-label="Close menu">✕</button>
+    <button id="mobileMenuThemeToggle" class="theme-toggle mobile-menu-theme" aria-label="Toggle dark mode">
+      <span class="icon-light">☀️</span>
+      <span class="icon-dark">🌙</span>
+    </button>
+  </div>
   <a href="/" onclick="toggleMobileMenu()">Home</a>
   <a href="/milestones" onclick="toggleMobileMenu()">Milestones</a>
   <a href="/stories" onclick="toggleMobileMenu()">Stories</a>
@@ -35,18 +47,34 @@ const isTree = pathname.startsWith('/family-tree');
 
 <script>
   function setupThemeToggle() {
-    const themeBtn = document.getElementById('themeToggle');
-    if (!themeBtn) return;
+    // Get all theme toggle buttons
+    const themeButtons = [
+      document.getElementById('themeToggle'),
+      document.getElementById('mobileThemeToggle'),
+      document.getElementById('mobileMenuThemeToggle')
+    ].filter((btn): btn is HTMLElement => btn !== null);
+    
+    if (themeButtons.length === 0) return;
+    
+    const updateButtonIcons = (btn: HTMLElement, isDark: boolean) => {
+      const iconLight = btn.querySelector('.icon-light') as HTMLElement;
+      const iconDark = btn.querySelector('.icon-dark') as HTMLElement;
+      if (iconLight) iconLight.style.display = isDark ? 'inline' : 'none';
+      if (iconDark) iconDark.style.display = isDark ? 'none' : 'inline';
+    };
+    
     const isDark = document.documentElement.classList.contains('dark-mode');
     
-    const iconLight = themeBtn.querySelector('.icon-light') as HTMLElement;
-    const iconDark = themeBtn.querySelector('.icon-dark') as HTMLElement;
-    if (iconLight) iconLight.style.display = isDark ? 'inline' : 'none';
-    if (iconDark) iconDark.style.display = isDark ? 'none' : 'inline';
-
-    if (themeBtn.parentNode) {
-      const newBtn = themeBtn.cloneNode(true) as HTMLElement;
-      themeBtn.parentNode.replaceChild(newBtn, themeBtn);
+    // Initialize all buttons
+    themeButtons.forEach(btn => updateButtonIcons(btn, isDark));
+    
+    // Add click handlers to all buttons
+    themeButtons.forEach(btn => {
+      // Clone to remove existing listeners
+      const newBtn = btn.cloneNode(true) as HTMLElement;
+      if (btn.parentNode) {
+        btn.parentNode.replaceChild(newBtn, btn);
+      }
       
       newBtn.addEventListener('click', () => {
         const element = document.documentElement;
@@ -55,12 +83,16 @@ const isTree = pathname.startsWith('/family-tree');
         const isDarkNow = element.classList.contains('dark-mode');
         document.cookie = `theme=${isDarkNow ? 'dark' : 'light'}; path=/; max-age=31536000`;
         
-        const newLight = newBtn.querySelector('.icon-light') as HTMLElement;
-        const newDark = newBtn.querySelector('.icon-dark') as HTMLElement;
-        if (newLight) newLight.style.display = isDarkNow ? 'inline' : 'none';
-        if (newDark) newDark.style.display = isDarkNow ? 'none' : 'inline';
+        // Update all buttons
+        const allButtons = [
+          document.getElementById('themeToggle'),
+          document.getElementById('mobileThemeToggle'),
+          document.getElementById('mobileMenuThemeToggle')
+        ].filter((b): b is HTMLElement => b !== null);
+        
+        allButtons.forEach(b => updateButtonIcons(b, isDarkNow));
       });
-    }
+    });
   }
   
   document.addEventListener('astro:page-load', setupThemeToggle);
@@ -68,6 +100,28 @@ const isTree = pathname.startsWith('/family-tree');
 
 <script is:inline>
   function toggleMobileMenu() {
-    document.getElementById('mobileMenu').classList.toggle('open');
+    const menu = document.getElementById('mobileMenu');
+    const hamburger = document.querySelector('.nav-hamburger');
+    menu.classList.toggle('open');
+    if (hamburger) {
+      hamburger.classList.toggle('open');
+    }
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
   }
+  
+  // Close mobile menu when clicking on a link
+  document.addEventListener('DOMContentLoaded', () => {
+    const mobileLinks = document.querySelectorAll('.mobile-menu a');
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const menu = document.getElementById('mobileMenu');
+        const hamburger = document.querySelector('.nav-hamburger');
+        menu.classList.remove('open');
+        if (hamburger) {
+          hamburger.classList.remove('open');
+        }
+        document.body.style.overflow = '';
+      });
+    });
+  });
 </script>
