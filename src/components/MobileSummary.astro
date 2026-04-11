@@ -1,0 +1,61 @@
+---
+/**
+ * MobileSummary.astro
+ * 
+ * Simplified mobile-only summary of the main family members.
+ */
+---
+
+<div class="ft-mobile-view fade-up">
+  <div class="ft-desktop-hint">
+    <div class="ft-desktop-hint-icon">🌳</div>
+    <p>
+      The full family tree is best explored on a larger screen.<br />
+      <strong>Visit on desktop</strong> to see all generations and every branch of the tree.
+    </p>
+  </div>
+
+  <div class="ft-mobile-parents">
+    <div class="ft-mobile-couple">
+      <div
+        class="ft-mobile-member"
+        id="mobile-node-dad"
+        tabindex="0"
+        role="button"
+        aria-label="Harman Singh"
+      >
+        <div class="ft-avatar ft-avatar--lg">👨</div>
+        <div class="ft-name">Harman Singh</div>
+        <div class="ft-relation">Papa</div>
+      </div>
+
+      <div class="ft-mobile-heart">💑</div>
+
+      <div
+        class="ft-mobile-member"
+        id="mobile-node-mum"
+        tabindex="0"
+        role="button"
+        aria-label="Jastinder Kaur"
+      >
+        <div class="ft-avatar ft-avatar--lg">👩</div>
+        <div class="ft-name">Jastinder Kaur</div>
+        <div class="ft-relation">Muma</div>
+      </div>
+    </div>
+
+    <div class="ft-mobile-child-line"></div>
+
+    <div
+      class="ft-mobile-member ft-mobile-member--star"
+      id="mobile-node-gursez"
+      tabindex="0"
+      role="button"
+      aria-label="Gursez"
+    >
+      <div class="ft-avatar ft-avatar--xl">👶</div>
+      <div class="ft-name">Gursez Singh Hira</div>
+      <div class="ft-relation">The Star of Our World</div>
+    </div>
+  </div>
+</div>

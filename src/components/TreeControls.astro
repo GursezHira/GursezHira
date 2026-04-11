@@ -1,0 +1,15 @@
+---
+/**
+ * TreeControls.astro
+ * 
+ * Interactive controls for the family tree (Zoom, Reset, Fullscreen, Toggle All).
+ */
+---
+
+<div class="tree-controls">
+  <button class="tree-ctrl-btn" onclick="treeZoom(0.15)"        aria-label="Zoom in">＋</button>
+  <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)"       aria-label="Zoom out">−</button>
+  <button class="tree-ctrl-btn" onclick="treeReset()"           aria-label="Reset view">↻</button>
+  <button class="tree-ctrl-btn" onclick="toggleFullScreen()"    aria-label="Full screen" title="Full Screen">⛶</button>
+  <button class="tree-ctrl-btn" onclick="toggleAllMembers()"    id="toggleAllBtn" title="Show All Members">👁</button>
+</div>

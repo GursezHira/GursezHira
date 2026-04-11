@@ -6,18 +6,19 @@
 import {
   activeHoverNodeId,
   isTouchDevice,
-} from './tree-state.js';
-import { showHoverCard, hideHoverCard, updateHoverPosition } from './hover-card.js';
+} from './tree-state';
+import { showHoverCard, hideHoverCard, updateHoverPosition } from './hover-card';
+import type { FamilyMember, FamilyTreeData } from '../../types/family-tree';
 
 /* ── Renderer ────────────────────────────────────────── */
 
 /**
  * Render (or re-render) the family grid with the given node list.
  *
- * @param {Array}  nodes     — subset of TREE_DATA.treeData to display
- * @param {object} TREE_DATA — full dataset (for branch order sorting)
+ * @param {FamilyMember[]}  nodes     — subset of TREE_DATA.treeData to display
+ * @param {FamilyTreeData} TREE_DATA — full dataset (for branch order sorting)
  */
-export function renderFamilyGrid(nodes, TREE_DATA) {
+export function renderFamilyGrid(nodes: FamilyMember[], TREE_DATA: FamilyTreeData) {
   const grid      = document.getElementById('familyGrid');
   const noResults = document.getElementById('ftNoResults');
   if (!grid) return;
@@ -29,7 +30,7 @@ export function renderFamilyGrid(nodes, TREE_DATA) {
   }
 
   // Sort: Gursez first, then by branch order
-  const order = { Gursez: 0 };
+  const order: Record<string, number> = { Gursez: 0 };
   (TREE_DATA.branches || []).forEach((br, idx) => { order[br.id] = idx + 1; });
 
   const sorted = [...nodes].sort((a, b) =>
@@ -39,13 +40,14 @@ export function renderFamilyGrid(nodes, TREE_DATA) {
   sorted.forEach((n, i) => {
     const d    = n.data;
     const card = document.createElement('div');
-    card.className = `family-member-card side-${d.side} fade-up visible`;
+    const sideClass = d.side.replace(/ /g, '-');
+    card.className = `family-member-card side-${sideClass} fade-up visible`;
     card.style.transitionDelay = (i * 0.03) + 's';
     card.innerHTML = `
       <div class="fmc-emoji">${d.emoji}</div>
       <div class="fmc-name">${d.name}</div>
       <div class="fmc-relation">${d.relation}</div>
-      <span class="fmc-side side-${d.side}">${d.side}</span>
+      <span class="fmc-side side-${sideClass}">${d.side}</span>
     `;
 
     if (isTouchDevice) {
@@ -54,7 +56,7 @@ export function renderFamilyGrid(nodes, TREE_DATA) {
         if (activeHoverNodeId === n.id) {
           hideHoverCard();
         } else {
-          showHoverCard(n, e, TREE_DATA.treeData);
+          showHoverCard(n, e as unknown as MouseEvent, TREE_DATA.treeData);
         }
       };
     } else {
@@ -73,10 +75,10 @@ export function renderFamilyGrid(nodes, TREE_DATA) {
  * Wire up the search input and clear button.
  * Filters the family grid on each keystroke.
  *
- * @param {object} TREE_DATA
+ * @param {FamilyTreeData} TREE_DATA
  */
-export function initSearch(TREE_DATA) {
-  const input    = document.getElementById('ftSearchInput');
+export function initSearch(TREE_DATA: FamilyTreeData) {
+  const input    = document.getElementById('ftSearchInput') as HTMLInputElement;
   const clearBtn = document.getElementById('ftSearchClear');
   if (!input || !clearBtn) return;
 

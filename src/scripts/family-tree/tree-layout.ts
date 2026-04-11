@@ -9,17 +9,50 @@ import {
   DIRECT_PATS,
   DIRECT_MATS,
   expandedNodeIds,
-} from './tree-state.js';
+} from './tree-state';
+import type { FamilyMember, FamilyTreeData } from '../../types/family-tree';
 
 const { CARD_W, CARD_H, GHOST_W, GHOST_H, HEART_W, BOX_PAD_X, BOX_PAD_Y, UNIT_GAP, ROW_H, PAD_X, PAD_Y } = LAYOUT;
 
+/* ── Types ──────────────────────────────────────────── */
+
+export interface Unit {
+  ids: string[];
+  gen: number;
+  side: string;
+}
+
+export interface UnitPosition {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface RowLayout {
+  g: number;
+  pUnits: Unit[];
+  cUnits: Unit[];
+  mUnits: Unit[];
+}
+
+export interface TreeLayout {
+  units: Unit[];
+  unitByNode: Record<string, Unit>;
+  unitPos: Map<Unit, UnitPosition>;
+  canvasW: number;
+  canvasH: number;
+  nodeMap: Record<string, FamilyMember>;
+  CENTER_X: number;
+}
+
 /* ── Helpers ────────────────────────────────────────── */
 
-function isExpanded(id) {
+function isExpanded(id: string): boolean {
   return expandedNodeIds.has(id);
 }
 
-function unitWidth(u) {
+function unitWidth(u: Unit): number {
   const ghostCount = u.ids.filter(id => !isExpanded(id)).length;
   if (u.ids.length === 2) {
     if (ghostCount === 2) return BOX_PAD_X * 2 + GHOST_W * 2 + HEART_W;
@@ -29,21 +62,21 @@ function unitWidth(u) {
   return isExpanded(u.ids[0]) ? CARD_W : GHOST_W;
 }
 
-function unitHeight(u) {
+function unitHeight(u: Unit): number {
   const hasExpanded = u.ids.some(isExpanded);
   return BOX_PAD_Y * 2 + (hasExpanded ? CARD_H : GHOST_H);
 }
 
-function rowTotalWidth(row) {
+function rowTotalWidth(row: Unit[]): number {
   if (!row || !row.length) return 0;
   return row.reduce((s, u) => s + unitWidth(u), 0) + (row.length - 1) * UNIT_GAP;
 }
 
 /* ── Step 1: Assign generation to every node ────────── */
-function buildGenMap(rawNodes, nodeMap) {
-  const genMap = {};
+function buildGenMap(rawNodes: FamilyMember[], nodeMap: Record<string, FamilyMember>): Record<string, number> {
+  const genMap: Record<string, number> = {};
 
-  function assignGen(id, g) {
+  function assignGen(id: string, g: number) {
     if (id in genMap) return;
     genMap[id] = g;
     const n = nodeMap[id];
@@ -53,8 +86,10 @@ function buildGenMap(rawNodes, nodeMap) {
     (n.rels.children || []).forEach(c => assignGen(c, g + 1));
   }
 
+  // Root Gursez at Gen 0
   assignGen('aaaEJwni', 0);
 
+  // Catch-all for disconnected nodes (if any)
   rawNodes.forEach(n => {
     if (!(n.id in genMap)) {
       const pg = (n.rels.parents || []).map(p => genMap[p]).filter(x => x != null);
@@ -67,10 +102,10 @@ function buildGenMap(rawNodes, nodeMap) {
 }
 
 /* ── Step 2: Build couple-units ─────────────────────── */
-function buildUnits(rawNodes, nodeMap, genMap) {
-  const unitByNode = {};
-  const units = [];
-  const paired = new Set();
+function buildUnits(rawNodes: FamilyMember[], nodeMap: Record<string, FamilyMember>, genMap: Record<string, number>) {
+  const unitByNode: Record<string, Unit> = {};
+  const units: Unit[] = [];
+  const paired = new Set<string>();
 
   rawNodes.forEach(n => {
     if (paired.has(n.id)) return;
@@ -78,7 +113,7 @@ function buildUnits(rawNodes, nodeMap, genMap) {
     if (spouses.length) {
       const sp = spouses[0];
       paired.add(n.id); paired.add(sp);
-      const unit = { ids: [n.id, sp], gen: genMap[n.id], side: n.data.side };
+      const unit: Unit = { ids: [n.id, sp], gen: genMap[n.id], side: n.data.side };
       units.push(unit);
       unitByNode[n.id] = unit;
       unitByNode[sp]   = unit;
@@ -87,7 +122,7 @@ function buildUnits(rawNodes, nodeMap, genMap) {
 
   rawNodes.forEach(n => {
     if (paired.has(n.id)) return;
-    const unit = { ids: [n.id], gen: genMap[n.id], side: n.data.side };
+    const unit: Unit = { ids: [n.id], gen: genMap[n.id], side: n.data.side };
     units.push(unit);
     unitByNode[n.id] = unit;
   });
@@ -96,8 +131,8 @@ function buildUnits(rawNodes, nodeMap, genMap) {
 }
 
 /* ── Step 3: Group units by generation ──────────────── */
-function groupByGen(units) {
-  const byGen = {};
+function groupByGen(units: Unit[]): Record<number, Unit[]> {
+  const byGen: Record<number, Unit[]> = {};
   units.forEach(u => {
     if (!byGen[u.gen]) byGen[u.gen] = [];
     byGen[u.gen].push(u);
@@ -106,38 +141,25 @@ function groupByGen(units) {
 }
 
 /* ── Step 4: Sort rows (paternal left, maternal right) ─ */
-function sortRows(byGen, branchOrder, visibleSides) {
+function sortRows(byGen: Record<number, Unit[]>, branchOrder: Record<string, number>, visibleSides: { paternal: boolean; maternal: boolean }): RowLayout[] {
   const gens = Object.keys(byGen).map(Number).sort((a, b) => a - b);
 
-  gens.forEach(g => {
+  return gens.map(g => {
     const row = byGen[g];
-    const patUnits = [];
-    const ctrUnits = [];
-    const matUnits = [];
+    let pUnits: Unit[] = [];
+    let cUnits: Unit[] = [];
+    let mUnits: Unit[] = [];
 
     row.forEach(u => {
       const isCenter = u.ids.some(id => CENTER_NODES.has(id));
       if (isCenter) {
-        ctrUnits.push(u);
+        cUnits.push(u);
       } else if (u.side && u.side.startsWith('Maternal')) {
-        matUnits.push(u);
+        mUnits.push(u);
       } else {
-        patUnits.push(u);
+        pUnits.push(u);
       }
     });
-
-    byGen[g] = [...patUnits, ...ctrUnits, ...matUnits];
-  });
-
-  return gens.map(g => {
-    const row = byGen[g];
-    let pUnits = row.filter(
-      u => (!u.side || !u.side.startsWith('Maternal')) && !u.ids.some(id => CENTER_NODES.has(id))
-    );
-    const cUnits = row.filter(u => u.ids.some(id => CENTER_NODES.has(id)));
-    let mUnits = row.filter(
-      u => u.side && u.side.startsWith('Maternal') && !u.ids.some(id => CENTER_NODES.has(id))
-    );
 
     if (!visibleSides.paternal) pUnits = [];
     if (!visibleSides.maternal) mUnits = [];
@@ -163,7 +185,7 @@ function sortRows(byGen, branchOrder, visibleSides) {
 }
 
 /* ── Step 5: Assign pixel positions ─────────────────── */
-function assignPositions(rowLayouts) {
+function assignPositions(rowLayouts: RowLayout[]) {
   let maxPW = 0, maxMW = 0, maxCW = 0;
   rowLayouts.forEach(rl => {
     const pw = rowTotalWidth(rl.pUnits);
@@ -177,7 +199,7 @@ function assignPositions(rowLayouts) {
   const CENTER_X = PAD_X + Math.max(maxPW + UNIT_GAP, maxCW / 2);
   const canvasW  = CENTER_X + Math.max(maxMW + UNIT_GAP, maxCW / 2) + PAD_X;
   const canvasH  = rowLayouts.length * ROW_H + PAD_Y * 2;
-  const unitPos  = new Map();
+  const unitPos  = new Map<Unit, UnitPosition>();
 
   rowLayouts.forEach((rl, rowIdx) => {
     const y = PAD_Y + rowIdx * ROW_H;
@@ -220,31 +242,31 @@ function assignPositions(rowLayouts) {
  * Build the full layout from TREE_DATA.
  * Returns everything the renderer needs.
  *
- * @param {object}  TREE_DATA
+ * @param {FamilyTreeData}  TREE_DATA
  * @param {{ paternal: boolean, maternal: boolean }} visibleSides
- * @returns {{ units, unitByNode, unitPos, canvasW, canvasH, nodeMap }}
+ * @returns {TreeLayout}
  */
-export function buildLayout(TREE_DATA, visibleSides) {
-  const branchOrder = {};
+export function buildLayout(TREE_DATA: FamilyTreeData, visibleSides: { paternal: boolean; maternal: boolean }): TreeLayout {
+  const branchOrder: Record<string, number> = {};
   (TREE_DATA.branches || []).forEach((br, idx) => { branchOrder[br.id] = idx; });
 
   const rawNodes = TREE_DATA.treeData;
-  const nodeMap  = {};
+  const nodeMap: Record<string, FamilyMember> = {};
   rawNodes.forEach(n => { nodeMap[n.id] = n; });
 
   const genMap              = buildGenMap(rawNodes, nodeMap);
   const { units, unitByNode } = buildUnits(rawNodes, nodeMap, genMap);
   const byGen               = groupByGen(units);
   const rowLayouts          = sortRows(byGen, branchOrder, visibleSides);
-  const { unitPos, canvasW, canvasH } = assignPositions(rowLayouts);
+  const { unitPos, canvasW, canvasH, CENTER_X } = assignPositions(rowLayouts);
 
-  return { units, unitByNode, unitPos, canvasW, canvasH, nodeMap };
+  return { units, unitByNode, unitPos, canvasW, canvasH, nodeMap, CENTER_X };
 }
 
 /**
  * Return the bottom-centre point of a couple unit (connector source).
  */
-export function unitConnectorBottom(u, unitPos) {
+export function unitConnectorBottom(u: Unit, unitPos: Map<Unit, UnitPosition>) {
   const p = unitPos.get(u);
   if (!p) return null;
 
@@ -260,7 +282,7 @@ export function unitConnectorBottom(u, unitPos) {
 /**
  * Return the top-centre point of a single node card (connector target).
  */
-export function nodeConnectorTop(id, unitByNode, unitPos) {
+export function nodeConnectorTop(id: string, unitByNode: Record<string, Unit>, unitPos: Map<Unit, UnitPosition>) {
   const u = unitByNode[id];
   if (!u) return null;
   const p = unitPos.get(u);

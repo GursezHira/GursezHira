@@ -9,15 +9,17 @@ import {
   expandedNodeIds,
   activeHoverNodeId,
   isTouchDevice,
-} from './tree-state.js';
-import { showHoverCard, hideHoverCard, updateHoverPosition } from './hover-card.js';
+} from './tree-state';
+import { showHoverCard, hideHoverCard, updateHoverPosition } from './hover-card';
+import type { TreeLayout } from './tree-layout';
+import type { FamilyMember } from '../../types/family-tree';
 
 const { CARD_W, GHOST_W } = LAYOUT;
 
 /**
  * Build the inner HTML for a fully-expanded (non-ghost) card.
  */
-function buildCardHTML(n, isMember, isParentCouple) {
+function buildCardHTML(n: FamilyMember, isMember: boolean, isParentCouple: boolean): string {
   const avatarClass = isMember ? 'ft-avatar--hero' : isParentCouple ? 'ft-avatar--xl' : '';
   return `
     <div class="ft-avatar ${avatarClass}">${n.data.emoji}</div>
@@ -31,7 +33,7 @@ function buildCardHTML(n, isMember, isParentCouple) {
 /**
  * Wire up click / hover handlers on an expanded card node.
  */
-function attachExpandedHandlers(card, n, id) {
+function attachExpandedHandlers(card: HTMLElement, n: FamilyMember, id: string) {
   if (!isTouchDevice) {
     card.onmouseenter = (e) => showHoverCard(n, e);
     card.onmousemove  = (e) => updateHoverPosition(e);
@@ -42,7 +44,7 @@ function attachExpandedHandlers(card, n, id) {
     e.stopPropagation();
     if (isTouchDevice) {
       if (activeHoverNodeId !== id) {
-        showHoverCard(n, e);
+        showHoverCard(n, e as unknown as MouseEvent);
         return; // First tap shows the hover card
       } else {
         hideHoverCard();
@@ -52,7 +54,7 @@ function attachExpandedHandlers(card, n, id) {
 
     if (!CORE_NODES.has(id)) {
       expandedNodeIds.delete(id);
-      // renderTree() is called by the parent module (tree-renderer.js)
+      // renderTree() is called by the parent module via ft:collapse event
       card.dispatchEvent(new CustomEvent('ft:collapse', { bubbles: true }));
     }
   };
@@ -62,7 +64,7 @@ function attachExpandedHandlers(card, n, id) {
  * Wire up the click handler on a ghost (collapsed) node.
  * Expanding adds the node, its spouse, parents, and children.
  */
-function attachGhostHandlers(card, n, id) {
+function attachGhostHandlers(card: HTMLElement, n: FamilyMember, id: string) {
   card.onclick = () => {
     expandedNodeIds.add(id);
     (n.rels.spouses  || []).forEach(sid => expandedNodeIds.add(sid));
@@ -75,9 +77,9 @@ function attachGhostHandlers(card, n, id) {
 /**
  * Render all couple-unit boxes into <div id="treeNodes">.
  *
- * @param {{ units, unitPos, nodeMap }} layout
+ * @param {TreeLayout} layout
  */
-export function renderNodes(layout) {
+export function renderNodes(layout: TreeLayout) {
   const { units, unitPos, nodeMap } = layout;
   const container = document.getElementById('treeNodes');
   if (!container) return;
@@ -102,7 +104,7 @@ export function renderNodes(layout) {
           ? 'ft-couple-box--pair'
           : 'ft-couple-box--solo',
       isStar         ? 'ft-couple-box--star'    : '',
-      u.side && u.side !== 'Gursez' ? `ft-couple-box--${u.side}` : '',
+      u.side && u.side !== 'Gursez' ? `ft-couple-box--${u.side.replace(/ /g, '-')}` : '',
       isParentCouple ? 'ft-couple-box--parents' : '',
     ].filter(Boolean).join(' ');
 
@@ -112,6 +114,8 @@ export function renderNodes(layout) {
     /* ── Individual member cards ────────────────────── */
     u.ids.forEach((id, idx) => {
       const n     = nodeMap[id];
+      if (!n) return;
+
       const isExp = expandedNodeIds.has(id);
       const isMember = id === 'aaaEJwni';
 
@@ -120,7 +124,7 @@ export function renderNodes(layout) {
         'ft-node',
         !isExp                                                   ? 'ft-node--ghost'          : '',
         isExp && isMember                                        ? 'ft-node--gursez ft-node--star' : '',
-        isExp && n.data.side && n.data.side !== 'Gursez'        ? `ft-node--${n.data.side}` : '',
+        isExp && n.data.side && n.data.side !== 'Gursez'        ? `ft-node--${n.data.side.replace(/ /g, '-')}` : '',
         isExp && isParentCouple                                  ? 'ft-node--parent'         : '',
       ].filter(Boolean).join(' ');
 

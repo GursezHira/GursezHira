@@ -1,0 +1,26 @@
+---
+/**
+ * TreeFilters.astro
+ * 
+ * Filter buttons for switching between Paternal and Maternal branches.
+ */
+---
+
+<div class="ft-filters fade-up" aria-label="Branch Filters">
+  <button
+    id="filter-paternal"
+    class="ft-filter-btn active"
+    onclick="toggleTreeSide('paternal')"
+    aria-pressed="true"
+  >
+    <span class="ft-dot ft-dot--Paternal"></span> Show Paternal
+  </button>
+  <button
+    id="filter-maternal"
+    class="ft-filter-btn active"
+    onclick="toggleTreeSide('maternal')"
+    aria-pressed="true"
+  >
+    <span class="ft-dot ft-dot--Maternal"></span> Show Maternal
+  </button>
+</div>

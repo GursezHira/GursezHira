@@ -4,13 +4,13 @@
 ─────────────────────────────────────────────────────── */
 
 import {
-  activeHoverNodeId,
   setActiveHoverNodeId,
-} from './tree-state.js';
+} from './tree-state';
+import type { FamilyMember } from '../../types/family-tree';
 
 /* ── HTML builder ────────────────────────────────────── */
 
-function buildHoverCardHTML(node, allNodes) {
+function buildHoverCardHTML(node: FamilyMember, allNodes: FamilyMember[]) {
   const d = node.data;
 
   const spouseNames = (node.rels.spouses || [])
@@ -57,7 +57,7 @@ function buildHoverCardHTML(node, allNodes) {
  * Move the card to follow the cursor / touch point,
  * flipping it if it would overflow the viewport.
  */
-export function updateHoverPosition(e) {
+export function updateHoverPosition(e: MouseEvent | { clientX: number, clientY: number }) {
   const card = document.getElementById('ftHoverCard');
   if (!card || card.style.display === 'none') return;
 
@@ -67,7 +67,7 @@ export function updateHoverPosition(e) {
   let x, y;
 
   if (isFullscreen) {
-    const container = document.querySelector('.tree-outer');
+    const container = document.querySelector('.tree-outer') as HTMLElement;
     const rect = container.getBoundingClientRect();
     x = e.clientX - rect.left + xOffset;
     y = e.clientY - rect.top  + yOffset;
@@ -97,16 +97,19 @@ export function updateHoverPosition(e) {
 /**
  * Render and display the hover card for a given tree node.
  *
- * @param {object} node      — single entry from TREE_DATA.treeData
- * @param {Event}  event     — the triggering mouse/touch event
- * @param {Array}  allNodes  — TREE_DATA.treeData (for resolving relatives)
+ * @param {FamilyMember} node      — single entry from TREE_DATA.treeData
+ * @param {MouseEvent}  event     — the triggering mouse/touch event
+ * @param {FamilyMember[]}  allNodes  — TREE_DATA.treeData (for resolving relatives)
  */
-export function showHoverCard(node, event, allNodes) {
+export function showHoverCard(node: FamilyMember, event: MouseEvent, allNodes: FamilyMember[] = []) {
   const card = document.getElementById('ftHoverCard');
   if (!card) return;
 
+  const { TREE_DATA } = window as any;
+  const nodes = allNodes.length ? allNodes : (TREE_DATA?.treeData || []);
+
   setActiveHoverNodeId(node.id);
-  card.innerHTML = buildHoverCardHTML(node, allNodes);
+  card.innerHTML = buildHoverCardHTML(node, nodes);
   card.style.display = 'block';
   updateHoverPosition(event);
 }

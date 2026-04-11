@@ -1,0 +1,28 @@
+---
+/**
+ * MilestoneFilters.astro
+ * 
+ * Search, category chips, and sort dropdown for filtering milestones.
+ */
+---
+
+<div class="filter-bar fade-up" style="transition-delay:0.1s" role="search" aria-label="Filter milestones">
+  <div class="filter-search">
+    <input type="text" id="milestoneSearch" placeholder="Search milestones…" aria-label="Search milestones" />
+  </div>
+  <div class="filter-chips" role="group" aria-label="Category filters">
+    <button class="filter-chip active" data-cat="all">All</button>
+    <button class="filter-chip" data-cat="Firsts">Firsts</button>
+    <button class="filter-chip" data-cat="Monthly">Monthly</button>
+    <button class="filter-chip" data-cat="Growth">Growth</button>
+    <button class="filter-chip" data-cat="Funny">Funny</button>
+    <button class="filter-chip" data-cat="Health">Health</button>
+    <button class="filter-chip" data-cat="Celebration">Celebration</button>
+  </div>
+  <div class="filter-sort">
+    <select id="sortSelect" aria-label="Sort milestones">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+    </select>
+  </div>
+</div>

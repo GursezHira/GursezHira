@@ -2,20 +2,21 @@
 /**
  * family-tree.astro
  *
- * Template-only page. All JavaScript is split across:
- *   scripts/main.js             — boot orchestrator
- *   scripts/tree-state.js       — shared state & constants
- *   scripts/tree-layout.js      — generation/unit/position engine
- *   scripts/tree-connectors.js  — SVG bezier connector renderer
- *   scripts/tree-nodes.js       — HTML card renderer
- *   scripts/tree-controls.js    — pan, zoom, drag, filter, fullscreen
- *   scripts/hover-card.js       — floating detail card
- *   scripts/family-grid.js      — grid renderer + search
- *   scripts/branch-spotlight.js — legend spotlight toggling
+ * Systematic modernization:
+ * - Monolithic template split into modular components.
+ * - Client-side scripts migrated to TypeScript.
+ * - View Transitions ready (Page Load orchestrator).
  */
 
 import Layout from '../layouts/Layout.astro';
 import { TREE_DATA } from '../data/family-tree';
+
+// Modular Components
+import TreeLegend from '../components/TreeLegend.astro';
+import TreeFilters from '../components/TreeFilters.astro';
+import TreeControls from '../components/TreeControls.astro';
+import FamilyGrid from '../components/FamilyGrid.astro';
+import MobileSummary from '../components/MobileSummary.astro';
 
 /**
  * Generate per-branch CSS custom overrides at build time.
@@ -43,57 +44,21 @@ const branchCSS = TREE_DATA.branches.map(b => `
     <div class="container">
 
       <!-- PAGE HEADER -->
-      <div class="page-header fade-up">
+      <header class="page-header fade-up">
         <span class="section-label">Rooted in Love</span>
         <h1 class="section-title">Gursez's <em>Family Tree</em></h1>
         <p class="section-sub" style="margin:0 auto">
           Every branch a story, every leaf a heartbeat. This is where Gursez belongs.
         </p>
-      </div>
+      </header>
 
-      <!-- LEGEND -->
-      <div class="ft-legend fade-up" aria-label="Legend">
-        {TREE_DATA.branches.map(b => (
-          <div
-            class="ft-legend-item"
-            onclick={`toggleBranchSpotlight('${b.id}', this)`}
-            style="cursor:pointer; transition: opacity 0.3s;"
-            title="Click to spotlight this branch"
-          >
-            <span class={`ft-dot ft-dot--${b.id}`}></span>
-            {b.label}
-            <span class="ft-legend-count">{b.nodes.length}</span>
-          </div>
-        ))}
-        <div class="ft-legend-item" style="transition: opacity 0.3s;">
-          <span class="ft-dot ft-dot--gursez"></span> Our Little Star
-        </div>
-        <div class="ft-legend-item" style="transition: opacity 0.3s;">
-          <span class="ft-dot ft-dot--line"></span> Connected by Love
-        </div>
-      </div>
+      <!-- LEGEND Component -->
+      <TreeLegend branches={TREE_DATA.branches} />
 
-      <!-- BRANCH FILTERS -->
-      <div class="ft-filters fade-up" aria-label="Branch Filters">
-        <button
-          id="filter-paternal"
-          class="ft-filter-btn active"
-          onclick="toggleTreeSide('paternal')"
-          aria-pressed="true"
-        >
-          <span class="ft-dot ft-dot--Paternal"></span> Show Paternal
-        </button>
-        <button
-          id="filter-maternal"
-          class="ft-filter-btn active"
-          onclick="toggleTreeSide('maternal')"
-          aria-pressed="true"
-        >
-          <span class="ft-dot ft-dot--Maternal"></span> Show Maternal
-        </button>
-      </div>
+      <!-- BRANCH FILTERS Component -->
+      <TreeFilters />
 
-      <!-- INTERACTIVE TREE (desktop) -->
+      <!-- INTERACTIVE TREE (Desktop/Tablet) -->
       <div class="tree-outer fade-up">
         <div class="tree-hint">✦ Click any card to learn more · Scroll or pinch to explore</div>
 
@@ -104,126 +69,39 @@ const branchCSS = TREE_DATA.branches.map(b => `
               id="treeSvg"
               style="position:absolute; top:0; left:0; pointer-events:none; overflow:visible;"
             ></svg>
-            <!-- HTML member cards -->
+            <!-- HTML member cards (Rendered via tree-nodes.ts) -->
             <div id="treeNodes"></div>
           </div>
         </div>
 
-        <!-- Pan / Zoom controls -->
-        <div class="tree-controls">
-          <button class="tree-ctrl-btn" onclick="treeZoom(0.15)"        aria-label="Zoom in">＋</button>
-          <button class="tree-ctrl-btn" onclick="treeZoom(-0.15)"       aria-label="Zoom out">−</button>
-          <button class="tree-ctrl-btn" onclick="treeReset()"           aria-label="Reset view">↻</button>
-          <button class="tree-ctrl-btn" onclick="toggleFullScreen()"    aria-label="Full screen" title="Full Screen">⛶</button>
-          <button class="tree-ctrl-btn" onclick="toggleAllMembers()"    id="toggleAllBtn" title="Show All Members">👁</button>
-        </div>
+        <!-- Pan / Zoom controls Component -->
+        <TreeControls />
       </div>
 
       <!-- FLOATING HOVER CARD -->
       <div id="ftHoverCard" class="ft-hover-card" style="display:none"></div>
 
-      <!-- MOBILE SUMMARY VIEW (shown when tree-outer is hidden) -->
-      <div class="ft-mobile-view fade-up">
-        <div class="ft-desktop-hint">
-          <div class="ft-desktop-hint-icon">🌳</div>
-          <p>
-            The full family tree is best explored on a larger screen.<br />
-            <strong>Visit on desktop</strong> to see all generations and every branch of the tree.
-          </p>
-        </div>
+      <!-- MOBILE SUMMARY Component (shown when tree-outer is hidden) -->
+      <MobileSummary />
 
-        <div class="ft-mobile-parents">
-          <div class="ft-mobile-couple">
-            <div
-              class="ft-mobile-member"
-              id="mobile-node-dad"
-              tabindex="0"
-              role="button"
-              aria-label="Harman Singh"
-            >
-              <div class="ft-avatar ft-avatar--lg">👨</div>
-              <div class="ft-name">Harman Singh</div>
-              <div class="ft-relation">Papa</div>
-            </div>
-
-            <div class="ft-mobile-heart">💑</div>
-
-            <div
-              class="ft-mobile-member"
-              id="mobile-node-mum"
-              tabindex="0"
-              role="button"
-              aria-label="Jastinder Kaur"
-            >
-              <div class="ft-avatar ft-avatar--lg">👩</div>
-              <div class="ft-name">Jastinder Kaur</div>
-              <div class="ft-relation">Muma</div>
-            </div>
-          </div>
-
-          <div class="ft-mobile-child-line"></div>
-
-          <div
-            class="ft-mobile-member ft-mobile-member--star"
-            id="mobile-node-gursez"
-            tabindex="0"
-            role="button"
-            aria-label="Gursez"
-          >
-            <div class="ft-avatar ft-avatar--xl">👶</div>
-            <div class="ft-name">Gursez Singh Hira</div>
-            <div class="ft-relation">The Star of Our World</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FAMILY GRID SECTION -->
-      <section class="section" aria-label="Family members">
-        <div class="fade-up">
-          <span class="section-label">The Whole Family</span>
-          <h2 class="section-title">Everyone Who <em>Loves</em> Gursez</h2>
-        </div>
-
-        <div class="ft-search-wrapper fade-up">
-          <input
-            type="text"
-            id="ftSearchInput"
-            class="ft-search-input"
-            placeholder="Search by name, relation or branch..."
-            aria-label="Search family members"
-          />
-          <button
-            id="ftSearchClear"
-            class="ft-search-clear"
-            aria-label="Clear search"
-            style="display:none"
-          >×</button>
-        </div>
-
-        <div class="family-grid" id="familyGrid"></div>
-
-        <div id="ftNoResults" class="ft-no-results fade-up" style="display:none">
-          <div class="ft-no-results-icon">🔍</div>
-          <p>No family members found matching your search.</p>
-        </div>
-      </section>
+      <!-- FAMILY GRID SECTION Component -->
+      <FamilyGrid />
 
     </div><!-- /.container -->
   </main>
 
   <!--
-    Pass server-side data to the client-side ES module.
-    define:vars serialises TREE_DATA as a global variable that
-    main.js reads directly (it cannot be imported as a module).
+    Pass server-side data to the client-side module.
+    define:vars serializes TREE_DATA as a global variable.
+    The TypeScript orchestrator (main.ts) reads this on boot.
   -->
   <script define:vars={{ TREE_DATA }}>
-    // Make TREE_DATA available to the ES module loaded below.
     window.TREE_DATA = TREE_DATA;
   </script>
 
-  <!-- Main JS entry point (Astro bundles this correctly) -->
+  <!-- Main TS Orchestrator -->
   <script>
-    import '../scripts/family-tree/main.js';
+    import '../scripts/family-tree/main';
   </script>
 
 </Layout>

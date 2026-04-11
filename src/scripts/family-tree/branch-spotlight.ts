@@ -6,7 +6,7 @@
 import {
   activeSpotlight,
   setActiveSpotlight,
-} from './tree-state.js';
+} from './tree-state';
 
 /**
  * Toggle a spotlight on a single branch.
@@ -15,22 +15,22 @@ import {
  * @param {string}      branchId — branch ID (e.g. 'Paternal', 'Maternal')
  * @param {HTMLElement} element  — the clicked legend item element
  */
-export function toggleBranchSpotlight(branchId, element) {
+export function toggleBranchSpotlight(branchId: string, element?: HTMLElement) {
   if (activeSpotlight === branchId) {
     // Clear spotlight — restore everything
     setActiveSpotlight(null);
-    document.querySelectorAll('.ft-node, .ft-couple-box').forEach(el => {
+    document.querySelectorAll('.ft-node, .ft-couple-box').forEach((el: any) => {
       el.style.opacity = '1';
       el.style.filter  = 'none';
     });
-    document.querySelectorAll('.ft-legend-item').forEach(el => {
+    document.querySelectorAll('.ft-legend-item').forEach((el: any) => {
       el.style.opacity = '1';
     });
   } else {
     // Apply spotlight — fade unrelated nodes
     setActiveSpotlight(branchId);
 
-    document.querySelectorAll('.ft-node, .ft-couple-box').forEach(el => {
+    document.querySelectorAll('.ft-node, .ft-couple-box').forEach((el: any) => {
       const isMatch =
         el.classList.contains(`ft-node--${branchId}`)       ||
         el.classList.contains(`ft-couple-box--${branchId}`) ||
@@ -46,7 +46,7 @@ export function toggleBranchSpotlight(branchId, element) {
       }
     });
 
-    document.querySelectorAll('.ft-legend-item').forEach(el => {
+    document.querySelectorAll('.ft-legend-item').forEach((el: any) => {
       el.style.opacity = '0.35';
     });
 

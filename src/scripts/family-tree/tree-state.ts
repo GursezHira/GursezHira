@@ -2,11 +2,21 @@
    Central state object and ID sets shared across modules.
 ─────────────────────────────────────────────────────── */
 
+export interface TreeState {
+  x: number;
+  y: number;
+  scale: number;
+  dragging: boolean;
+  startX: number;
+  startY: number;
+  visibleSides: { paternal: boolean; maternal: boolean };
+}
+
 /**
  * Pan/zoom/filter state for the tree viewport.
  * All modules read and write this object directly.
  */
-export const treeState = {
+export const treeState: TreeState = {
   x: 0,
   y: 0,
   scale: 0.85,
@@ -20,7 +30,7 @@ export const treeState = {
  * IDs of nodes that are currently rendered as full cards
  * (as opposed to collapsed ghost nodes).
  */
-export const expandedNodeIds = new Set([
+export const expandedNodeIds = new Set<string>([
   'aaaEJwni',
   'aaaEJwnj', 'aaaEJwnk',
   'aaaEJwnn', 'aaaEJwnp',
@@ -34,20 +44,20 @@ export const expandedNodeIds = new Set([
  * "Core" nodes that the user cannot collapse — always visible.
  * Populated once from the initial expandedNodeIds set.
  */
-export const CORE_NODES = new Set([...expandedNodeIds]);
+export const CORE_NODES = new Set<string>([...expandedNodeIds]);
 
 /** IDs that belong directly to the central (Gursez) family unit. */
-export const CENTER_NODES = new Set(['aaaEJwni', 'aaaEJwnj', 'aaaEJwnk']);
+export const CENTER_NODES = new Set<string>(['aaaEJwni', 'aaaEJwnj', 'aaaEJwnk']);
 
 /** IDs of the direct paternal ancestors (used for sort ordering). */
-export const DIRECT_PATS = new Set([
+export const DIRECT_PATS = new Set<string>([
   'aaaEJwnn', 'aaaEJwnp',
   'aaaEJwnq', 'aaaEJwnr',
   'aaaEJwns', 'aaaEJwnt', 'aaaEJwnu',
 ]);
 
 /** IDs of the direct maternal ancestors (used for sort ordering). */
-export const DIRECT_MATS = new Set([
+export const DIRECT_MATS = new Set<string>([
   'aaaEJwnH', 'aaaEJwnJ',
   'aaaEJwnK', 'aaaEJwnL',
   'aaaEJwnM', 'aaaEJwnN',
@@ -69,13 +79,13 @@ export const LAYOUT = {
 };
 
 /** Currently-hovered node ID (used to avoid re-rendering the hover card). */
-export let activeHoverNodeId = null;
-export function setActiveHoverNodeId(id) { activeHoverNodeId = id; }
+export let activeHoverNodeId: string | null = null;
+export function setActiveHoverNodeId(id: string | null) { activeHoverNodeId = id; }
 
 /** Whether the device supports touch input (set on boot). */
 export let isTouchDevice = false;
-export function setIsTouchDevice(val) { isTouchDevice = val; }
+export function setIsTouchDevice(val: boolean) { isTouchDevice = val; }
 
 /** Currently spotlighted branch ID (null = no spotlight). */
-export let activeSpotlight = null;
-export function setActiveSpotlight(val) { activeSpotlight = val; }
+export let activeSpotlight: string | null = null;
+export function setActiveSpotlight(val: string | null) { activeSpotlight = val; }
