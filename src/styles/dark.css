@@ -16,8 +16,16 @@ html.dark-mode {
   --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
-html.dark-mode .blog-lg-img, .blog-card-img, .tl-card-img { filter: brightness(0.5); }
-html.dark-mode .blog-lg-img:hover, .blog-card-img:hover, .tl-card-img:hover { filter: brightness(0.6); }
+html.dark-mode .blog-lg-img,
+html.dark-mode .blog-card-img,
+html.dark-mode .tl-card-img {
+  filter: brightness(0.5);
+}
+html.dark-mode .blog-lg-img:hover,
+html.dark-mode .blog-card-img:hover,
+html.dark-mode .tl-card-img:hover {
+  filter: brightness(0.6);
+}
 
 html.dark-mode .milestone-preview-card,
 html.dark-mode .blog-card,

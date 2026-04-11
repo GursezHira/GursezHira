@@ -40,7 +40,12 @@ const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
   <!-- ── MILESTONE DETAIL MODAL (centred overlay variant) ───── -->
   <MemberModal id="milestoneModal" label="Milestone detail" />
 
+  <!-- Pass server-side data to the client-side module -->
+  <script define:vars={{ ALL_MILESTONES }}>
+    window.ALL_MILESTONES = ALL_MILESTONES;
+  </script>
+
   <script>
     import '../scripts/milestones';
   </script>
-</Layout>
+</Layout>
