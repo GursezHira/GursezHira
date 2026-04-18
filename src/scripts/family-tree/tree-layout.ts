@@ -151,7 +151,7 @@ function sortRows(byGen: Record<number, Unit[]>, branchOrder: Record<string, num
     let mUnits: Unit[] = [];
 
     row.forEach(u => {
-      const isCenter = u.ids.some(id => CENTER_NODES.has(id));
+      const isCenter = u.ids.some(id => CENTER_NODES.has(id) || DIRECT_PATS.has(id) || DIRECT_MATS.has(id));
       if (isCenter) {
         cUnits.push(u);
       } else if (u.side && u.side.startsWith('Maternal')) {
@@ -163,6 +163,13 @@ function sortRows(byGen: Record<number, Unit[]>, branchOrder: Record<string, num
 
     if (!visibleSides.paternal) pUnits = [];
     if (!visibleSides.maternal) mUnits = [];
+
+    // Sort centre units (Paternal direct ancestors left, Maternal direct right)
+    cUnits.sort((a, b) => {
+      const aMat = a.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
+      const bMat = b.ids.some(id => DIRECT_MATS.has(id)) ? 1 : 0;
+      return aMat - bMat;
+    });
 
     // Direct paternal ancestors go closest to centre (right side of paternal group)
     pUnits.sort((a, b) => {
@@ -196,36 +203,42 @@ function assignPositions(rowLayouts: RowLayout[]) {
     if (mw > maxMW) maxMW = mw;
   });
 
-  const CENTER_X = PAD_X + Math.max(maxPW + UNIT_GAP, maxCW / 2);
-  const canvasW  = CENTER_X + Math.max(maxMW + UNIT_GAP, maxCW / 2) + PAD_X;
+  const pTotalW = maxPW > 0 ? maxPW + UNIT_GAP : 0;
+  const mTotalW = maxMW > 0 ? maxMW + UNIT_GAP : 0;
+
+  const pZoneMid = PAD_X + maxPW / 2;
+  const cZoneMid = PAD_X + pTotalW + maxCW / 2;
+  const mZoneMid = cZoneMid + maxCW / 2 + UNIT_GAP + maxMW / 2;
+
+  const CENTER_X = cZoneMid;
+  const canvasW  = PAD_X + pTotalW + maxCW + UNIT_GAP + mTotalW + PAD_X;
   const canvasH  = rowLayouts.length * ROW_H + PAD_Y * 2;
   const unitPos  = new Map<Unit, UnitPosition>();
 
   rowLayouts.forEach((rl, rowIdx) => {
     const y = PAD_Y + rowIdx * ROW_H;
 
-    // Center
+    // Center layout
     const cW = rowTotalWidth(rl.cUnits);
-    let cx = CENTER_X - cW / 2;
+    let cx = cZoneMid - cW / 2;
     rl.cUnits.forEach(u => {
       const w = unitWidth(u);
       unitPos.set(u, { x: cx, y, w, h: unitHeight(u) });
       cx += w + UNIT_GAP;
     });
 
-    // Paternal — grows leftward from centre
-    const pW     = rowTotalWidth(rl.pUnits);
-    const pBound = rl.cUnits.length > 0 ? CENTER_X - cW / 2 - UNIT_GAP : CENTER_X - UNIT_GAP;
-    let px = pBound - pW;
+    // Paternal side branch layout (centered in left zone)
+    const pW = rowTotalWidth(rl.pUnits);
+    let px = pZoneMid - pW / 2;
     rl.pUnits.forEach(u => {
       const w = unitWidth(u);
       unitPos.set(u, { x: px, y, w, h: unitHeight(u) });
       px += w + UNIT_GAP;
     });
 
-    // Maternal — grows rightward from centre
-    const mBound = rl.cUnits.length > 0 ? CENTER_X + cW / 2 + UNIT_GAP : CENTER_X + UNIT_GAP;
-    let mx = mBound;
+    // Maternal side branch layout (centered in right zone)
+    const mW = rowTotalWidth(rl.mUnits);
+    let mx = mZoneMid - mW / 2;
     rl.mUnits.forEach(u => {
       const w = unitWidth(u);
       unitPos.set(u, { x: mx, y, w, h: unitHeight(u) });
