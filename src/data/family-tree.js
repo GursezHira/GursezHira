@@ -1,12 +1,17 @@
 import { PATERNAL_NODES } from "./family-tree-paternal.js";
 import { MATERNAL_NODES } from "./family-tree-maternal.js";
 import { DADI_BAJWA_NODES, DADI_KAHLON_NODES } from "./family-tree-dadi-side.js";
-import { RANJEET_SIDE_NODES } from "./family-tree-ranjeet-side.js";
 import { MATERNAL_SABARJEET_NODES } from "./family-tree-maternal-sabarjeet.js";
 import { MATERNAL_NORANG_NODES } from "./family-tree-maternal-norang.js";
 import { MATERNAL_GURJEET_NODES } from "./family-tree-maternal-gurjeet.js";
 import { MATERNAL_BALVEER_NODES } from "./family-tree-maternal-balveer.js";
 import { MATERNAL_KAMALJEET_NODES } from "./family-tree-maternal-kamaljeet.js";
+import { RANJEET_BISHAN_NODES }     from "./family-tree-ranjeet-bishan.js";
+import { RANJEET_SHINGARA_NODES }   from "./family-tree-ranjeet-shingara.js";
+import { RANJEET_HARNAM_NODES }     from "./family-tree-ranjeet-harnam.js";
+import { RANJEET_RATAN_NODES }      from "./family-tree-ranjeet-ratan.js";
+import { RANJEET_BALVIRKAUR_NODES } from "./family-tree-ranjeet-balvirkaur.js";
+import { RANJEET_BALVIRSINGH_NODES } from "./family-tree-ranjeet-balvirsingh.js";
 
 // ── Gursez lives here as the shared centre node ──
 const GURSEZ_NODE = {
@@ -29,167 +34,277 @@ const GURSEZ_NODE = {
 };
 
 export const BRANCHES = [
+
+  // ── Royal Blue ──
   {
     id: "Paternal",
     label: "Paternal Side",
     nodes: PATERNAL_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#dff8fc,#c9f4f8)",
-      boxBg: "rgba(223,248,252,0.45)",
-      boxBorder: "rgba(92,215,234,0.38)",
-      nodeBorder: "#5cd7ea",
-      nodeBg: "linear-gradient(to bottom, rgba(223,248,252,0.18), white)",
-      stroke: "rgba(92,215,234,0.75)",
-      gridBefore: "linear-gradient(90deg,var(--sky),var(--sage-light))",
-      gridBadgeBg: "var(--blush-light)",
-      gridBadgeText: "#3a6e8a",
+      dot: "linear-gradient(135deg,#dbeafe,#3b82f6)",
+      boxBg: "rgba(219,234,254,0.55)",
+      boxBorder: "rgba(59,130,246,0.38)",
+      nodeBorder: "#3b82f6",
+      nodeBg: "linear-gradient(to bottom, rgba(219,234,254,0.25), white)",
+      stroke: "rgba(59,130,246,0.75)",
+      gridBefore: "linear-gradient(90deg,#dbeafe,#bfdbfe)",
+      gridBadgeBg: "#dbeafe",
+      gridBadgeText: "#1e3a8a",
     },
   },
+
+  // ── Deep Violet ──
   {
     id: "Maternal",
     label: "Maternal Side",
     nodes: MATERNAL_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#bda2df,#f8f0ff)",
-      boxBg: "rgba(237,228,248,0.45)",
-      boxBorder: "rgba(154,126,200,0.38)",
-      nodeBorder: "#9a7ec8",
-      nodeBg: "linear-gradient(to bottom, rgba(237,228,248,0.18), white)",
-      stroke: "rgba(154,126,200,0.75)",
-      gridBefore: "linear-gradient(90deg,var(--lavender),var(--blush-light))",
-      gridBadgeBg: "#d0c8e0",
-      gridBadgeText: "#6a4ea0",
+      dot: "linear-gradient(135deg,#ede9fe,#7c3aed)",
+      boxBg: "rgba(237,233,254,0.55)",
+      boxBorder: "rgba(124,58,237,0.38)",
+      nodeBorder: "#7c3aed",
+      nodeBg: "linear-gradient(to bottom, rgba(237,233,254,0.25), white)",
+      stroke: "rgba(124,58,237,0.75)",
+      gridBefore: "linear-gradient(90deg,#ede9fe,#ddd6fe)",
+      gridBadgeBg: "#ede9fe",
+      gridBadgeText: "#3b0764",
     },
   },
+
+  // ── Deep Amber ──
   {
     id: "Dadi-Bajwa",
     label: "Dadi's Side (Bajwa)",
     nodes: DADI_BAJWA_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#f8e8d8,#dff8fc)",
-      boxBg: "rgba(254,243,226,0.55)",
-      boxBorder: "rgba(230,160,80,0.38)",
-      nodeBorder: "#e6a050",
-      nodeBg: "linear-gradient(to bottom, rgba(254,243,226,0.25), white)",
-      stroke: "rgba(230,160,80,0.75)",
-      gridBefore: "linear-gradient(90deg,#fde8c8,#fef3e2)",
-      gridBadgeBg: "#fde8c8",
-      gridBadgeText: "#a05a10",
+      dot: "linear-gradient(135deg,#fef3c7,#d97706)",
+      boxBg: "rgba(254,243,199,0.55)",
+      boxBorder: "rgba(217,119,6,0.38)",
+      nodeBorder: "#d97706",
+      nodeBg: "linear-gradient(to bottom, rgba(254,243,199,0.25), white)",
+      stroke: "rgba(217,119,6,0.75)",
+      gridBefore: "linear-gradient(90deg,#fef3c7,#fde68a)",
+      gridBadgeBg: "#fef3c7",
+      gridBadgeText: "#78350f",
     },
   },
+
+  // ── Magenta Pink ──
   {
     id: "Dadi-Kahlon",
     label: "Kahlon Family",
     nodes: DADI_KAHLON_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#ffe4e1,#ffc0cb)",
-      boxBg: "rgba(255,228,225,0.55)",
-      boxBorder: "rgba(255,182,193,0.38)",
-      nodeBorder: "#ffb6c1",
-      nodeBg: "linear-gradient(to bottom, rgba(255,228,225,0.25), white)",
-      stroke: "rgba(255,182,193,0.75)",
-      gridBefore: "linear-gradient(90deg,#fee2e2,#fecaca)",
-      gridBadgeBg: "#fee2e2",
-      gridBadgeText: "#b91c1c",
+      dot: "linear-gradient(135deg,#fce7f3,#be185d)",
+      boxBg: "rgba(252,231,243,0.55)",
+      boxBorder: "rgba(190,24,93,0.38)",
+      nodeBorder: "#be185d",
+      nodeBg: "linear-gradient(to bottom, rgba(252,231,243,0.25), white)",
+      stroke: "rgba(190,24,93,0.75)",
+      gridBefore: "linear-gradient(90deg,#fce7f3,#fbcfe8)",
+      gridBadgeBg: "#fce7f3",
+      gridBadgeText: "#831843",
     },
   },
-{
-    id: "Ranjeet-Side",
-    label: "Ranjeet's Side",
-    nodes: RANJEET_SIDE_NODES,
+
+  // ── Deep Teal ──
+  {
+    id: "Ranjeet-Bishan",
+    label: "Bishan's Line (Bakhtaur & Ranjeet's Family)",
+    nodes: RANJEET_BISHAN_NODES,
     theme: {
-      dot: "linear-gradient(135deg, #d4f5ef, #a8ebe0)",
-      boxBg: "rgba(212,245,239,0.55)",
-      boxBorder: "rgba(72,195,175,0.38)",
-      nodeBorder: "#48c3af",
-      nodeBg: "linear-gradient(to bottom, rgba(212,245,239,0.25), white)",
-      stroke: "rgba(72,195,175,0.75)",
-      gridBefore: "linear-gradient(90deg,#b8ede4,#e0f8f4)",
-      gridBadgeBg: "#c8f0e8",
-      gridBadgeText: "#1a7a6a",
+      dot: "linear-gradient(135deg,#ccfbf1,#0d9488)",
+      boxBg: "rgba(204,251,241,0.55)",
+      boxBorder: "rgba(13,148,136,0.38)",
+      nodeBorder: "#0d9488",
+      nodeBg: "linear-gradient(to bottom, rgba(204,251,241,0.25), white)",
+      stroke: "rgba(13,148,136,0.75)",
+      gridBefore: "linear-gradient(90deg,#ccfbf1,#99f6e4)",
+      gridBadgeBg: "#ccfbf1",
+      gridBadgeText: "#134e4a",
     },
   },
+
+  // ── Mustard Yellow ──
+  {
+    id: "Ranjeet-Shingara",
+    label: "Shingara's Line",
+    nodes: RANJEET_SHINGARA_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#fefce8,#ca8a04)",
+      boxBg: "rgba(254,252,232,0.55)",
+      boxBorder: "rgba(202,138,4,0.38)",
+      nodeBorder: "#ca8a04",
+      nodeBg: "linear-gradient(to bottom, rgba(254,252,232,0.25), white)",
+      stroke: "rgba(202,138,4,0.75)",
+      gridBefore: "linear-gradient(90deg,#fefce8,#fef08a)",
+      gridBadgeBg: "#fefce8",
+      gridBadgeText: "#713f12",
+    },
+  },
+
+  // ── Deep Fuchsia ──
+  {
+    id: "Ranjeet-Harnam",
+    label: "Harnam Singh's Line",
+    nodes: RANJEET_HARNAM_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#fdf4ff,#a21caf)",
+      boxBg: "rgba(253,244,255,0.55)",
+      boxBorder: "rgba(162,28,175,0.38)",
+      nodeBorder: "#a21caf",
+      nodeBg: "linear-gradient(to bottom, rgba(253,244,255,0.25), white)",
+      stroke: "rgba(162,28,175,0.75)",
+      gridBefore: "linear-gradient(90deg,#fdf4ff,#f5d0fe)",
+      gridBadgeBg: "#fdf4ff",
+      gridBadgeText: "#581c87",
+    },
+  },
+
+  // ── Forest Green ──
+  {
+    id: "Ranjeet-Ratan",
+    label: "Ratan Singh's Line",
+    nodes: RANJEET_RATAN_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#f0fdf4,#15803d)",
+      boxBg: "rgba(240,253,244,0.55)",
+      boxBorder: "rgba(21,128,61,0.38)",
+      nodeBorder: "#15803d",
+      nodeBg: "linear-gradient(to bottom, rgba(240,253,244,0.25), white)",
+      stroke: "rgba(21,128,61,0.75)",
+      gridBefore: "linear-gradient(90deg,#f0fdf4,#bbf7d0)",
+      gridBadgeBg: "#f0fdf4",
+      gridBadgeText: "#14532d",
+    },
+  },
+
+  // ── Burnt Orange ──
+  {
+    id: "Ranjeet-BalvirKaur",
+    label: "Balvir Kaur's Line",
+    nodes: RANJEET_BALVIRKAUR_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#fff7ed,#ea580c)",
+      boxBg: "rgba(255,247,237,0.55)",
+      boxBorder: "rgba(234,88,12,0.38)",
+      nodeBorder: "#ea580c",
+      nodeBg: "linear-gradient(to bottom, rgba(255,247,237,0.25), white)",
+      stroke: "rgba(234,88,12,0.75)",
+      gridBefore: "linear-gradient(90deg,#fff7ed,#fed7aa)",
+      gridBadgeBg: "#fff7ed",
+      gridBadgeText: "#7c2d12",
+    },
+  },
+
+  // ── Deep Indigo ──
+  {
+    id: "Ranjeet-BalvirSingh",
+    label: "Balvir Singh's Line",
+    nodes: RANJEET_BALVIRSINGH_NODES,
+    theme: {
+      dot: "linear-gradient(135deg,#eef2ff,#4338ca)",
+      boxBg: "rgba(238,242,255,0.55)",
+      boxBorder: "rgba(67,56,202,0.38)",
+      nodeBorder: "#4338ca",
+      nodeBg: "linear-gradient(to bottom, rgba(238,242,255,0.25), white)",
+      stroke: "rgba(67,56,202,0.75)",
+      gridBefore: "linear-gradient(90deg,#eef2ff,#c7d2fe)",
+      gridBadgeBg: "#eef2ff",
+      gridBadgeText: "#1e1b4b",
+    },
+  },
+
+  // ── Deep Rose ──
   {
     id: "Maternal-Sabarjeet",
     label: "Maternal: Sabarjeet's Line",
     nodes: MATERNAL_SABARJEET_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#fce3c5,#fef0df)",
-      boxBg: "rgba(254,238,218,0.45)",
-      boxBorder: "rgba(235,170,110,0.38)",
-      nodeBorder: "#ebaa6e",
-      nodeBg: "linear-gradient(to bottom, rgba(254,238,218,0.18), white)",
-      stroke: "rgba(235,170,110,0.75)",
-      gridBefore: "linear-gradient(90deg,#fce3c5,var(--wheat))",
-      gridBadgeBg: "#fce3c5",
-      gridBadgeText: "#9b6a38",
+      dot: "linear-gradient(135deg,#fdf2f8,#db2777)",
+      boxBg: "rgba(253,242,248,0.55)",
+      boxBorder: "rgba(219,39,119,0.38)",
+      nodeBorder: "#db2777",
+      nodeBg: "linear-gradient(to bottom, rgba(253,242,248,0.25), white)",
+      stroke: "rgba(219,39,119,0.75)",
+      gridBefore: "linear-gradient(90deg,#fdf2f8,#fbcfe8)",
+      gridBadgeBg: "#fdf2f8",
+      gridBadgeText: "#831843",
     },
   },
+
+  // ── Ocean Cyan ──
   {
     id: "Maternal-Norang",
     label: "Maternal: Norang's Line",
     nodes: MATERNAL_NORANG_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#d2f3db,#e5faeb)",
-      boxBg: "rgba(225,248,232,0.45)",
-      boxBorder: "rgba(125,205,150,0.38)",
-      nodeBorder: "#7dcd96",
-      nodeBg: "linear-gradient(to bottom, rgba(225,248,232,0.18), white)",
-      stroke: "rgba(125,205,150,0.75)",
-      gridBefore: "linear-gradient(90deg,var(--sage-light),var(--wheat))",
-      gridBadgeBg: "#d2f3db",
-      gridBadgeText: "#4b8e61",
+      dot: "linear-gradient(135deg,#f0fdfa,#0891b2)",
+      boxBg: "rgba(240,253,250,0.55)",
+      boxBorder: "rgba(8,145,178,0.38)",
+      nodeBorder: "#0891b2",
+      nodeBg: "linear-gradient(to bottom, rgba(240,253,250,0.25), white)",
+      stroke: "rgba(8,145,178,0.75)",
+      gridBefore: "linear-gradient(90deg,#f0fdfa,#a5f3fc)",
+      gridBadgeBg: "#f0fdfa",
+      gridBadgeText: "#164e63",
     },
   },
+
+  // ── Crimson Red ──
   {
     id: "Maternal-Gurjeet",
     label: "Maternal: Gurjeet's Line",
     nodes: MATERNAL_GURJEET_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#fedfe8,#fff0f5)",
-      boxBg: "rgba(254,230,240,0.45)",
-      boxBorder: "rgba(235,130,170,0.38)",
-      nodeBorder: "#ebb0c5",
-      nodeBg: "linear-gradient(to bottom, rgba(254,230,240,0.18), white)",
-      stroke: "rgba(235,130,170,0.75)",
-      gridBefore: "linear-gradient(90deg,#fedfe8,#fdf3f6)",
-      gridBadgeBg: "#fedfe8",
-      gridBadgeText: "#b04a70",
+      dot: "linear-gradient(135deg,#fff1f2,#e11d48)",
+      boxBg: "rgba(255,241,242,0.55)",
+      boxBorder: "rgba(225,29,72,0.38)",
+      nodeBorder: "#e11d48",
+      nodeBg: "linear-gradient(to bottom, rgba(255,241,242,0.25), white)",
+      stroke: "rgba(225,29,72,0.75)",
+      gridBefore: "linear-gradient(90deg,#fff1f2,#fecdd3)",
+      gridBadgeBg: "#fff1f2",
+      gridBadgeText: "#881337",
     },
   },
+
+  // ── Steel Teal / Dark Cyan ──
   {
     id: "Maternal-Balveer",
     label: "Maternal: Balveer's Line",
     nodes: MATERNAL_BALVEER_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#d0f0eb,#e4f7f4)",
-      boxBg: "rgba(222,246,242,0.45)",
-      boxBorder: "rgba(110,200,185,0.38)",
-      nodeBorder: "#6ec8b9",
-      nodeBg: "linear-gradient(to bottom, rgba(222,246,242,0.18), white)",
-      stroke: "rgba(110,200,185,0.75)",
-      gridBefore: "linear-gradient(90deg,#d0f0eb,var(--sky))",
-      gridBadgeBg: "#d0f0eb",
-      gridBadgeText: "#3a877d",
+      dot: "linear-gradient(135deg,#ecfeff,#0e7490)",
+      boxBg: "rgba(236,254,255,0.55)",
+      boxBorder: "rgba(14,116,144,0.38)",
+      nodeBorder: "#0e7490",
+      nodeBg: "linear-gradient(to bottom, rgba(236,254,255,0.25), white)",
+      stroke: "rgba(14,116,144,0.75)",
+      gridBefore: "linear-gradient(90deg,#ecfeff,#a5f3fc)",
+      gridBadgeBg: "#ecfeff",
+      gridBadgeText: "#083344",
     },
   },
+
+  // ── Olive Lime ──
   {
     id: "Maternal-Kamaljeet",
     label: "Maternal: Kamaljeet's Line",
     nodes: MATERNAL_KAMALJEET_NODES,
     theme: {
-      dot: "linear-gradient(135deg,#fdf3b8,#fef9d6)",
-      boxBg: "rgba(254,248,198,0.45)",
-      boxBorder: "rgba(230,210,95,0.38)",
-      nodeBorder: "#e6d25f",
-      nodeBg: "linear-gradient(to bottom, rgba(254,248,198,0.18), white)",
-      stroke: "rgba(230,210,95,0.75)",
-      gridBefore: "linear-gradient(90deg,#fdf3b8,var(--wheat))",
-      gridBadgeBg: "#fdf3b8",
-      gridBadgeText: "#857820",
+      dot: "linear-gradient(135deg,#f7fee7,#65a30d)",
+      boxBg: "rgba(247,254,231,0.55)",
+      boxBorder: "rgba(101,163,13,0.38)",
+      nodeBorder: "#65a30d",
+      nodeBg: "linear-gradient(to bottom, rgba(247,254,231,0.25), white)",
+      stroke: "rgba(101,163,13,0.75)",
+      gridBefore: "linear-gradient(90deg,#f7fee7,#d9f99d)",
+      gridBadgeBg: "#f7fee7",
+      gridBadgeText: "#1a2e05",
     },
   },
-  
+
 ];
 
 export const TREE_DATA = {
