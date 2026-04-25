@@ -35,6 +35,7 @@ const { title, description, image, type } = Astro.props;
         }
         return 'light';
       })();
+      
       if (theme === 'dark') {
         document.documentElement.classList.add('dark-mode');
       } else {

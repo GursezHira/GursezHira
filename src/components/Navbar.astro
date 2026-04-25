@@ -47,7 +47,6 @@ const isTree = pathname.startsWith('/family-tree');
 
 <script>
   function setupThemeToggle() {
-    // Get all theme toggle buttons
     const themeButtons = [
       document.getElementById('themeToggle'),
       document.getElementById('mobileThemeToggle'),
@@ -56,42 +55,28 @@ const isTree = pathname.startsWith('/family-tree');
     
     if (themeButtons.length === 0) return;
     
-    const updateButtonIcons = (btn: HTMLElement, isDark: boolean) => {
-      const iconLight = btn.querySelector('.icon-light') as HTMLElement;
-      const iconDark = btn.querySelector('.icon-dark') as HTMLElement;
-      if (iconLight) iconLight.style.display = isDark ? 'inline' : 'none';
-      if (iconDark) iconDark.style.display = isDark ? 'none' : 'inline';
+    const updateButtonIcons = (isDark: boolean) => {
+      themeButtons.forEach(btn => {
+        const iconLight = btn.querySelector('.icon-light') as HTMLElement;
+        const iconDark = btn.querySelector('.icon-dark') as HTMLElement;
+        if (iconLight) iconLight.style.display = isDark ? 'inline' : 'none';
+        if (iconDark) iconDark.style.display = isDark ? 'none' : 'inline';
+      });
     };
     
     const isDark = document.documentElement.classList.contains('dark-mode');
+    updateButtonIcons(isDark);
     
-    // Initialize all buttons
-    themeButtons.forEach(btn => updateButtonIcons(btn, isDark));
-    
-    // Add click handlers to all buttons
     themeButtons.forEach(btn => {
-      // Clone to remove existing listeners
-      const newBtn = btn.cloneNode(true) as HTMLElement;
-      if (btn.parentNode) {
-        btn.parentNode.replaceChild(newBtn, btn);
-      }
-      
-      newBtn.addEventListener('click', () => {
+      // Use a named function to avoid double-binding if needed, 
+      // though astro:page-load handles cleanup for bundled scripts usually.
+      btn.onclick = () => {
         const element = document.documentElement;
         element.classList.toggle('dark-mode');
-        
         const isDarkNow = element.classList.contains('dark-mode');
         document.cookie = `theme=${isDarkNow ? 'dark' : 'light'}; path=/; max-age=31536000`;
-        
-        // Update all buttons
-        const allButtons = [
-          document.getElementById('themeToggle'),
-          document.getElementById('mobileThemeToggle'),
-          document.getElementById('mobileMenuThemeToggle')
-        ].filter((b): b is HTMLElement => b !== null);
-        
-        allButtons.forEach(b => updateButtonIcons(b, isDarkNow));
-      });
+        updateButtonIcons(isDarkNow);
+      };
     });
   }
   
