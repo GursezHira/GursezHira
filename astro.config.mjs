@@ -4,40 +4,6 @@ import sveltia from 'astro-loader-sveltia-cms';
 
 export default defineConfig({
   site: 'https://gursez.hira.im',
-
-  // GitHub Pages serves files with long-lived cache headers for hashed assets
-  // Astro's default asset hashing already handles cache busting for /_astro/* files.
-  // Setting trailingSlash and build output helps GH Pages serve correctly.
-  trailingSlash: 'ignore',
-
-  build: {
-    // Inline small stylesheets (<4kb) directly into HTML to eliminate render-blocking CSS requests.
-    // Your Layout.CMtM6yVA.css is 9 KiB so it won't be inlined, but any smaller component
-    // styles will be, reducing round trips.
-    inlineStylesheets: 'auto',
-
-    // Astro already fingerprints /_astro/* assets with content hashes.
-    // GitHub Pages CDN caches these aggressively on repeat visits automatically.
-    assets: '_astro',
-  },
-
-  vite: {
-    build: {
-      // Raise the chunk size warning limit (optional, keeps build output clean)
-      chunkSizeWarningLimit: 1000,
-
-      rollupOptions: {
-        output: {
-          // Keep CSS in a single file to minimise requests
-          manualChunks: undefined,
-        },
-      },
-    },
-
-    // Optimise image handling during dev
-    assetsInclude: ['**/*.webp', '**/*.avif'],
-  },
-
   integrations: [
     sitemap(),
     sveltia({
