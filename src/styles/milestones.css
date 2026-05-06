@@ -32,7 +32,7 @@
   font-family: var(--font-body);
 }
 .filter-chip:hover { border-color: var(--blush-deep); color: var(--blush-deep); }
-.filter-chip.active { background: var(--cream); color: white; border-color: var(--text-dark); }
+.filter-chip.active { background: var(--cream); color: var(--text-mid); border-color: var(--text-dark); font-weight: 600; }
 .filter-sort select {
   padding: 10px 16px; border: 1.5px solid rgba(200,160,140,0.2);
   border-radius: 99px; font-family: var(--font-body); font-size: 0.82rem;
