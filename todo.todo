@@ -2,14 +2,27 @@
   "todotree": {
     "tree": [
       {
+        "key": 1779614609618,
+        "children": [],
+        "todo": {
+          "content": "Add Skeletons for Component to make the page load fast",
+          "id": 1779614609618,
+          "level": "default",
+          "done": false,
+          "start": 1779614609618
+        }
+      },
+      {
         "key": 1779610873180,
         "children": [],
         "todo": {
           "content": "Fix Dark Mode as default - Need Light Mode as default.",
           "id": 1779610873180,
           "level": "default",
-          "done": false,
-          "start": 1779610873180
+          "done": true,
+          "start": 1779610873180,
+          "focus": false,
+          "end": 1779614593922
         }
       },
       {
@@ -157,7 +170,8 @@
     ],
     "expandKeys": [
       1779609225495,
-      1779610251169
+      1779610251169,
+      1779609345669
     ],
     "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
     "add_mode": "top",
@@ -172,6 +186,6 @@
     "simpleMode": false,
     "lang": "en",
     "desc": "Things I need to add",
-    "version": "1779610895597"
+    "version": "1779614689538"
   }
 }
