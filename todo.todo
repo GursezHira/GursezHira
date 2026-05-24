@@ -1,0 +1,177 @@
+{
+  "todotree": {
+    "tree": [
+      {
+        "key": 1779610873180,
+        "children": [],
+        "todo": {
+          "content": "Fix Dark Mode as default - Need Light Mode as default.",
+          "id": 1779610873180,
+          "level": "default",
+          "done": false,
+          "start": 1779610873180
+        }
+      },
+      {
+        "key": 1779610251169,
+        "children": [
+          {
+            "key": 1779610294605,
+            "children": [],
+            "todo": {
+              "content": "Twitter:Domain",
+              "id": 1779610294605,
+              "level": "default",
+              "done": true,
+              "start": 1779610294605,
+              "focus": false,
+              "end": 1779610853985
+            }
+          },
+          {
+            "key": 1779610287616,
+            "children": [],
+            "todo": {
+              "content": "Twitter:Creator",
+              "id": 1779610287616,
+              "level": "default",
+              "done": true,
+              "start": 1779610287616,
+              "focus": false,
+              "end": 1779610861282
+            }
+          },
+          {
+            "key": 1779610269167,
+            "children": [],
+            "todo": {
+              "content": "Twitter:Site",
+              "id": 1779610269167,
+              "level": "default",
+              "done": true,
+              "start": 1779610269167,
+              "focus": false,
+              "end": 1779610862406
+            }
+          }
+        ],
+        "todo": {
+          "content": "SEO Meta Tags Add",
+          "id": 1779610251169,
+          "level": "default",
+          "done": true,
+          "start": 1779610251169,
+          "focus": false,
+          "end": 1779610868542
+        }
+      },
+      {
+        "key": 1779610012047,
+        "children": [],
+        "todo": {
+          "content": "Add Custom Image Support for Blog Posts",
+          "id": 1779610012047,
+          "level": "default",
+          "done": false,
+          "start": 1779610012047
+        }
+      },
+      {
+        "key": 1779610696836,
+        "children": [],
+        "todo": {
+          "content": "Implement \"wsrv.nl\" Image Optimization",
+          "id": 1779610696836,
+          "level": "default",
+          "done": false,
+          "start": 1779610696836
+        }
+      },
+      {
+        "key": 1779609345669,
+        "children": [
+          {
+            "key": 1779610130753,
+            "children": [],
+            "todo": {
+              "content": "Add \"X Months X Days ago\" for Milestones",
+              "id": 1779610130753,
+              "level": "default",
+              "done": false,
+              "start": 1779610130753
+            }
+          },
+          {
+            "key": 1779610110786,
+            "children": [],
+            "todo": {
+              "content": "Milestones at Home page do not have Popup. Need to add that",
+              "id": 1779610110786,
+              "level": "default",
+              "done": false,
+              "start": 1779610110786
+            }
+          },
+          {
+            "key": 1779610100742,
+            "children": [],
+            "todo": {
+              "content": "Create a Seprate page for Milestones to make it sharable on Social Media",
+              "id": 1779610100742,
+              "level": "default",
+              "done": false,
+              "start": 1779610100742
+            }
+          }
+        ],
+        "todo": {
+          "content": "Milestones",
+          "id": 1779609345669,
+          "level": "default",
+          "done": false,
+          "start": 1779609345669
+        }
+      },
+      {
+        "key": 1779609225495,
+        "children": [],
+        "todo": {
+          "content": "Fix Family Tree Colors in Dark Mode",
+          "id": 1779609225495,
+          "level": "default",
+          "done": false,
+          "start": 1779609225495
+        }
+      },
+      {
+        "key": 1779610422530,
+        "children": [],
+        "todo": {
+          "content": "Footer Texts Fix",
+          "id": 1779610422530,
+          "level": "default",
+          "done": false,
+          "start": 1779610422530
+        }
+      }
+    ],
+    "expandKeys": [
+      1779609225495,
+      1779610251169
+    ],
+    "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
+    "add_mode": "top",
+    "virtual": false,
+    "timelines": [],
+    "showLine": false,
+    "restDays": [],
+    "playFontSize": 24,
+    "title": "To Do List",
+    "autoSort": false,
+    "showEndTime": false,
+    "simpleMode": false,
+    "lang": "en",
+    "desc": "Things I need to add",
+    "version": "1779610895597"
+  }
+}
