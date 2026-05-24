@@ -1,9 +1,0 @@
-deploy:
-    git add -A
-    git diff --cached --quiet || git commit -m "Building"
-    git push
-
-d:
-    git add -A
-    git diff --cached --quiet || git commit -m "Update"
-    git push
