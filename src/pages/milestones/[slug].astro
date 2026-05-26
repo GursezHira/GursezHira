@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
 import { slugify } from '../../utils/slugify';
 import { getMilestoneAge, formatMilestoneDate } from '../../utils/date';
+import { getAnimatedEmojiUrl } from '../../utils/emoji';
 
 export async function getStaticPaths() {
   const milestones = await getCollection('milestones');
@@ -17,6 +18,7 @@ export async function getStaticPaths() {
 
 const { milestone } = Astro.props;
 const m = milestone.data;
+const animatedEmojiUrl = await getAnimatedEmojiUrl(m.animatedEmoji);
 
 function getCategoryClass(cat: string) {
   const map: Record<string, string> = {
@@ -51,7 +53,14 @@ const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encod
       </a>
       
       <article class="milestone-detail-card fade-up">
-        <div class="milestone-hero-img" style={`background:${m.color}`}>{m.emoji}</div>
+        <div class="milestone-hero-img" style={`background:${m.color}; display: flex; align-items: center; justify-content: center; overflow: hidden;`}>
+          {animatedEmojiUrl ? (
+            <img src={animatedEmojiUrl} alt={m.emoji} class="animated-emoji" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="static-emoji" style="display: none;">{m.emoji}</span>
+          ) : (
+            <span class="static-emoji">{m.emoji}</span>
+          )}
+        </div>
         
         <div class="milestone-detail-body">
           <span class={`mpc-category ${getCategoryClass(m.category)}`}>{m.category}</span>

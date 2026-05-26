@@ -10,6 +10,8 @@ export interface Milestone {
   date: string;
   category: string;
   emoji: string;
+  animatedEmoji?: string;
+  animatedEmojiUrl?: string | null;
   color: string;
   desc: string;
   story: string;

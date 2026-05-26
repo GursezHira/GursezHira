@@ -96,9 +96,16 @@ export function initMilestonesPage() {
     document.querySelectorAll('.sk-item').forEach(s => s.remove());
   }
 
+  function renderEmojiHtml(emoji: string, animatedEmojiUrl?: string | null) {
+    if (animatedEmojiUrl) {
+      return `<img src="${animatedEmojiUrl}" alt="${emoji}" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><span class="static-emoji" style="display:none;">${emoji}</span>`;
+    }
+    return `<span class="static-emoji">${emoji}</span>`;
+  }
+
   function buildMilestoneHTML(m: Milestone) {
     return `
-      <div class="modal-img" style="background:${m.color}">${m.emoji}</div>
+      <div class="modal-img" style="background:${m.color}">${renderEmojiHtml(m.emoji, m.animatedEmojiUrl)}</div>
       <a href="/milestones/${slugify(m.title)}" class="modal-link" aria-label="View single page" style="
           position: absolute;
           top: 20px;
@@ -169,13 +176,13 @@ export function initMilestonesPage() {
         item.style.transitionDelay = (i * 0.08) + 's';
         item.innerHTML = `
           <div class="tl-empty"></div>
-          <div class="tl-center"><div class="tl-node">${m.emoji}</div></div>
+          <div class="tl-center"><div class="tl-node" style="display:flex;align-items:center;justify-content:center;">${renderEmojiHtml(m.emoji, m.animatedEmojiUrl)}</div></div>
           <div class="tl-card" onclick="openModal('${m.id}')">
             <div class="tl-card-header">
               <div class="tl-card-title">${m.title}</div>
               <span class="mpc-category ${getCategoryClass(m.category)}">${m.category}</span>
             </div>
-            <div class="tl-card-img" style="background:${m.color}">${m.emoji}</div>
+            <div class="tl-card-img" style="background:${m.color};display:flex;align-items:center;justify-content:center;">${renderEmojiHtml(m.emoji, m.animatedEmojiUrl)}</div>
             <div class="tl-card-desc">${m.desc}</div>
             <div class="tl-card-footer">
               <span class="tl-age">${getMilestoneAge(m.date)}</span>

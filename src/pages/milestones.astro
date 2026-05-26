@@ -3,9 +3,15 @@ import Layout from '../layouts/Layout.astro';
 import MemberModal from '../components/MemberModal.astro';
 import MilestoneFilters from '../components/MilestoneFilters.astro';
 import { getCollection } from 'astro:content';
+import { getAnimatedEmojiUrl } from '../utils/emoji';
 
 const allMilestonesRaw = await getCollection('milestones');
-const ALL_MILESTONES = allMilestonesRaw.map(m => ({ ...m.data, id: m.id }));
+const ALL_MILESTONES = await Promise.all(
+  allMilestonesRaw.map(async (m) => {
+    const animatedEmojiUrl = await getAnimatedEmojiUrl(m.data.animatedEmoji);
+    return { ...m.data, id: m.id, animatedEmojiUrl };
+  })
+);
 ---
 
 <Layout 
