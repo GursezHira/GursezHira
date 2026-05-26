@@ -10,37 +10,42 @@ export function formatMilestoneDate(dateStr: string) {
 }
 
 export function getMilestoneAge(dateStr: string, birthDateStr: string = BIRTH_DATE) {
-  const birth = new Date(birthDateStr);
   const milestone = new Date(dateStr);
+  const today = new Date();
   
-  const diffMs = milestone.getTime() - birth.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  milestone.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
   
-  if (diffDays === 0) return 'Newborn';
-  if (diffDays < 0) return 'Pre-birth';
-  if (diffDays < 7) return `${diffDays} days old`;
+  const diffMs = milestone.getTime() - today.getTime();
   
-  const diffWeeks = Math.floor(diffDays / 7);
-  if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} old`;
-  
-  // Calculate months properly
-  let months = (milestone.getFullYear() - birth.getFullYear()) * 12 + (milestone.getMonth() - birth.getMonth());
-  if (milestone.getDate() < birth.getDate()) {
-    months--;
+  if (diffMs === 0) {
+    return 'Today';
   }
   
-  if (months < 1) {
-     // If it's more than 4 weeks but less than a full month, still use weeks or days? 
-     // Usually 4 weeks is a month in baby terms, but let's be precise.
-     return `${diffWeeks} weeks old`;
+  if (diffMs < 0) {
+    // Past milestone: "X Months X Days ago"
+    let months = (today.getFullYear() - milestone.getFullYear()) * 12 + (today.getMonth() - milestone.getMonth());
+    let days = today.getDate() - milestone.getDate();
+    
+    if (days < 0) {
+      months--;
+      // Days in the previous month of today
+      const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+    
+    if (months > 0) {
+      const monthStr = `${months} Month${months !== 1 ? 's' : ''}`;
+      const dayStr = days > 0 ? ` ${days} Day${days !== 1 ? 's' : ''}` : '';
+      return `${monthStr}${dayStr} ago`;
+    } else {
+      return `${days} Day${days !== 1 ? 's' : ''} ago`;
+    }
+  } else {
+    // Future milestone: "X Year" or "X Years"
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    const years = Math.floor(diffDays / 365.25);
+    const displayYears = Math.max(1, years);
+    return `${displayYears} Year${displayYears !== 1 ? 's' : ''}`;
   }
-  
-  if (months < 24) {
-    return `${months} month${months > 1 ? 's' : ''} old`;
-  }
-  
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-  if (remainingMonths === 0) return `${years} year${years > 1 ? 's' : ''} old`;
-  return `${years} year${years > 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths > 1 ? 's' : ''} old`;
 }
