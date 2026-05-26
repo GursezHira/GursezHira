@@ -2,6 +2,17 @@
   "todotree": {
     "tree": [
       {
+        "key": 1779779668062,
+        "children": [],
+        "todo": {
+          "content": "Add Animated Emojies and Leave Normal Emojies as Fall Back",
+          "id": 1779779668062,
+          "level": "default",
+          "done": false,
+          "start": 1779779668062
+        }
+      },
+      {
         "key": 1779614609618,
         "children": [],
         "todo": {
@@ -122,8 +133,9 @@
               "content": "Milestones at Home page do not have Popup. Need to add that",
               "id": 1779610110786,
               "level": "default",
-              "done": false,
-              "start": 1779610110786
+              "done": true,
+              "start": 1779610110786,
+              "end": 1779614689538
             }
           },
           {
@@ -133,8 +145,9 @@
               "content": "Create a Seprate page for Milestones to make it sharable on Social Media",
               "id": 1779610100742,
               "level": "default",
-              "done": false,
-              "start": 1779610100742
+              "done": true,
+              "start": 1779610100742,
+              "end": 1779614689538
             }
           }
         ],
@@ -142,8 +155,9 @@
           "content": "Milestones",
           "id": 1779609345669,
           "level": "default",
-          "done": false,
-          "start": 1779609345669
+          "done": true,
+          "start": 1779609345669,
+          "end": 1779614689538
         }
       },
       {
@@ -187,6 +201,6 @@
     "simpleMode": false,
     "lang": "en",
     "desc": "Things I need to add",
-    "version": "1779614689538"
+    "version": "1779779713603"
   }
 }

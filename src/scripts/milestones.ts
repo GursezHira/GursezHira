@@ -7,6 +7,7 @@
 import { formatMilestoneDate, getMilestoneAge } from '../utils/date';
 import { initRevealObserver } from '../utils/reveal';
 import type { Milestone, MilestoneCategory, SortOrder } from '../types/milestone';
+import { slugify } from '../utils/slugify';
 
 declare global {
   interface Window {
@@ -98,6 +99,25 @@ export function initMilestonesPage() {
   function buildMilestoneHTML(m: Milestone) {
     return `
       <div class="modal-img" style="background:${m.color}">${m.emoji}</div>
+      <a href="/milestones/${slugify(m.title)}" class="modal-link" aria-label="View single page" style="
+          position: absolute;
+          top: 20px;
+          right: 63px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: var(--shadow-soft);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1rem;
+          cursor: pointer;
+          color: var(--text-mid);
+          transition: all 0.2s;
+          text-decoration: none;
+          z-index: 10;
+      ">🔗</a>
       <div class="modal-body">
         <span class="mpc-category ${getCategoryClass(m.category)} modal-category">${m.category}</span>
         <h2 class="modal-title">${m.title}</h2>

@@ -1,5 +1,6 @@
 ---
 import { getMilestoneAge, formatMilestoneDate } from "../utils/date";
+import { slugify } from "../utils/slugify";
 
 interface Props {
   milestone: any;
@@ -30,4 +31,68 @@ function getCategoryClass(cat: string) {
     <div class="mpc-age">{getMilestoneAge(m.data.date)}</div>
     <div class="mpc-date">{formatMilestoneDate(m.data.date)}</div>
   </div>
+
+  <template class="milestone-modal-template">
+    <div class="modal-img" style={`background:${m.data.color}`}>
+      {m.data.emoji}
+    </div>
+    <a
+      href={`/milestones/${slugify(m.data.title)}`}
+      class="modal-link"
+      aria-label="View single page">🔗</a
+    >
+    <div class="modal-body">
+      <span
+        class={`mpc-category ${getCategoryClass(m.data.category)} modal-category`}
+        >{m.data.category}</span
+      >
+      <h2 class="modal-title">{m.data.title}</h2>
+      <div class="modal-age-date">
+        <span>👶 {getMilestoneAge(m.data.date)}</span>
+        <span>📅 {formatMilestoneDate(m.data.date)}</span>
+      </div>
+      <div class="modal-desc">{m.data.desc}</div>
+      <div class="modal-full-story">{m.data.story}</div>
+    </div>
+  </template>
 </div>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const cards = document.querySelectorAll(".milestone-preview-card");
+    cards.forEach((card) => {
+      if (card.classList.contains("has-popup-listener")) return;
+      card.classList.add("has-popup-listener");
+
+      card.addEventListener("click", (e) => {
+        if ((e.target as HTMLElement).closest(".mpc-category")) return;
+
+        const template = card.querySelector(
+          ".milestone-modal-template",
+        ) as HTMLTemplateElement;
+        if (!template) return;
+
+        const isCelebration =
+          card.querySelector(".mpc-category")?.textContent?.trim() ===
+          "Celebration";
+
+        if (typeof (window as any).milestoneModal_open === "function") {
+          (window as any).milestoneModal_open(template.innerHTML);
+
+          if (isCelebration) {
+            import("https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm").then(
+              (confettiModule) => {
+                const confetti = confettiModule.default || confettiModule;
+                confetti({
+                  particleCount: 150,
+                  spread: 70,
+                  origin: { y: 0.6 },
+                });
+              },
+            );
+          }
+        }
+      });
+    });
+  });
+</script>

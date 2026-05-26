@@ -1,0 +1,308 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { slugify } from '../../utils/slugify';
+import { getMilestoneAge, formatMilestoneDate } from '../../utils/date';
+
+export async function getStaticPaths() {
+  const milestones = await getCollection('milestones');
+  return milestones.map((m) => {
+    const slug = slugify(m.data.title);
+    return {
+      params: { slug },
+      props: { milestone: m },
+    };
+  });
+}
+
+const { milestone } = Astro.props;
+const m = milestone.data;
+
+function getCategoryClass(cat: string) {
+  const map: Record<string, string> = {
+    Firsts: 'cat-firsts',
+    Monthly: 'cat-monthly',
+    Growth: 'cat-growth',
+    Funny: 'cat-funny',
+    Health: 'cat-health',
+    Celebration: 'cat-celebration'
+  };
+  return map[cat] || 'cat-firsts';
+}
+
+const url = Astro.url.href;
+const title = m.title;
+
+const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+---
+
+<Layout 
+  title={m.title}
+  description={m.desc}
+  image="/og/home.png"
+  type="article"
+>
+  <main id="page-milestone-detail" class="page active" aria-label={`Milestone: ${m.title}`}>
+    <div class="container" style="padding-top:48px; max-width: 760px;">
+      <a href="/milestones" class="back-btn" aria-label="Back to milestones">
+        ← Back to Milestones
+      </a>
+      
+      <article class="milestone-detail-card fade-up">
+        <div class="milestone-hero-img" style={`background:${m.color}`}>{m.emoji}</div>
+        
+        <div class="milestone-detail-body">
+          <span class={`mpc-category ${getCategoryClass(m.category)}`}>{m.category}</span>
+          <h1 class="milestone-title">{m.title}</h1>
+          
+          <div class="milestone-meta">
+            <span>👶 {getMilestoneAge(m.date)}</span>
+            <span>📅 {formatMilestoneDate(m.date)}</span>
+          </div>
+          
+          <p class="milestone-desc">{m.desc}</p>
+          
+          {m.story && (
+            <div class="milestone-story">
+              {m.story.split('\n\n').map((paragraph: string) => (
+                <p>{paragraph}</p>
+              ))}
+            </div>
+          )}
+          
+          <hr class="share-divider" />
+          
+          <div class="share-section">
+            <span class="share-label">Share this precious moment:</span>
+            <div class="share-buttons">
+              <a href={twitterUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-twitter" aria-label="Share on Twitter/X">
+                <svg class="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span>X</span>
+              </a>
+              <a href={facebookUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-facebook" aria-label="Share on Facebook">
+                <svg class="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
+                </svg>
+                <span>Facebook</span>
+              </a>
+              <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-linkedin" aria-label="Share on LinkedIn">
+                <svg class="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                <span>LinkedIn</span>
+              </a>
+              <button class="share-btn share-copy" id="copyLinkBtn" aria-label="Copy page link">
+                <svg class="share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <span id="copyLinkText">Copy Link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    // Fade-up animation observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Copy Link functionality
+    const copyBtn = document.getElementById('copyLinkBtn');
+    const copyText = document.getElementById('copyLinkText');
+    
+    if (copyBtn && copyText) {
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          copyText.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          
+          setTimeout(() => {
+            copyText.textContent = 'Copy Link';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy text: ', err);
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  .back-btn {
+    display: inline-block;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-family: var(--font-body);
+  }
+  .back-btn:hover {
+    color: var(--blush-deep);
+  }
+  .milestone-detail-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(200,160,140,0.1);
+    overflow: hidden;
+    margin-bottom: 60px;
+  }
+  .milestone-hero-img {
+    width: 100%;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+  }
+  .milestone-detail-body {
+    padding: 40px;
+  }
+  .milestone-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text-dark);
+    margin-top: 16px;
+    margin-bottom: 12px;
+  }
+  .milestone-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.88rem;
+    color: var(--text-soft);
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(200,160,140,0.15);
+  }
+  .milestone-desc {
+    font-size: 1.1rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+  .milestone-story {
+    font-size: 0.98rem;
+    color: var(--text-mid);
+    line-height: 1.85;
+    margin-bottom: 32px;
+  }
+  .milestone-story p {
+    margin-bottom: 16px;
+  }
+  .share-divider {
+    border: 0;
+    height: 1px;
+    background: rgba(200,160,140,0.15);
+    margin: 32px 0 24px 0;
+  }
+  .share-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .share-label {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    letter-spacing: 0.02em;
+  }
+  .share-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .share-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--cream);
+    color: var(--text-mid);
+    border: 1.5px solid rgba(200,160,140,0.15);
+  }
+  .share-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+    border-color: var(--blush-deep);
+    color: var(--blush-deep);
+  }
+  .share-twitter:hover {
+    background: rgba(20, 23, 26, 0.04);
+    color: #14171A;
+    border-color: #14171A;
+  }
+  .share-facebook:hover {
+    background: rgba(24, 119, 242, 0.04);
+    color: #1877F2;
+    border-color: #1877F2;
+  }
+  .share-linkedin:hover {
+    background: rgba(10, 102, 194, 0.04);
+    color: #0A66C2;
+    border-color: #0A66C2;
+  }
+  .share-copy.copied {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #2e7d32;
+  }
+  .share-copy.copied:hover {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #2e7d32;
+  }
+  
+  @media (max-width: 768px) {
+    .milestone-detail-body {
+      padding: 24px;
+    }
+    .milestone-hero-img {
+      height: 240px;
+      font-size: 4.5rem;
+    }
+    .share-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+    }
+    .share-btn {
+      justify-content: center;
+    }
+  }
+</style>

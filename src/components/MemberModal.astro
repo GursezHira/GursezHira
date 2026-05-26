@@ -37,50 +37,62 @@ const isPanel = variant === 'panel';
 
 <script define:vars={{ id, isPanel }}>
   (function () {
-    const closeBtn = document.getElementById(id + 'CloseBtn');
-    const content  = document.getElementById(id + 'Content');
+    function setupModal() {
+      const closeBtn = document.getElementById(id + 'CloseBtn');
+      const content  = document.getElementById(id + 'Content');
+      const overlay = isPanel
+        ? document.getElementById(id + 'Overlay')
+        : document.getElementById(id);
+      const panel = isPanel ? document.getElementById(id) : null;
 
-    // Panel variant uses a separate overlay element; modal variant uses the wrapper itself
-    const overlay = isPanel
-      ? document.getElementById(id + 'Overlay')
-      : document.getElementById(id);
+      if (!closeBtn || !overlay || !content) return;
 
-    const panel = isPanel ? document.getElementById(id) : null;
-
-    function closeModal() {
-      if (isPanel) {
-        panel.classList.remove('open');
-        overlay.classList.remove('open');
-      } else {
-        overlay.classList.remove('open');
+      function closeModal() {
+        if (isPanel) {
+          panel.classList.remove('open');
+          overlay.classList.remove('open');
+        } else {
+          overlay.classList.remove('open');
+        }
+        document.body.style.overflow = '';
       }
-      document.body.style.overflow = '';
+
+      function openModal(html) {
+        content.innerHTML = html;
+        if (isPanel) {
+          panel.classList.add('open');
+          overlay.classList.add('open');
+        } else {
+          overlay.classList.add('open');
+        }
+        document.body.style.overflow = 'hidden';
+        closeBtn.focus();
+      }
+
+      window[id + '_open']  = openModal;
+      window[id + '_close'] = closeModal;
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (isPanel || e.target === overlay) closeModal();
+      });
     }
 
-    function openModal(html) {
-      content.innerHTML = html;
-      if (isPanel) {
-        panel.classList.add('open');
-        overlay.classList.add('open');
-      } else {
-        overlay.classList.add('open');
-      }
-      document.body.style.overflow = 'hidden';
-      closeBtn.focus();
+    setupModal();
+    document.addEventListener('astro:page-load', setupModal);
+
+    if (!window.hasModalEscapeListener) {
+      window.hasModalEscapeListener = true;
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          const openModals = document.querySelectorAll('.modal-overlay.open, .ft-panel.open, .ft-panel-overlay.open');
+          openModals.forEach(m => {
+            const mId = m.id.replace('Overlay', '');
+            const closeBtn = document.getElementById(mId + 'CloseBtn');
+            closeBtn?.click();
+          });
+        }
+      });
     }
-
-    // Expose on window so each page's inline script can call them
-    window[id + '_open']  = openModal;
-    window[id + '_close'] = closeModal;
-
-    closeBtn.addEventListener('click', closeModal);
-    // Panel: the overlay div IS the backdrop, click anywhere on it closes
-    // Modal: click only when target is the overlay backdrop itself
-    overlay.addEventListener('click', function (e) {
-      if (isPanel || e.target === overlay) closeModal();
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeModal();
-    });
   })();
 </script>

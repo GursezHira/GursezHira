@@ -6,6 +6,7 @@ import StatsStrip from '../components/StatsStrip.astro';
 import MilestoneCard from '../components/MilestoneCard.astro';
 import BlogCard from '../components/BlogCard.astro';
 import LoveNote from '../components/LoveNote.astro';
+import MemberModal from '../components/MemberModal.astro';
 
 const allMilestones = await getCollection('milestones');
 const milestones = allMilestones.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()).slice(0, 3);
@@ -59,6 +60,7 @@ const posts = allPosts.sort((a, b) => new Date(b.data.date).valueOf() - new Date
       </section>
     </div>
   </main>
+  <MemberModal id="milestoneModal" label="Milestone detail" />
 </Layout>
 
 <script>
