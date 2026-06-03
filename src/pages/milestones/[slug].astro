@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 
 const { milestone } = Astro.props;
 const m = milestone.data;
-const animatedEmojiUrl = await getAnimatedEmojiUrl(m.animatedEmoji);
+const animatedEmojiUrl = await getAnimatedEmojiUrl(m.emoji);
 
 function getCategoryClass(cat: string) {
   const map: Record<string, string> = {
@@ -55,7 +55,7 @@ const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encod
       <article class="milestone-detail-card fade-up">
         <div class="milestone-hero-img" style={`background:${m.color}; display: flex; align-items: center; justify-content: center; overflow: hidden;`}>
           {animatedEmojiUrl ? (
-            <img src={animatedEmojiUrl} alt={m.emoji} class="animated-emoji" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <img src={animatedEmojiUrl} alt={m.emoji} class="animated-emoji" style="width:8%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
             <span class="static-emoji" style="display: none;">{m.emoji}</span>
           ) : (
             <span class="static-emoji">{m.emoji}</span>

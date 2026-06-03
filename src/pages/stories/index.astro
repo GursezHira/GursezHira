@@ -8,7 +8,7 @@ const postsSorted = allPosts.sort((a: any, b: any) => new Date(b.data.date).valu
 
 const posts = await Promise.all(
   postsSorted.map(async (p) => {
-    const animatedEmojiUrl = await getAnimatedEmojiUrl(p.data.animatedEmoji);
+    const animatedEmojiUrl = await getAnimatedEmojiUrl(p.data.emoji);
     return { ...p, animatedEmojiUrl };
   })
 );
@@ -37,7 +37,7 @@ const remainingPosts = posts.slice(1);
             <a href={`/stories/${featuredPost.id}`} class="blog-card-lg fade-up">
               <div class="blog-lg-img" style={`background:${featuredPost.data.bg}; display: flex; align-items: center; justify-content: center; overflow: hidden;`}>
                 {featuredPost.animatedEmojiUrl ? (
-                  <img src={featuredPost.animatedEmojiUrl} alt={featuredPost.data.emoji} class="animated-emoji" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                  <img src={featuredPost.animatedEmojiUrl} alt={featuredPost.data.emoji} class="animated-emoji" style="width:8%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
                   <span class="static-emoji" style="display: none;">{featuredPost.data.emoji}</span>
                 ) : (
                   <span class="static-emoji">{featuredPost.data.emoji}</span>

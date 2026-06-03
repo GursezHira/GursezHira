@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - graphify-out/graph.html</title>
+<script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
+        integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
+        crossorigin="anonymous"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+  #legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 4px 0; }
+  #legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #aaa; user-select: none; }
+  #legend-controls label:hover { color: #e0e0e0; }
+  .legend-cb, #select-all-cb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid #3a3a5e; border-radius: 3px; background: #0f0f1a; cursor: pointer; position: relative; flex-shrink: 0; }
+  .legend-cb:checked, #select-all-cb:checked { background: #4E79A7; border-color: #4E79A7; }
+  .legend-cb:checked::after, #select-all-cb:checked::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  #select-all-cb:indeterminate { background: #4E79A7; border-color: #4E79A7; }
+  #select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend-controls">
+      <label><input type="checkbox" id="select-all-cb" checked onchange="toggleAllCommunities(!this.checked)">Select All</label>
+    </div>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">69 nodes &middot; 27 edges &middot; 47 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "og_route_png_getstaticpaths", "label": "getStaticPaths", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "getStaticPaths", "community": 32, "community_name": "OG Static Paths", "source_file": "src/pages/og/[...route].png.ts", "file_type": "code", "degree": 0}, {"id": "og_route_png_get", "label": "GET", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "GET", "community": 31, "community_name": "OG Image Route", "source_file": "src/pages/og/[...route].png.ts", "file_type": "code", "degree": 0}, {"id": "pages_rss_xml_get", "label": "GET", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "GET", "community": 33, "community_name": "RSS Feed", "source_file": "src/pages/rss.xml.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_branch_spotlight_togglebranchspotlight", "label": "toggleBranchSpotlight", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "toggleBranchSpotlight", "community": 5, "community_name": "Branch Spotlight", "source_file": "src/scripts/family-tree/branch-spotlight.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_family_grid_renderfamilygrid", "label": "renderFamilyGrid", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "renderFamilyGrid", "community": 7, "community_name": "Family Grid Rendering", "source_file": "src/scripts/family-tree/family-grid.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_family_grid_initsearch", "label": "initSearch", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initSearch", "community": 6, "community_name": "Family Grid Search", "source_file": "src/scripts/family-tree/family-grid.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_hover_card_updatehoverposition", "label": "updateHoverPosition", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "updateHoverPosition", "community": 10, "community_name": "Hover Card Position", "source_file": "src/scripts/family-tree/hover-card.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_hover_card_showhovercard", "label": "showHoverCard", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "showHoverCard", "community": 9, "community_name": "Hover Card Show", "source_file": "src/scripts/family-tree/hover-card.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_hover_card_hidehovercard", "label": "hideHoverCard", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "hideHoverCard", "community": 8, "community_name": "Hover Card Hide", "source_file": "src/scripts/family-tree/hover-card.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_connectors_renderconnectors", "label": "renderConnectors", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "renderConnectors", "community": 11, "community_name": "Tree Connectors", "source_file": "src/scripts/family-tree/tree-connectors.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_applytreetransform", "label": "applyTreeTransform", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "applyTreeTransform", "community": 12, "community_name": "Tree Transform", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_treezoom", "label": "treeZoom", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "treeZoom", "community": 19, "community_name": "Tree Zoom", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_treereset", "label": "treeReset", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "treeReset", "community": 18, "community_name": "Tree Reset", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_toggletreeside", "label": "toggleTreeSide", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "toggleTreeSide", "community": 17, "community_name": "Toggle Tree Side", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_toggleallmembers", "label": "toggleAllMembers", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "toggleAllMembers", "community": 15, "community_name": "Toggle All Members", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_togglefullscreen", "label": "toggleFullScreen", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "toggleFullScreen", "community": 16, "community_name": "Toggle Fullscreen", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_initfullscreenlistener", "label": "initFullscreenListener", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initFullscreenListener", "community": 13, "community_name": "Fullscreen Listener", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_controls_inittreedrag", "label": "initTreeDrag", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initTreeDrag", "community": 14, "community_name": "Tree Drag", "source_file": "src/scripts/family-tree/tree-controls.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_unit", "label": "Unit", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Unit", "community": 23, "community_name": "Tree Unit", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_unitposition", "label": "UnitPosition", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "UnitPosition", "community": 25, "community_name": "Unit Position", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_rowlayout", "label": "RowLayout", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "RowLayout", "community": 22, "community_name": "Row Layout", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_treelayout", "label": "TreeLayout", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "TreeLayout", "community": 4, "community_name": "Family Tree Layout", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 1}, {"id": "family_tree_tree_layout_buildlayout", "label": "buildLayout", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "buildLayout", "community": 20, "community_name": "Build Layout", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_unitconnectorbottom", "label": "unitConnectorBottom", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "unitConnectorBottom", "community": 24, "community_name": "Unit Connector Bottom", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_layout_nodeconnectortop", "label": "nodeConnectorTop", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "nodeConnectorTop", "community": 21, "community_name": "Node Connector Top", "source_file": "src/scripts/family-tree/tree-layout.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_nodes_rendernodes", "label": "renderNodes", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "renderNodes", "community": 26, "community_name": "Render Nodes", "source_file": "src/scripts/family-tree/tree-nodes.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_state_treestate", "label": "TreeState", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "TreeState", "community": 30, "community_name": "Tree State", "source_file": "src/scripts/family-tree/tree-state.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_state_setactivehovernodeid", "label": "setActiveHoverNodeId", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "setActiveHoverNodeId", "community": 27, "community_name": "Active Hover Node", "source_file": "src/scripts/family-tree/tree-state.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_state_setistouchdevice", "label": "setIsTouchDevice", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "setIsTouchDevice", "community": 29, "community_name": "Touch Device", "source_file": "src/scripts/family-tree/tree-state.ts", "file_type": "code", "degree": 0}, {"id": "family_tree_tree_state_setactivespotlight", "label": "setActiveSpotlight", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "setActiveSpotlight", "community": 28, "community_name": "Active Spotlight", "source_file": "src/scripts/family-tree/tree-state.ts", "file_type": "code", "degree": 0}, {"id": "scripts_milestones_initmilestonespage", "label": "initMilestonesPage", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initMilestonesPage", "community": 35, "community_name": "Milestones Page", "source_file": "src/scripts/milestones.ts", "file_type": "code", "degree": 0}, {"id": "types_family_tree_familymember", "label": "FamilyMember", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "FamilyMember", "community": 4, "community_name": "Family Tree Layout", "source_file": "src/types/family-tree.ts", "file_type": "code", "degree": 1}, {"id": "types_family_tree_branchtheme", "label": "BranchTheme", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "BranchTheme", "community": 37, "community_name": "Branch Theme Type", "source_file": "src/types/family-tree.ts", "file_type": "code", "degree": 0}, {"id": "types_family_tree_branch", "label": "Branch", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Branch", "community": 36, "community_name": "Family Branch Type", "source_file": "src/types/family-tree.ts", "file_type": "code", "degree": 0}, {"id": "types_family_tree_familytreedata", "label": "FamilyTreeData", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "FamilyTreeData", "community": 38, "community_name": "Family Tree Data Type", "source_file": "src/types/family-tree.ts", "file_type": "code", "degree": 0}, {"id": "types_milestone_milestone", "label": "Milestone", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "Milestone", "community": 39, "community_name": "Milestone Type", "source_file": "src/types/milestone.ts", "file_type": "code", "degree": 0}, {"id": "types_milestone_milestonecategory", "label": "MilestoneCategory", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "MilestoneCategory", "community": 40, "community_name": "Milestone Category Type", "source_file": "src/types/milestone.ts", "file_type": "code", "degree": 0}, {"id": "types_milestone_sortorder", "label": "SortOrder", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "SortOrder", "community": 41, "community_name": "Sort Order Type", "source_file": "src/types/milestone.ts", "file_type": "code", "degree": 0}, {"id": "utils_date_formatmilestonedate", "label": "formatMilestoneDate", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "formatMilestoneDate", "community": 42, "community_name": "Format Milestone Date", "source_file": "src/utils/date.ts", "file_type": "code", "degree": 0}, {"id": "utils_date_getmilestoneage", "label": "getMilestoneAge", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "getMilestoneAge", "community": 43, "community_name": "Get Milestone Age", "source_file": "src/utils/date.ts", "file_type": "code", "degree": 0}, {"id": "utils_emoji_getanimatedemojiurl", "label": "getAnimatedEmojiUrl", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "getAnimatedEmojiUrl", "community": 44, "community_name": "Emoji URL", "source_file": "src/utils/emoji.ts", "file_type": "code", "degree": 0}, {"id": "utils_reveal_initrevealobserver", "label": "initRevealObserver", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initRevealObserver", "community": 45, "community_name": "Reveal Observer", "source_file": "src/utils/reveal.ts", "file_type": "code", "degree": 0}, {"id": "utils_slugify_slugify", "label": "slugify", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "slugify", "community": 46, "community_name": "Slugify", "source_file": "src/utils/slugify.ts", "file_type": "code", "degree": 0}, {"id": "agents_rules_graphify", "label": ".agents/rules/graphify.md", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".agents/rules/graphify.md", "community": 3, "community_name": "Graphify Agent Tools", "source_file": ".agents/rules/graphify.md", "file_type": "document", "degree": 1}, {"id": "agents_workflows_graphify", "label": ".agents/workflows/graphify.md", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".agents/workflows/graphify.md", "community": 3, "community_name": "Graphify Agent Tools", "source_file": ".agents/workflows/graphify.md", "file_type": "document", "degree": 1}, {"id": "deploy_yml", "label": ".github/workflows/deploy.yml", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 30.0, "font": {"size": 12, "color": "#ffffff"}, "title": ".github/workflows/deploy.yml", "community": 2, "community_name": "CI/CD Deployment", "source_file": ".github/workflows/deploy.yml", "file_type": "code", "degree": 4}, {"id": "readme", "label": "README.md", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "README.md", "community": 34, "community_name": "Project README", "source_file": "README.md", "file_type": "document", "degree": 0}, {"id": "cormorant_garamond_readme", "label": "public/fonts/Cormorant_Garamond/README.txt", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "public/fonts/Cormorant_Garamond/README.txt", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/Cormorant_Garamond/README.txt", "file_type": "document", "degree": 2}, {"id": "dm_sans_readme", "label": "public/fonts/DM_Sans/README.txt", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "public/fonts/DM_Sans/README.txt", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/DM_Sans/README.txt", "file_type": "document", "degree": 2}, {"id": "pinyon_script_ofl", "label": "public/fonts/Pinyon_Script/OFL.txt", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "public/fonts/Pinyon_Script/OFL.txt", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/Pinyon_Script/OFL.txt", "file_type": "document", "degree": 2}, {"id": "blogpost_name", "label": "The Name We Searched the World For", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 35.0, "font": {"size": 12, "color": "#ffffff"}, "title": "The Name We Searched the World For", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-name-we-searched-the-world-for.md", "file_type": "document", "degree": 5}, {"id": "blogpost_night", "label": "The Night You Came", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 30.0, "font": {"size": 12, "color": "#ffffff"}, "title": "The Night You Came", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-night-you-came.md", "file_type": "document", "degree": 4}, {"id": "image_png", "label": "public/image.png", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "public/image.png", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "public/image.png", "file_type": "image", "degree": 1}, {"id": "image_webp", "label": "public/image.webp", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "public/image.webp", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "public/image.webp", "file_type": "image", "degree": 1}, {"id": "graphify", "label": "Graphify", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Graphify", "community": 3, "community_name": "Graphify Agent Tools", "source_file": ".agents/rules/graphify.md", "file_type": "document", "degree": 2}, {"id": "astro", "label": "Astro", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Astro", "community": 2, "community_name": "CI/CD Deployment", "source_file": ".github/workflows/deploy.yml", "file_type": "document", "degree": 2}, {"id": "github_pages", "label": "GitHub Pages", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "GitHub Pages", "community": 2, "community_name": "CI/CD Deployment", "source_file": ".github/workflows/deploy.yml", "file_type": "document", "degree": 2}, {"id": "bun", "label": "Bun", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Bun", "community": 2, "community_name": "CI/CD Deployment", "source_file": ".github/workflows/deploy.yml", "file_type": "document", "degree": 1}, {"id": "github_actions", "label": "GitHub Actions", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "GitHub Actions", "community": 2, "community_name": "CI/CD Deployment", "source_file": ".github/workflows/deploy.yml", "file_type": "document", "degree": 1}, {"id": "cormorant_garamond", "label": "Cormorant Garamond", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Cormorant Garamond", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/Cormorant_Garamond/README.txt", "file_type": "document", "degree": 2}, {"id": "dm_sans", "label": "DM Sans", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "DM Sans", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/DM_Sans/README.txt", "file_type": "document", "degree": 2}, {"id": "pinyon_script", "label": "Pinyon Script", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Pinyon Script", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/Pinyon_Script/OFL.txt", "file_type": "document", "degree": 2}, {"id": "sil_ofl", "label": "SIL Open Font License", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "SIL Open Font License", "community": 1, "community_name": "Typography & Font Licensing", "source_file": "public/fonts/Cormorant_Garamond/OFL.txt", "file_type": "document", "degree": 6}, {"id": "gursez", "label": "Gursez", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 30.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Gursez", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-name-we-searched-the-world-for.md", "file_type": "document", "degree": 4}, {"id": "naam_karan", "label": "Naam Karan", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Naam Karan", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-name-we-searched-the-world-for.md", "file_type": "document", "degree": 1}, {"id": "hukamnama", "label": "Hukamnama", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Hukamnama", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-name-we-searched-the-world-for.md", "file_type": "document", "degree": 1}, {"id": "guru_granth_sahib", "label": "Guru Granth Sahib", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Guru Granth Sahib", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-name-we-searched-the-world-for.md", "file_type": "document", "degree": 1}, {"id": "middlemore_hospital", "label": "Middlemore Hospital", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Middlemore Hospital", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-night-you-came.md", "file_type": "document", "degree": 1}, {"id": "fateme_moloodi", "label": "Fateme Moloodi", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Fateme Moloodi", "community": 0, "community_name": "Baby Gursez Stories", "source_file": "src/content/blog/the-night-you-came.md", "file_type": "document", "degree": 1}];
+const RAW_EDGES = [{"from": "family_tree_tree_layout_treelayout", "to": "types_family_tree_familymember", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "agents_rules_graphify", "to": "graphify", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "agents_workflows_graphify", "to": "graphify", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "deploy_yml", "to": "astro", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "deploy_yml", "to": "bun", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "deploy_yml", "to": "github_actions", "label": "references", "title": "references [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "deploy_yml", "to": "github_pages", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "cormorant_garamond_readme", "to": "cormorant_garamond", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "cormorant_garamond_readme", "to": "sil_ofl", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dm_sans_readme", "to": "dm_sans", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "dm_sans_readme", "to": "sil_ofl", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "pinyon_script_ofl", "to": "pinyon_script", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "pinyon_script_ofl", "to": "sil_ofl", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_name", "to": "blogpost_night", "label": "semantically_similar_to", "title": "semantically_similar_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "blogpost_name", "to": "gursez", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_name", "to": "guru_granth_sahib", "label": "cites", "title": "cites [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_name", "to": "hukamnama", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_name", "to": "naam_karan", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_night", "to": "fateme_moloodi", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_night", "to": "gursez", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "blogpost_night", "to": "middlemore_hospital", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "image_png", "to": "gursez", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "image_webp", "to": "gursez", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "astro", "to": "github_pages", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "cormorant_garamond", "to": "sil_ofl", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "dm_sans", "to": "sil_ofl", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "pinyon_script", "to": "sil_ofl", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "Baby Gursez Stories", "count": 10}, {"cid": 1, "color": "#F28E2B", "label": "Typography &amp; Font Licensing", "count": 7}, {"cid": 2, "color": "#E15759", "label": "CI/CD Deployment", "count": 5}, {"cid": 3, "color": "#76B7B2", "label": "Graphify Agent Tools", "count": 3}, {"cid": 4, "color": "#59A14F", "label": "Family Tree Layout", "count": 2}, {"cid": 5, "color": "#EDC948", "label": "Branch Spotlight", "count": 1}, {"cid": 6, "color": "#B07AA1", "label": "Family Grid Search", "count": 1}, {"cid": 7, "color": "#FF9DA7", "label": "Family Grid Rendering", "count": 1}, {"cid": 8, "color": "#9C755F", "label": "Hover Card Hide", "count": 1}, {"cid": 9, "color": "#BAB0AC", "label": "Hover Card Show", "count": 1}, {"cid": 10, "color": "#4E79A7", "label": "Hover Card Position", "count": 1}, {"cid": 11, "color": "#F28E2B", "label": "Tree Connectors", "count": 1}, {"cid": 12, "color": "#E15759", "label": "Tree Transform", "count": 1}, {"cid": 13, "color": "#76B7B2", "label": "Fullscreen Listener", "count": 1}, {"cid": 14, "color": "#59A14F", "label": "Tree Drag", "count": 1}, {"cid": 15, "color": "#EDC948", "label": "Toggle All Members", "count": 1}, {"cid": 16, "color": "#B07AA1", "label": "Toggle Fullscreen", "count": 1}, {"cid": 17, "color": "#FF9DA7", "label": "Toggle Tree Side", "count": 1}, {"cid": 18, "color": "#9C755F", "label": "Tree Reset", "count": 1}, {"cid": 19, "color": "#BAB0AC", "label": "Tree Zoom", "count": 1}, {"cid": 20, "color": "#4E79A7", "label": "Build Layout", "count": 1}, {"cid": 21, "color": "#F28E2B", "label": "Node Connector Top", "count": 1}, {"cid": 22, "color": "#E15759", "label": "Row Layout", "count": 1}, {"cid": 23, "color": "#76B7B2", "label": "Tree Unit", "count": 1}, {"cid": 24, "color": "#59A14F", "label": "Unit Connector Bottom", "count": 1}, {"cid": 25, "color": "#EDC948", "label": "Unit Position", "count": 1}, {"cid": 26, "color": "#B07AA1", "label": "Render Nodes", "count": 1}, {"cid": 27, "color": "#FF9DA7", "label": "Active Hover Node", "count": 1}, {"cid": 28, "color": "#9C755F", "label": "Active Spotlight", "count": 1}, {"cid": 29, "color": "#BAB0AC", "label": "Touch Device", "count": 1}, {"cid": 30, "color": "#4E79A7", "label": "Tree State", "count": 1}, {"cid": 31, "color": "#F28E2B", "label": "OG Image Route", "count": 1}, {"cid": 32, "color": "#E15759", "label": "OG Static Paths", "count": 1}, {"cid": 33, "color": "#76B7B2", "label": "RSS Feed", "count": 1}, {"cid": 34, "color": "#59A14F", "label": "Project README", "count": 1}, {"cid": 35, "color": "#EDC948", "label": "Milestones Page", "count": 1}, {"cid": 36, "color": "#B07AA1", "label": "Family Branch Type", "count": 1}, {"cid": 37, "color": "#FF9DA7", "label": "Branch Theme Type", "count": 1}, {"cid": 38, "color": "#9C755F", "label": "Family Tree Data Type", "count": 1}, {"cid": 39, "color": "#BAB0AC", "label": "Milestone Type", "count": 1}, {"cid": 40, "color": "#4E79A7", "label": "Milestone Category Type", "count": 1}, {"cid": 41, "color": "#F28E2B", "label": "Sort Order Type", "count": 1}, {"cid": 42, "color": "#E15759", "label": "Format Milestone Date", "count": 1}, {"cid": 43, "color": "#76B7B2", "label": "Get Milestone Age", "count": 1}, {"cid": 44, "color": "#59A14F", "label": "Emoji URL", "count": 1}, {"cid": 45, "color": "#EDC948", "label": "Reveal Observer", "count": 1}, {"cid": 46, "color": "#B07AA1", "label": "Slugify", "count": 1}];
+
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" onclick="focusNode(${JSON.stringify(nid)})">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+
+const selectAllCb = document.getElementById('select-all-cb');
+
+function updateSelectAllState() {
+  const total = LEGEND.length;
+  const hidden = hiddenCommunities.size;
+  selectAllCb.checked = hidden === 0;
+  selectAllCb.indeterminate = hidden > 0 && hidden < total;
+}
+
+function toggleAllCommunities(hide) {
+  document.querySelectorAll('.legend-item').forEach(item => {
+    hide ? item.classList.add('dimmed') : item.classList.remove('dimmed');
+  });
+  document.querySelectorAll('.legend-cb').forEach(cb => {
+    cb.checked = !hide;
+  });
+  LEGEND.forEach(c => {
+    if (hide) hiddenCommunities.add(c.cid); else hiddenCommunities.delete(c.cid);
+  });
+  const updates = RAW_NODES.map(n => ({ id: n.id, hidden: hide }));
+  nodesDS.update(updates);
+  updateSelectAllState();
+}
+
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'legend-cb';
+  cb.checked = true;
+  cb.addEventListener('change', (e) => {
+    e.stopPropagation();
+    if (cb.checked) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: !cb.checked }));
+    nodesDS.update(updates);
+    updateSelectAllState();
+  });
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.prepend(cb);
+  item.onclick = (e) => {
+    if (e.target === cb) return;
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [{"id": "ci_cd_pipeline", "label": "CI/CD Deployment Pipeline", "nodes": ["deploy_yml", "astro", "github_pages", "bun", "github_actions"], "relation": "participate_in", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": ".github/workflows/deploy.yml"}];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Centroid and expanded hull in network coordinates
+        const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+        const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+        const expanded = positions.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+});
+</script>
+</body>
+</html>

@@ -42,7 +42,6 @@ export default defineConfig({
                 options: ['Firsts', 'Monthly', 'Growth', 'Funny', 'Health', 'Celebration']
               },
               { name: 'emoji', label: 'Emoji', widget: 'string' },
-              { name: 'animatedEmoji', label: 'Animated Emoji Name (Optional)', widget: 'string', required: false, hint: 'e.g. "Pregnant woman" or "Fire" from fluentui-emoji-animated' },
               { name: 'color', label: 'Color', widget: 'color' },
               { name: 'desc', label: 'Description', widget: 'text' },
               { name: 'story', label: 'Story', widget: 'markdown' },
@@ -61,7 +60,6 @@ export default defineConfig({
               { name: 'title',    label: 'Title',     widget: 'string' },
               { name: 'tag',      label: 'Tag',       widget: 'string' },
               { name: 'emoji',    label: 'Emoji',     widget: 'string' },
-              { name: 'animatedEmoji', label: 'Animated Emoji Name (Optional)', widget: 'string', required: false, hint: 'e.g. "Blue heart" or "Glowing star" from fluentui-emoji-animated' },
               { name: 'bg',       label: 'Background',widget: 'string' },
               { name: 'date',     label: 'Date',      widget: 'datetime', date_format: 'YYYY-MM-DD', format: 'MMMM D, YYYY', time_format: false },
               { name: 'readTime', label: 'Read Time', widget: 'string', hint: 'e.g. 5 min read' },

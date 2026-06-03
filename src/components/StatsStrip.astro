@@ -1,25 +1,58 @@
 ---
+import { getAnimatedEmojiUrl } from '../utils/emoji';
+const calendarUrl = await getAnimatedEmojiUrl('🗓️');
+const clockUrl = await getAnimatedEmojiUrl('🕐');
+const cityUrl = await getAnimatedEmojiUrl('🌄');
+const boyUrl = await getAnimatedEmojiUrl('👦');
 ---
 <div class="stats-strip" aria-label="Baby stats">
   <div class="container">
     <div class="stats-grid">
       <div class="stat-item fade-up">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;overflow:hidden;font-size:1.5rem;margin:0 auto 10px auto;">
+          {calendarUrl ? (
+            <img src={calendarUrl} alt="📅" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="static-emoji" style="display:none;">📅</span>
+          ) : (
+            <span class="static-emoji">📅</span>
+          )}
+        </div>
         <span class="stat-label">Born on</span>
         <span class="stat-val">Jan 13, 2026</span>
       </div>
       <div class="stat-item fade-up" style="transition-delay:0.2s">
-        <div class="stat-icon">🕐</div>
+        <div class="stat-icon" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;overflow:hidden;font-size:1.5rem;margin:0 auto 10px auto;">
+          {clockUrl ? (
+            <img src={clockUrl} alt="🕐" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="static-emoji" style="display:none;">🕐</span>
+          ) : (
+            <span class="static-emoji">🕐</span>
+          )}
+        </div>
         <span class="stat-label">Born At</span>
         <span class="stat-val">01:42 am</span>
       </div>
       <div class="stat-item fade-up" style="transition-delay:0.3s">
-        <div class="stat-icon">🏙️</div>
+        <div class="stat-icon" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;overflow:hidden;font-size:1.5rem;margin:0 auto 10px auto;">
+          {cityUrl ? (
+            <img src={cityUrl} alt="🏙️" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="static-emoji" style="display:none;">🏙️</span>
+          ) : (
+            <span class="static-emoji">🏙️</span>
+          )}
+        </div>
         <span class="stat-label">Born in</span>
         <span class="stat-val">Auckland</span>
       </div>
       <div class="stat-item fade-up" style="transition-delay:0.1s">
-        <div class="stat-icon">👦</div>
+        <div class="stat-icon" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;overflow:hidden;font-size:1.5rem;margin:0 auto 10px auto;">
+          {boyUrl ? (
+            <img src={boyUrl} alt="👦" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="static-emoji" style="display:none;">👦</span>
+          ) : (
+            <span class="static-emoji">👦</span>
+          )}
+        </div>
         <span class="stat-label">Born as</span>
         <span class="stat-val">Boy</span>
       </div>

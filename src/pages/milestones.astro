@@ -8,7 +8,7 @@ import { getAnimatedEmojiUrl } from '../utils/emoji';
 const allMilestonesRaw = await getCollection('milestones');
 const ALL_MILESTONES = await Promise.all(
   allMilestonesRaw.map(async (m) => {
-    const animatedEmojiUrl = await getAnimatedEmojiUrl(m.data.animatedEmoji);
+    const animatedEmojiUrl = await getAnimatedEmojiUrl(m.data.emoji);
     return { ...m.data, id: m.id, animatedEmojiUrl };
   })
 );

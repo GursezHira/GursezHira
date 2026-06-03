@@ -98,7 +98,7 @@ export function initMilestonesPage() {
 
   function renderEmojiHtml(emoji: string, animatedEmojiUrl?: string | null) {
     if (animatedEmojiUrl) {
-      return `<img src="${animatedEmojiUrl}" alt="${emoji}" class="animated-emoji" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><span class="static-emoji" style="display:none;">${emoji}</span>`;
+      return `<img src="${animatedEmojiUrl}" alt="${emoji}" class="animated-emoji" style="width:8%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><span class="static-emoji" style="display:none;">${emoji}</span>`;
     }
     return `<span class="static-emoji">${emoji}</span>`;
   }

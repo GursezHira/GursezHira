@@ -1,0 +1,1041 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "ci_cd_pipeline",
+        "label": "CI/CD Deployment Pipeline",
+        "nodes": [
+          "deploy_yml",
+          "astro",
+          "github_pages",
+          "bun",
+          "github_actions"
+        ],
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": ".github/workflows/deploy.yml"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "getStaticPaths",
+      "file_type": "code",
+      "source_file": "src/pages/og/[...route].png.ts",
+      "source_location": "L14",
+      "id": "og_route_png_getstaticpaths",
+      "community": 32,
+      "norm_label": "getstaticpaths"
+    },
+    {
+      "label": "GET",
+      "file_type": "code",
+      "source_file": "src/pages/og/[...route].png.ts",
+      "source_location": "L30",
+      "id": "og_route_png_get",
+      "community": 31,
+      "norm_label": "get"
+    },
+    {
+      "label": "GET",
+      "file_type": "code",
+      "source_file": "src/pages/rss.xml.ts",
+      "source_location": "L4",
+      "id": "pages_rss_xml_get",
+      "community": 33,
+      "norm_label": "get"
+    },
+    {
+      "label": "toggleBranchSpotlight",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/branch-spotlight.ts",
+      "source_location": "L18",
+      "id": "family_tree_branch_spotlight_togglebranchspotlight",
+      "community": 5,
+      "norm_label": "togglebranchspotlight"
+    },
+    {
+      "label": "renderFamilyGrid",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/family-grid.ts",
+      "source_location": "L21",
+      "id": "family_tree_family_grid_renderfamilygrid",
+      "community": 7,
+      "norm_label": "renderfamilygrid"
+    },
+    {
+      "label": "initSearch",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/family-grid.ts",
+      "source_location": "L80",
+      "id": "family_tree_family_grid_initsearch",
+      "community": 6,
+      "norm_label": "initsearch"
+    },
+    {
+      "label": "updateHoverPosition",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/hover-card.ts",
+      "source_location": "L60",
+      "id": "family_tree_hover_card_updatehoverposition",
+      "community": 10,
+      "norm_label": "updatehoverposition"
+    },
+    {
+      "label": "showHoverCard",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/hover-card.ts",
+      "source_location": "L104",
+      "id": "family_tree_hover_card_showhovercard",
+      "community": 9,
+      "norm_label": "showhovercard"
+    },
+    {
+      "label": "hideHoverCard",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/hover-card.ts",
+      "source_location": "L120",
+      "id": "family_tree_hover_card_hidehovercard",
+      "community": 8,
+      "norm_label": "hidehovercard"
+    },
+    {
+      "label": "renderConnectors",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-connectors.ts",
+      "source_location": "L75",
+      "id": "family_tree_tree_connectors_renderconnectors",
+      "community": 11,
+      "norm_label": "renderconnectors"
+    },
+    {
+      "label": "applyTreeTransform",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L10",
+      "id": "family_tree_tree_controls_applytreetransform",
+      "community": 12,
+      "norm_label": "applytreetransform"
+    },
+    {
+      "label": "treeZoom",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L19",
+      "id": "family_tree_tree_controls_treezoom",
+      "community": 19,
+      "norm_label": "treezoom"
+    },
+    {
+      "label": "treeReset",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L26",
+      "id": "family_tree_tree_controls_treereset",
+      "community": 18,
+      "norm_label": "treereset"
+    },
+    {
+      "label": "toggleTreeSide",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L58",
+      "id": "family_tree_tree_controls_toggletreeside",
+      "community": 17,
+      "norm_label": "toggletreeside"
+    },
+    {
+      "label": "toggleAllMembers",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L85",
+      "id": "family_tree_tree_controls_toggleallmembers",
+      "community": 15,
+      "norm_label": "toggleallmembers"
+    },
+    {
+      "label": "toggleFullScreen",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L102",
+      "id": "family_tree_tree_controls_togglefullscreen",
+      "community": 16,
+      "norm_label": "togglefullscreen"
+    },
+    {
+      "label": "initFullscreenListener",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L117",
+      "id": "family_tree_tree_controls_initfullscreenlistener",
+      "community": 13,
+      "norm_label": "initfullscreenlistener"
+    },
+    {
+      "label": "initTreeDrag",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-controls.ts",
+      "source_location": "L143",
+      "id": "family_tree_tree_controls_inittreedrag",
+      "community": 14,
+      "norm_label": "inittreedrag"
+    },
+    {
+      "label": "Unit",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L19",
+      "id": "family_tree_tree_layout_unit",
+      "community": 23,
+      "norm_label": "unit"
+    },
+    {
+      "label": "UnitPosition",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L25",
+      "id": "family_tree_tree_layout_unitposition",
+      "community": 25,
+      "norm_label": "unitposition"
+    },
+    {
+      "label": "RowLayout",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L32",
+      "id": "family_tree_tree_layout_rowlayout",
+      "community": 22,
+      "norm_label": "rowlayout"
+    },
+    {
+      "label": "TreeLayout",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L39",
+      "id": "family_tree_tree_layout_treelayout",
+      "community": 4,
+      "norm_label": "treelayout"
+    },
+    {
+      "label": "buildLayout",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L262",
+      "id": "family_tree_tree_layout_buildlayout",
+      "community": 20,
+      "norm_label": "buildlayout"
+    },
+    {
+      "label": "unitConnectorBottom",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L282",
+      "id": "family_tree_tree_layout_unitconnectorbottom",
+      "community": 24,
+      "norm_label": "unitconnectorbottom"
+    },
+    {
+      "label": "nodeConnectorTop",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L298",
+      "id": "family_tree_tree_layout_nodeconnectortop",
+      "community": 21,
+      "norm_label": "nodeconnectortop"
+    },
+    {
+      "label": "renderNodes",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-nodes.ts",
+      "source_location": "L82",
+      "id": "family_tree_tree_nodes_rendernodes",
+      "community": 26,
+      "norm_label": "rendernodes"
+    },
+    {
+      "label": "TreeState",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-state.ts",
+      "source_location": "L5",
+      "id": "family_tree_tree_state_treestate",
+      "community": 30,
+      "norm_label": "treestate"
+    },
+    {
+      "label": "setActiveHoverNodeId",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-state.ts",
+      "source_location": "L83",
+      "id": "family_tree_tree_state_setactivehovernodeid",
+      "community": 27,
+      "norm_label": "setactivehovernodeid"
+    },
+    {
+      "label": "setIsTouchDevice",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-state.ts",
+      "source_location": "L87",
+      "id": "family_tree_tree_state_setistouchdevice",
+      "community": 29,
+      "norm_label": "setistouchdevice"
+    },
+    {
+      "label": "setActiveSpotlight",
+      "file_type": "code",
+      "source_file": "src/scripts/family-tree/tree-state.ts",
+      "source_location": "L91",
+      "id": "family_tree_tree_state_setactivespotlight",
+      "community": 28,
+      "norm_label": "setactivespotlight"
+    },
+    {
+      "label": "initMilestonesPage",
+      "file_type": "code",
+      "source_file": "src/scripts/milestones.ts",
+      "source_location": "L20",
+      "id": "scripts_milestones_initmilestonespage",
+      "community": 35,
+      "norm_label": "initmilestonespage"
+    },
+    {
+      "label": "FamilyMember",
+      "file_type": "code",
+      "source_file": "src/types/family-tree.ts",
+      "source_location": "L7",
+      "id": "types_family_tree_familymember",
+      "community": 4,
+      "norm_label": "familymember"
+    },
+    {
+      "label": "BranchTheme",
+      "file_type": "code",
+      "source_file": "src/types/family-tree.ts",
+      "source_location": "L28",
+      "id": "types_family_tree_branchtheme",
+      "community": 37,
+      "norm_label": "branchtheme"
+    },
+    {
+      "label": "Branch",
+      "file_type": "code",
+      "source_file": "src/types/family-tree.ts",
+      "source_location": "L40",
+      "id": "types_family_tree_branch",
+      "community": 36,
+      "norm_label": "branch"
+    },
+    {
+      "label": "FamilyTreeData",
+      "file_type": "code",
+      "source_file": "src/types/family-tree.ts",
+      "source_location": "L47",
+      "id": "types_family_tree_familytreedata",
+      "community": 38,
+      "norm_label": "familytreedata"
+    },
+    {
+      "label": "Milestone",
+      "file_type": "code",
+      "source_file": "src/types/milestone.ts",
+      "source_location": "L7",
+      "id": "types_milestone_milestone",
+      "community": 39,
+      "norm_label": "milestone"
+    },
+    {
+      "label": "MilestoneCategory",
+      "file_type": "code",
+      "source_file": "src/types/milestone.ts",
+      "source_location": "L19",
+      "id": "types_milestone_milestonecategory",
+      "community": 40,
+      "norm_label": "milestonecategory"
+    },
+    {
+      "label": "SortOrder",
+      "file_type": "code",
+      "source_file": "src/types/milestone.ts",
+      "source_location": "L27",
+      "id": "types_milestone_sortorder",
+      "community": 41,
+      "norm_label": "sortorder"
+    },
+    {
+      "label": "formatMilestoneDate",
+      "file_type": "code",
+      "source_file": "src/utils/date.ts",
+      "source_location": "L3",
+      "id": "utils_date_formatmilestonedate",
+      "community": 42,
+      "norm_label": "formatmilestonedate"
+    },
+    {
+      "label": "getMilestoneAge",
+      "file_type": "code",
+      "source_file": "src/utils/date.ts",
+      "source_location": "L12",
+      "id": "utils_date_getmilestoneage",
+      "community": 43,
+      "norm_label": "getmilestoneage"
+    },
+    {
+      "label": "getAnimatedEmojiUrl",
+      "file_type": "code",
+      "source_file": "src/utils/emoji.ts",
+      "source_location": "L41",
+      "id": "utils_emoji_getanimatedemojiurl",
+      "community": 44,
+      "norm_label": "getanimatedemojiurl"
+    },
+    {
+      "label": "initRevealObserver",
+      "file_type": "code",
+      "source_file": "src/utils/reveal.ts",
+      "source_location": "L7",
+      "id": "utils_reveal_initrevealobserver",
+      "community": 45,
+      "norm_label": "initrevealobserver"
+    },
+    {
+      "label": "slugify",
+      "file_type": "code",
+      "source_file": "src/utils/slugify.ts",
+      "source_location": "L1",
+      "id": "utils_slugify_slugify",
+      "community": 46,
+      "norm_label": "slugify"
+    },
+    {
+      "label": ".agents/rules/graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "agents_rules_graphify",
+      "community": 3,
+      "norm_label": ".agents/rules/graphify.md"
+    },
+    {
+      "label": ".agents/workflows/graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "agents_workflows_graphify",
+      "community": 3,
+      "norm_label": ".agents/workflows/graphify.md"
+    },
+    {
+      "label": ".github/workflows/deploy.yml",
+      "file_type": "code",
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "deploy_yml",
+      "community": 2,
+      "norm_label": ".github/workflows/deploy.yml"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme",
+      "community": 34,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "public/fonts/Cormorant_Garamond/README.txt",
+      "file_type": "document",
+      "source_file": "public/fonts/Cormorant_Garamond/README.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cormorant_garamond_readme",
+      "community": 1,
+      "norm_label": "public/fonts/cormorant_garamond/readme.txt"
+    },
+    {
+      "label": "public/fonts/DM_Sans/README.txt",
+      "file_type": "document",
+      "source_file": "public/fonts/DM_Sans/README.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "dm_sans_readme",
+      "community": 1,
+      "norm_label": "public/fonts/dm_sans/readme.txt"
+    },
+    {
+      "label": "public/fonts/Pinyon_Script/OFL.txt",
+      "file_type": "document",
+      "source_file": "public/fonts/Pinyon_Script/OFL.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "pinyon_script_ofl",
+      "community": 1,
+      "norm_label": "public/fonts/pinyon_script/ofl.txt"
+    },
+    {
+      "label": "The Name We Searched the World For",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "blogpost_name",
+      "community": 0,
+      "norm_label": "the name we searched the world for"
+    },
+    {
+      "label": "The Night You Came",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "blogpost_night",
+      "community": 0,
+      "norm_label": "the night you came"
+    },
+    {
+      "label": "public/image.png",
+      "file_type": "image",
+      "source_file": "public/image.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "image_png",
+      "community": 0,
+      "norm_label": "public/image.png"
+    },
+    {
+      "label": "public/image.webp",
+      "file_type": "image",
+      "source_file": "public/image.webp",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "image_webp",
+      "community": 0,
+      "norm_label": "public/image.webp"
+    },
+    {
+      "label": "Graphify",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "graphify",
+      "community": 3,
+      "norm_label": "graphify"
+    },
+    {
+      "label": "Astro",
+      "file_type": "document",
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "astro",
+      "community": 2,
+      "norm_label": "astro"
+    },
+    {
+      "label": "GitHub Pages",
+      "file_type": "document",
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "github_pages",
+      "community": 2,
+      "norm_label": "github pages"
+    },
+    {
+      "label": "Bun",
+      "file_type": "document",
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "bun",
+      "community": 2,
+      "norm_label": "bun"
+    },
+    {
+      "label": "GitHub Actions",
+      "file_type": "document",
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "github_actions",
+      "community": 2,
+      "norm_label": "github actions"
+    },
+    {
+      "label": "Cormorant Garamond",
+      "file_type": "document",
+      "source_file": "public/fonts/Cormorant_Garamond/README.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "cormorant_garamond",
+      "community": 1,
+      "norm_label": "cormorant garamond"
+    },
+    {
+      "label": "DM Sans",
+      "file_type": "document",
+      "source_file": "public/fonts/DM_Sans/README.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "dm_sans",
+      "community": 1,
+      "norm_label": "dm sans"
+    },
+    {
+      "label": "Pinyon Script",
+      "file_type": "document",
+      "source_file": "public/fonts/Pinyon_Script/OFL.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "pinyon_script",
+      "community": 1,
+      "norm_label": "pinyon script"
+    },
+    {
+      "label": "SIL Open Font License",
+      "file_type": "document",
+      "source_file": "public/fonts/Cormorant_Garamond/OFL.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "sil_ofl",
+      "community": 1,
+      "norm_label": "sil open font license"
+    },
+    {
+      "label": "Gursez",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "gursez",
+      "community": 0,
+      "norm_label": "gursez"
+    },
+    {
+      "label": "Naam Karan",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "naam_karan",
+      "community": 0,
+      "norm_label": "naam karan"
+    },
+    {
+      "label": "Hukamnama",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "hukamnama",
+      "community": 0,
+      "norm_label": "hukamnama"
+    },
+    {
+      "label": "Guru Granth Sahib",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "guru_granth_sahib",
+      "community": 0,
+      "norm_label": "guru granth sahib"
+    },
+    {
+      "label": "Middlemore Hospital",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "middlemore_hospital",
+      "community": 0,
+      "norm_label": "middlemore hospital"
+    },
+    {
+      "label": "Fateme Moloodi",
+      "file_type": "document",
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "fateme_moloodi",
+      "community": 0,
+      "norm_label": "fateme moloodi"
+    }
+  ],
+  "links": [
+    {
+      "relation": "references",
+      "context": "generic_arg",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scripts/family-tree/tree-layout.ts",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "family_tree_tree_layout_treelayout",
+      "target": "types_family_tree_familymember",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "agents_rules_graphify",
+      "target": "graphify"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "agents_workflows_graphify",
+      "target": "graphify"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "deploy_yml",
+      "target": "astro"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "deploy_yml",
+      "target": "bun"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "deploy_yml",
+      "target": "github_actions"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "deploy_yml",
+      "target": "github_pages"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/Cormorant_Garamond/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "cormorant_garamond_readme",
+      "target": "cormorant_garamond"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/Cormorant_Garamond/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "cormorant_garamond_readme",
+      "target": "sil_ofl"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/DM_Sans/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dm_sans_readme",
+      "target": "dm_sans"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/DM_Sans/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dm_sans_readme",
+      "target": "sil_ofl"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/Pinyon_Script/OFL.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "pinyon_script_ofl",
+      "target": "pinyon_script"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/fonts/Pinyon_Script/OFL.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "pinyon_script_ofl",
+      "target": "sil_ofl"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_name",
+      "target": "blogpost_night"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_name",
+      "target": "gursez"
+    },
+    {
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_name",
+      "target": "guru_granth_sahib"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_name",
+      "target": "hukamnama"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-name-we-searched-the-world-for.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_name",
+      "target": "naam_karan"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_night",
+      "target": "fateme_moloodi"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_night",
+      "target": "gursez"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/content/blog/the-night-you-came.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "blogpost_night",
+      "target": "middlemore_hospital"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "public/image.png",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "image_png",
+      "target": "gursez"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "public/image.webp",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "image_webp",
+      "target": "gursez"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": ".github/workflows/deploy.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "astro",
+      "target": "github_pages"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "public/fonts/Cormorant_Garamond/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "cormorant_garamond",
+      "target": "sil_ofl"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "public/fonts/DM_Sans/README.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dm_sans",
+      "target": "sil_ofl"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "public/fonts/Pinyon_Script/OFL.txt",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "pinyon_script",
+      "target": "sil_ofl"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "ci_cd_pipeline",
+      "label": "CI/CD Deployment Pipeline",
+      "nodes": [
+        "deploy_yml",
+        "astro",
+        "github_pages",
+        "bun",
+        "github_actions"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": ".github/workflows/deploy.yml"
+    }
+  ],
+  "built_at_commit": "e6e006029a58a5eec6bc07aa940d355fe7ab9a7c"
+}
