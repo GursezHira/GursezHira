@@ -8,8 +8,10 @@
           "content": "Add Animated Emojies and Leave Normal Emojies as Fall Back",
           "id": 1779779668062,
           "level": "default",
-          "done": false,
-          "start": 1779779668062
+          "done": true,
+          "start": 1779779668062,
+          "focus": false,
+          "end": 1780899542971
         }
       },
       {
@@ -201,6 +203,6 @@
     "simpleMode": false,
     "lang": "en",
     "desc": "Things I need to add",
-    "version": "1779779713603"
+    "version": "1780899543002"
   }
 }
